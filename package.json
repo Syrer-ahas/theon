@@ -1,0 +1,29 @@
+{
+  "name": "theon",
+  "version": "1.0.0",
+  "description": "Tactical Web - ReShade Preset Generator with Vercel Speed Insights",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Syrer-ahas/theon.git"
+  },
+  "keywords": [
+    "reshade",
+    "presets",
+    "generator",
+    "vercel",
+    "speed-insights"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Syrer-ahas/theon/issues"
+  },
+  "homepage": "https://github.com/Syrer-ahas/theon#readme",
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
+  }
+}
