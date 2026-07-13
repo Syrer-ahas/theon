@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tactical Web Generator</title>
+    <meta name="description" content="A dedicated, polished ReShade preset generator experience for Tactical Web." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="ai-config.js"></script>
+    <style>
+      :root {
+        --bg: #060814;
+        --surface: rgba(12, 17, 31, 0.82);
+        --surface-strong: rgba(16, 23, 40, 0.94);
+        --border: rgba(255,255,255,0.16);
+        --text: #f6f7ff;
+        --muted: #92a0bf;
+        --accent: #8b7cff;
+        --accent-2: #50d4ff;
+        --accent-3: #f28cff;
+        --success: #4fe6a2;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Inter', system-ui, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top center, rgba(120, 110, 255, 0.16), transparent 26%),
+          linear-gradient(135deg, #070a16 0%, #0a1123 45%, #060813 100%);
+        overflow-x: hidden;
+        user-select: text;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(255,255,255,0.13), transparent 24%, transparent 78%, rgba(255,255,255,0.05));
+        pointer-events: none;
+        mask-image: linear-gradient(180deg, rgba(0,0,0,0.95), transparent 100%);
+      }
+
+      .cookie-banner {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(900px, calc(100% - 24px));
+        z-index: 20;
+        background: rgba(10, 15, 28, 0.86);
+        color: var(--text);
+        border: 1px solid rgba(255,255,255,0.16);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        backdrop-filter: blur(18px);
+        border-radius: 18px;
+        padding: 16px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+      }
+      .cookie-banner.hidden { display: none; }
+      .cookie-actions button { margin-left: 8px; }
+
+      .container { width: min(1320px, calc(100% - 28px)); margin: 0 auto; padding: 24px 0 52px; }
+      .topbar { display:flex; justify-content:space-between; align-items:center; padding: 6px 0 24px; }
+      .brand { display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:0.02em; }
+      .brand-logo { width:48px; height:48px; border-radius:0; object-fit:cover; border:0; box-shadow:none; }
+
+      .panel {
+        background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        backdrop-filter: blur(18px);
+        box-shadow: 0 18px 50px rgba(0,0,0,0.2);
+        position: relative;
+        overflow: hidden;
+      }
+      .panel::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(110deg, rgba(255,255,255,0.35), rgba(255,255,255,0.05), rgba(255,255,255,0.2));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+
+      .hero { padding: 26px 28px; display:grid; grid-template-columns: 1.08fr 0.92fr; gap:20px; margin-bottom: 18px; }
+      .hero h1 { font-family:'Manrope',sans-serif; font-size:clamp(2rem,3.3vw,2.9rem); margin:8px 0 12px; line-height:1.06; }
+      .hero p { color: var(--muted); line-height: 1.7; margin:0 0 16px; }
+      .pill { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background: rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); font-size:0.92rem; color:#dfe7ff; }
+      .eyebrow { display:inline-flex; align-items:center; gap:8px; padding:7px 10px; border-radius:999px; background: rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); font-size:0.75rem; letter-spacing:0.16em; text-transform:uppercase; color:#c6d4ff; margin-bottom: 8px; }
+      .panel-header { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom: 10px; }
+      .panel-header h3 { font-size: 1rem; margin:0; }
+      .meta-badge { padding:7px 10px; border-radius:999px; background: rgba(80,212,255,0.12); border:1px solid rgba(80,212,255,0.24); color:#9fe2ff; font-size:0.78rem; font-weight:700; }
+
+      .btn {
+        border: 0;
+        border-radius: 22px;
+        padding: 12px 18px;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        cursor: pointer;
+        color: white;
+        transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .btn:hover { transform: translateY(-2px); filter: brightness(1.04); }
+      .btn-primary {
+        background: linear-gradient(180deg, #fff7e6 0%, #ffe7b2 60%);
+        color: #2e1a07;
+        padding: 10px 24px;
+        border-radius: 22px;
+        border: 1px solid rgba(0,0,0,0.16);
+        box-shadow: 0 10px 30px rgba(6,8,12,0.78), 0 0 18px rgba(90,60,20,0.20), inset 0 1px 0 rgba(255,255,255,0.7);
+        font-weight: 900;
+        letter-spacing: 0.01em;
+        outline: 0;
+      }
+      .btn-secondary { background: linear-gradient(180deg, rgba(255,240,245,0.98), rgba(250,210,235,0.9)); color:#3a1f2b; box-shadow: 0 8px 22px rgba(6,8,12,0.7), 0 0 18px rgba(140,80,110,0.12); border:1px solid rgba(0,0,0,0.12); }
+      .btn-ghost { background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color: var(--text); box-shadow:0 6px 18px rgba(6,8,12,0.55); }
+      .btn-yellow { background: linear-gradient(180deg, #fff8c8 0%, #ffd96b 70%); color: #4a2a04; border:1px solid rgba(84,54,12,0.16); box-shadow: 0 8px 22px rgba(255,188,40,0.18); }
+      .hero-metrics { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-top: 18px; }
+      .metric { padding:14px; border-radius:16px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }
+      .metric strong { display:block; font-size:1.1rem; }
+      .metric span { color: var(--muted); font-size:0.9rem; }
+
+      .content { display:grid; grid-template-columns:0.92fr 1.08fr; gap:18px; align-items:start; }
+      .side-panel { padding:20px; border-radius: 22px; background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); border:1px solid rgba(255,255,255,0.1); }
+      .stack { display:grid; gap:12px; }
+      .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+      .field { display:grid; gap:6px; }
+      label { font-size:0.92rem; font-weight:700; }
+      input, textarea, select {
+        width: 100%;
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 14px;
+        padding: 12px 13px;
+        background: rgba(7, 11, 22, 0.8);
+        color: var(--text);
+        font: inherit;
+        position: relative;
+        z-index: 2;
+        caret-color: #fff;
+        -webkit-user-select: text;
+        user-select: text;
+      }
+      textarea { min-height: 116px; resize: vertical; }
+      input:focus, textarea:focus, select:focus { outline: 2px solid rgba(82,213,255,0.24); outline-offset: 1px; }
+
+      .auth-card { padding:18px; border-radius:18px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); margin-bottom:12px; }
+      .auth-state { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+      .auth-actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+      .login-shell { position:fixed; inset:0; background:rgba(2,6,16,0.7); backdrop-filter:blur(8px); display:grid; place-items:center; z-index:30; }
+      .login-shell.hidden { display:none; }
+      .login-card { width:min(460px, calc(100% - 24px)); padding:24px; border-radius:24px; background: var(--surface-strong); border:1px solid var(--border); box-shadow:0 24px 70px rgba(0,0,0,0.32); }
+      .login-card h3 { margin:0 0 8px; font-family:'Manrope',sans-serif; }
+      .login-card p { margin:0 0 16px; color: var(--muted); }
+      .login-btn { width:100%; margin-top:8px; text-align:left; display:flex; justify-content:space-between; align-items:center; }
+
+      .console-panel { padding:20px; display:grid; gap:12px; }
+      .console-card { padding:14px 16px; border-radius:16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#edf2ff; line-height:1.6; }
+      .console-panel .console-card.system { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+      .console-card.success { border-color:rgba(79,230,162,0.3); background:rgba(79,230,162,0.08); }
+      .console-card.system { border-color: rgba(255,255,255,0.1); }
+      .progress { height:10px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,0.08); }
+      .progress > span { display:block; height:100%; width:0%; background: linear-gradient(90deg,var(--accent),var(--accent-2)); transition: width 0.28s ease; }
+      .status-line { color: var(--muted); font-size:0.94rem; }
+      .credits-pill { display:inline-flex; align-items:center; gap:8px; border-radius:999px; padding:8px 12px; background:rgba(79,230,162,0.1); color:#dffceb; border:1px solid rgba(79,230,162,0.18); }
+      .small { font-size:0.88rem; color: var(--muted); }
+      .option-row { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; }
+
+      @media (max-width: 980px) {
+        .hero, .content { grid-template-columns:1fr; }
+        .hero-metrics, .option-row { grid-template-columns:1fr; }
+        .row { grid-template-columns:1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cookie-banner" id="cookieBanner">
+      <div>We use cookies to keep your session and preferences intact. <a href="privacy.html" style="color:#8fdfff;">Learn more</a></div>
+      <div class="cookie-actions">
+        <button class="btn btn-ghost" id="cookieDeclineBtn" type="button">Decline</button>
+        <button class="btn btn-primary" id="cookieAcceptBtn" type="button">Accept</button>
+      </div>
+    </div>
+
+    <div class="login-shell hidden" id="loginShell">
+      <div class="login-card">
+        <h3>Sign in to begin</h3>
+        <p>Use Gmail or Discord to unlock the Tactical Web generator and start building presets.</p>
+        <div class="field" style="margin-bottom: 10px;">
+          <label for="emailInput">Email or Discord handle</label>
+          <input id="emailInput" type="text" placeholder="you@example.com or discord name" />
+        </div>
+        <button class="btn btn-primary login-btn" id="loginGmailBtn">Continue with Gmail</button>
+        <button class="btn btn-secondary login-btn" id="loginDiscordBtn">Continue with Discord</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="topbar">
+        <div class="brand">
+          <img class="brand-logo" src="images/logo.png" alt="Tactical Web logo" />
+          <span>Tactical Web Generator</span>
+        </div>
+        <a class="btn btn-ghost" href="index.html" style="display:inline-flex; align-items:center;">Back to landing</a>
+      </div>
+
+      <section class="panel hero">
+        <div>
+          <div class="pill">✦ Precision generation • Glassy workflow • Premium export</div>
+          <h1>Build cinematic, production-ready ReShade presets with a calm, premium workflow.</h1>
+          <p>Every preset is assembled in layers: prompt analysis, style selection, shader planning, and a polished ZIP bundle, all with a slower and more deliberate generation rhythm.</p>
+          <div class="auth-card">
+            <div class="auth-state">
+              <div>
+                <div id="authStatus">Anonymous session</div>
+                <div class="small" id="authInfo">Sign in to unlock generation.</div>
+              </div>
+              <div class="auth-actions">
+                <button class="btn btn-primary" id="openLoginBtn">Sign in</button>
+                <button class="btn btn-ghost" id="logoutBtn">Reset</button>
+              </div>
+            </div>
+          </div>
+          <div class="hero-metrics">
+            <div class="metric"><strong id="creditMetric">500</strong><span>Starting credits</span></div>
+            <div class="metric"><strong id="burstMetric">3</strong><span>Credits / second</span></div>
+            <div class="metric"><strong id="suiteMetric">3</strong><span>Files in package</span></div>
+          </div>
+        </div>
+
+        <div class="side-panel">
+          <div class="panel-header">
+            <div>
+              <div class="eyebrow">Composer</div>
+              <h3>Prompt studio</h3>
+            </div>
+            <div class="meta-badge">AI-assisted</div>
+          </div>
+          <div class="stack">
+            <div class="field">
+              <label for="gameSelect">Game profile</label>
+              <select id="gameSelect"></select>
+            </div>
+            <div class="field">
+              <label for="promptInput">Prompt</label>
+              <textarea id="promptInput" placeholder="Example: Create a deeply cinematic night preset with soft contrast, warmer highlights, and subtle depth in the shadows."></textarea>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="severitySelect">Severity</label>
+                <select id="severitySelect">
+                  <option value="light">Light</option>
+                  <option value="medium">Medium</option>
+                  <option value="heavy">Heavy</option>
+                  <option value="critical">Critical</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="presetNameInput">Preset name</label>
+                <input id="presetNameInput" type="text" value="Velvet Horizon" />
+              </div>
+            </div>
+            <div class="option-row">
+              <div class="field">
+                <label for="styleTagInput">Style tag</label>
+                <input id="styleTagInput" type="text" value="Cinematic Night" />
+              </div>
+              <div class="field">
+                <label for="qualitySelect">Quality</label>
+                <select id="qualitySelect">
+                  <option value="balanced">Balanced</option>
+                  <option value="ultra">Ultra</option>
+                  <option value="streamlined">Streamlined</option>
+                </select>
+              </div>
+            </div>
+            <div class="option-row">
+              <div class="field">
+                <label for="hardwareSelect">Hardware target</label>
+                <select id="hardwareSelect">
+                  <option value="mid">Mid-range PC</option>
+                  <option value="high">High-end PC</option>
+                  <option value="ultra">Ultra setup</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="paletteSelect">Color palette</label>
+                <select id="paletteSelect">
+                  <option value="cinematic">Cinematic</option>
+                  <option value="cool">Cool contrast</option>
+                  <option value="warm">Warm glow</option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <button class="btn btn-primary" id="generateBtn">Generate package</button>
+              <button class="btn btn-secondary" id="downloadBtn" disabled>Download ZIP</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content">
+        <div class="panel console-panel">
+          <div class="panel-header">
+            <div>
+              <div class="eyebrow">Workspace</div>
+              <h3>Generation stream</h3>
+            </div>
+            <div class="meta-badge">Premium mode</div>
+          </div>
+          <div class="credits-pill">⚡ Credits remaining: <span id="creditValue">500</span></div>
+          <div class="console-card system">The generator has been tuned for a deliberate, premium pace. It will walk through each layer of your preset instead of rushing the result.</div>
+          <div class="console-card" id="statusCard">Waiting for authentication and prompt input.</div>
+          <div class="progress"><span id="progressFill"></span></div>
+          <div class="status-line" id="statusLine">Ready for a polished build.</div>
+          <div class="console-card system" id="stepList">
+            <strong>Mission chain</strong><br />
+            1. Parse prompt intent<br />
+            2. Build shader stack<br />
+            3. Apply lighting balance<br />
+            4. Package export files
+          </div>
+        </div>
+
+        <div class="panel console-panel">
+          <div class="panel-header">
+            <div>
+              <div class="eyebrow">Notes</div>
+              <h3>Session memory</h3>
+            </div>
+            <div class="meta-badge">Live</div>
+          </div>
+          <div class="console-card system" id="logPanel">Your session will appear here as the generator works through the build.</div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const games = [
+        'RDR2', 'Hitman: World of Assassination', 'Cyberpunk 2077', 'Elden Ring', 'Far Cry 6', 'Subnautica', 'Forza Horizon 5', 'Dark Souls III', 'Fallout 4', 'God of War Ragnarok', 'God of War', 'GTA 5'
+      ];
+
+      const state = {
+        credits: 500,
+        authenticated: false,
+        generatedFiles: null,
+        cookiesAccepted: false
+      };
+
+      const gameSelect = document.getElementById('gameSelect');
+      const promptInput = document.getElementById('promptInput');
+      const severitySelect = document.getElementById('severitySelect');
+      const presetNameInput = document.getElementById('presetNameInput');
+      const styleTagInput = document.getElementById('styleTagInput');
+      const qualitySelect = document.getElementById('qualitySelect');
+      const hardwareSelect = document.getElementById('hardwareSelect');
+      const paletteSelect = document.getElementById('paletteSelect');
+      const generateBtn = document.getElementById('generateBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const statusCard = document.getElementById('statusCard');
+      const statusLine = document.getElementById('statusLine');
+      const progressFill = document.getElementById('progressFill');
+      const logPanel = document.getElementById('logPanel');
+      const creditValue = document.getElementById('creditValue');
+      const creditMetric = document.getElementById('creditMetric');
+      const authStatus = document.getElementById('authStatus');
+      const authInfo = document.getElementById('authInfo');
+      const loginShell = document.getElementById('loginShell');
+      const emailInput = document.getElementById('emailInput');
+      function restoreCookies() {
+        // Cookie consent is handled by the CookieInfo widget. Keep a lightweight check for the consent cookie.
+        const has = document.cookie.split(';').some(c => c.trim().startsWith('tactical-web-consent='));
+        state.cookiesAccepted = !!has;
+      }
+
+      function renderGames() {
+        gameSelect.innerHTML = '';
+        games.forEach((game) => {
+          const option = document.createElement('option');
+          option.value = game;
+          option.textContent = game;
+          gameSelect.appendChild(option);
+        });
+      }
+
+      function updateCredits() {
+        creditValue.textContent = state.credits;
+        creditMetric.textContent = state.credits;
+      }
+
+      function log(message, kind = 'system') {
+        const card = document.createElement('div');
+        card.className = `console-card ${kind}`;
+        card.textContent = message;
+        logPanel.appendChild(card);
+        logPanel.scrollTop = logPanel.scrollHeight;
+      }
+
+      function openLogin() { loginShell.classList.remove('hidden'); setTimeout(()=> { if (emailInput) emailInput.focus(); }, 180); }
+      function closeLogin() { loginShell.classList.add('hidden'); }
+
+      function authenticate(method) {
+        const inputValue = emailInput.value.trim();
+        if (!inputValue) {
+          statusCard.textContent = 'Add an email or Discord handle to continue.';
+          return;
+        }
+        state.authenticated = true;
+        const label = method === 'gmail' ? 'Gmail' : 'Discord';
+        authStatus.textContent = `Signed in with ${label}`;
+        authInfo.textContent = `Welcome, ${inputValue}`;
+        statusCard.textContent = `Session unlocked through ${label}. You are ready to generate.`;
+        state.credits += 5000;
+        updateCredits();
+        log(`Authentication complete via ${label}. Bonus credits have been applied.`, 'success');
+        closeLogin();
+      }
+
+      function escapeFilename(value) {
+        return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      }
+
+      function getCost() {
+        const severity = severitySelect.value;
+        const base = severity === 'light' ? 35 : severity === 'medium' ? 55 : severity === 'heavy' ? 80 : 120;
+        return base;
+      }
+
+      function sanitizePresetText(rawText) {
+        let text = String(rawText || '').trim();
+        const fenced = text.match(/```(?:ini)?\s*([\s\S]*?)```/i);
+        if (fenced) {
+          text = fenced[1].trim();
+        } else {
+          text = text.replace(/^```(?:ini)?/i, '').replace(/```$/i, '').trim();
+        }
+        return text;
+      }
+
+      function buildPresetContent(prompt, presetName, game, styleTag, severity, quality, hardware, palette) {
+        const lowerPrompt = String(prompt || '').toLowerCase();
+        const techniques = [];
+        const techniqueSettings = [];
+
+        const addTechnique = (shaderName, settingsLines) => {
+          techniques.push(`${shaderName}=1`);
+          techniqueSettings.push(`${shaderName}=`, ...settingsLines.map((line) => `  ${line}`));
+        };
+
+        if (/(vibrant|neon|pop)/.test(lowerPrompt)) {
+          addTechnique('Colorfulness.fx', ['Colorfulness=1.450000', 'Contrast=1.100000', 'Gamma=1.000000']);
+          addTechnique('Vibrance.fx', ['Vibrance=0.450000', 'VibranceRGBBalance=1.000000,1.000000,1.000000']);
+          addTechnique('MagicBloom.fx', ['Intensity=0.900000', 'Threshold=0.250000']);
+        }
+
+        if (/(dark|gritty|military)/.test(lowerPrompt)) {
+          addTechnique('Curves.fx', ['Mode=2', 'Formula=4', 'Contrast=1.250000']);
+          addTechnique('Levels.fx', ['BlackPoint=0.120000', 'WhitePoint=0.900000', 'Gamma=1.000000']);
+          addTechnique('FilmicPass.fx', ['Strength=0.850000', 'Contrast=1.050000', 'Saturation=0.800000', 'Bleach=0.300000']);
+        }
+
+        if (/(sharp|clear|crisp)/.test(lowerPrompt)) {
+          addTechnique('LumaSharpen.fx', ['pattern=1', 'sharp_strength=0.650000', 'sharp_clamp=0.035000']);
+          addTechnique('SMAA.fx', ['EdgeDetectionType=1', 'EdgeDetectionThreshold=0.100000', 'MaxSearchSteps=16']);
+        }
+
+        if (/(cinematic|movie|dramatic)/.test(lowerPrompt)) {
+          addTechnique('Vignette.fx', ['Type=1', 'Center=0.500000,0.500000', 'Radius=0.650000', 'Slope=2.000000']);
+          addTechnique('ChromaticAberration.fx', ['Shift=1.000000', 'Strength=0.050000']);
+        }
+
+        if (/(soft|dreamy|foggy)/.test(lowerPrompt)) {
+          addTechnique('MagicBloom.fx', ['Intensity=1.100000', 'Threshold=0.150000']);
+          addTechnique('Colorfulness.fx', ['Colorfulness=0.900000', 'Contrast=0.850000', 'Gamma=1.000000']);
+        }
+
+        if (/(warm|sunset|gold)/.test(lowerPrompt)) {
+          addTechnique('Sepia.fx', ['Tint=0.980000,0.700000,0.350000', 'Strength=0.180000']);
+        }
+
+        if (/(cold|blue|frost)/.test(lowerPrompt)) {
+          addTechnique('LiftGammaGain.fx', ['Lift=0.000000,0.030000,0.080000', 'Gamma=0.000000,0.000000,0.000000', 'Gain=0.000000,0.000000,0.040000']);
+        }
+
+        if (techniques.length === 0) {
+          addTechnique('Colorfulness.fx', ['Colorfulness=1.100000', 'Contrast=1.000000', 'Gamma=1.000000']);
+          addTechnique('FilmicPass.fx', ['Strength=0.750000', 'Contrast=1.000000', 'Saturation=0.900000', 'Bleach=0.150000']);
+          addTechnique('Vignette.fx', ['Type=1', 'Center=0.500000,0.500000', 'Radius=0.600000', 'Slope=2.000000']);
+        }
+
+        return [
+          '[PRESET]',
+          `Name=${presetName}`,
+          `Game=${game}`,
+          `StyleTag=${styleTag}`,
+          `Severity=${severity}`,
+          `Quality=${quality}`,
+          `Hardware=${hardware}`,
+          `Palette=${palette}`,
+          'Author=Tactical Web',
+          'Description=Generated from text prompt',
+          'Screenshot=',
+          '',
+          '[Techniques]',
+          ...techniques,
+          '',
+          '[TechniqueSettings]',
+          ...techniqueSettings
+        ].join('\n');
+      }
+
+      async function generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette) {
+        const systemPrompt = `You are a ReShade Preset Engine. Convert natural language style descriptions into valid ReShade .ini preset files. Use only the listed shaders and parameters. Return ONLY raw .ini content with sections [PRESET], [Techniques], and [TechniqueSettings]. The target game profile is ${game}. Style tag is ${styleTag}. Severity is ${severity}. Quality is ${quality}. Hardware target is ${hardware}. Palette is ${palette}.`;
+        const userPrompt = `Create a ReShade preset for ${game} from this prompt: ${prompt}. Make the preset feel tailored to the selected game profile and package it as a valid .ini file.`;
+        const aiConfig = window.AI_CONFIG || {};
+        const geminiApiKey = aiConfig.geminiApiKey || '';
+        const groqApiKey = aiConfig.groqApiKey || '';
+
+        try {
+          if (!geminiApiKey) {
+            throw new Error('Gemini API key not configured.');
+          }
+
+          const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(geminiApiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+              systemInstruction: { role: 'system', parts: [{ text: systemPrompt }] }
+            })
+          });
+          const geminiData = await geminiResponse.json();
+          const geminiText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          const cleanedText = sanitizePresetText(geminiText);
+          if (cleanedText.includes('[PRESET]') && cleanedText.includes('[Techniques]') && cleanedText.includes('[TechniqueSettings]')) {
+            return cleanedText;
+          }
+        } catch (error) {
+          console.warn('Gemini preset generation failed, falling back to local preset builder.', error);
+        }
+
+        try {
+          if (!groqApiKey) {
+            throw new Error('Groq API key not configured.');
+          }
+
+          const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${groqApiKey}`
+            },
+            body: JSON.stringify({
+              model: 'llama-3.3-70b-versatile',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+              ],
+              temperature: 0.6
+            })
+          });
+          const groqData = await groqResponse.json();
+          const groqText = groqData?.choices?.[0]?.message?.content || '';
+          const cleanedText = sanitizePresetText(groqText);
+          if (cleanedText.includes('[PRESET]') && cleanedText.includes('[Techniques]') && cleanedText.includes('[TechniqueSettings]')) {
+            return cleanedText;
+          }
+        } catch (error) {
+          console.warn('Groq preset generation failed, falling back to local preset builder.', error);
+        }
+
+        return buildPresetContent(prompt, presetName, game, styleTag, severity, quality, hardware, palette);
+      }
+
+      function buildReadme(presetName, game, styleTag, severity, prompt, quality, hardware, palette) {
+        return `Tactical Web ReShade Package
+===========================
+Preset: ${presetName}
+Game Profile: ${game}
+Style Tag: ${styleTag}
+Severity: ${severity}
+Quality: ${quality}
+Hardware Target: ${hardware}
+Palette: ${palette}
+
+Prompt:
+${prompt}
+
+Installation:
+1. Copy preset.ini into your ReShade preset folder.
+2. Open ReShade and load preset.ini.
+3. Ensure the related shaders are installed and enabled in-game.
+`;
+      }
+
+      function buildManifest(presetName, game, styleTag, severity, prompt, quality, hardware, palette) {
+        return JSON.stringify({ presetName, game, styleTag, severity, quality, hardware, palette, prompt, generatedBy:'Tactical Web AI', packageVersion:'1.0.0', files:['preset.ini','README.readme','manifest.json','shader-profile.txt'] }, null, 2);
+      }
+
+      async function generatePackage() {
+        if (!state.authenticated) {
+          statusCard.textContent = 'Please sign in with Gmail or Discord before generating.';
+          log('Authentication is required before the mission can begin.', 'system');
+          return;
+        }
+
+        const prompt = promptInput.value.trim();
+        const presetName = presetNameInput.value.trim() || 'Velvet Horizon';
+        const game = gameSelect.value;
+        const styleTag = styleTagInput.value.trim() || 'Cinematic';
+        const severity = severitySelect.value;
+        const quality = qualitySelect.value;
+        const hardware = hardwareSelect.value;
+        const palette = paletteSelect.value;
+
+        if (!prompt) {
+          statusCard.textContent = 'Enter a prompt so the generator can build a package.';
+          return;
+        }
+
+        const cost = getCost();
+        if (state.credits < cost) {
+          statusCard.textContent = `You need ${cost} credits for this task.`;
+          log('Insufficient credits for the selected complexity.', 'system');
+          return;
+        }
+
+        generateBtn.disabled = true;
+        downloadBtn.disabled = true;
+        statusCard.textContent = 'The package is now being assembled with a deliberate premium workflow.';
+        statusLine.textContent = 'Generating…';
+        progressFill.style.width = '4%';
+
+        const steps = ['Parsing prompt intent', 'Selecting shader stack', 'Balancing lighting depth', 'Writing preset files', 'Packaging ZIP bundle', 'Finalizing export'];
+        let current = 0;
+        const interval = setInterval(() => {
+          if (current < steps.length) {
+            progressFill.style.width = `${(current / steps.length) * 100}%`;
+            statusLine.textContent = steps[current];
+            current += 1;
+          }
+        }, 1100);
+
+        log(`Mission launched for ${game} with a ${severity} complexity profile.`, 'system');
+        log(`AI planning optimized for ${hardware} hardware and a ${palette} palette.`, 'system');
+
+        setTimeout(async () => {
+          clearInterval(interval);
+          state.credits -= cost + 15;
+          updateCredits();
+
+          const presetContent = await generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette);
+          const readmeContent = buildReadme(presetName, game, styleTag, severity, prompt, quality, hardware, palette);
+          const manifestContent = buildManifest(presetName, game, styleTag, severity, prompt, quality, hardware, palette);
+
+          const zip = new JSZip();
+          zip.file('preset.ini', presetContent);
+          zip.file('README.readme', readmeContent);
+          zip.file('manifest.json', manifestContent);
+          zip.file('shader-profile.txt', `Shader profile for ${styleTag} using ${quality} quality settings and a ${palette} palette for ${game}.`);
+
+          const blob = await zip.generateAsync({ type: 'blob' });
+          state.generatedFiles = { blob, presetName };
+
+          progressFill.style.width = '100%';
+          statusLine.textContent = 'Package complete.';
+          statusCard.textContent = `Package ready. ${state.credits} credits remain.`;
+          log('Export bundle generated successfully and is ready to download.', 'success');
+          downloadBtn.disabled = false;
+          generateBtn.disabled = false;
+        }, 7000);
+      }
+
+      async function downloadPackage() {
+        if (!state.generatedFiles) return;
+        const fileName = `${escapeFilename(state.generatedFiles.presetName || 'tactical-web')}-preset-package.zip`;
+        const link = document.createElement('a');
+        const objectUrl = URL.createObjectURL(state.generatedFiles.blob);
+        link.href = objectUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(objectUrl);
+      }
+
+      document.getElementById('openLoginBtn').addEventListener('click', openLogin);
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        state.authenticated = false;
+        authStatus.textContent = 'Anonymous session';
+        authInfo.textContent = 'Sign in to unlock generation.';
+        statusCard.textContent = 'Sign in again to unlock the generator.';
+        log('Session reset. Please sign in again.', 'system');
+      });
+      document.getElementById('loginGmailBtn').addEventListener('click', () => authenticate('gmail'));
+      document.getElementById('loginDiscordBtn').addEventListener('click', () => authenticate('discord'));
+      document.getElementById('generateBtn').addEventListener('click', generatePackage);
+      document.getElementById('downloadBtn').addEventListener('click', downloadPackage);
+      loginShell.addEventListener('click', (event) => { if (event.target === loginShell) closeLogin(); });
+
+      // Small UX improvements: focus prompt on load and allow Ctrl/Cmd+Enter to generate
+      setTimeout(() => { if (promptInput) promptInput.focus(); }, 220);
+      if (promptInput) {
+        promptInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            generatePackage();
+          }
+        });
+      }
+
+      renderGames();
+      updateCredits();
+      restoreCookies();
+      log('Welcome to Tactical Web. Sign in to begin the premium generation experience.', 'system');
+    </script>
+    <script src="cookie.js"></script>
+    <script src="countdown.js"></script>
+  </body>
+</html>
+

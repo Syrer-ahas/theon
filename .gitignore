@@ -1,0 +1,25 @@
+# AI and secret configuration
+.env
+.env.*
+!.env.example
+ai-config.js
+
+# API key files and tokens
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.json
+config/*.json
+
+# Common AI provider environment variables
+OPENAI_API_KEY
+ANTHROPIC_API_KEY
+GEMINI_API_KEY
+GOOGLE_API_KEY
+AZURE_OPENAI_API_KEY
+AZURE_OPENAI_ENDPOINT
+COHERE_API_KEY
+MISTRAL_API_KEY
+HUGGINGFACEHUB_API_TOKEN
+OPENROUTER_API_KEY
