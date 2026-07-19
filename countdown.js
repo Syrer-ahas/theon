@@ -266,7 +266,94 @@
         }
         .cdo-bottom .cdo-highlight { color: rgba(255,215,0,0.7); font-weight: 700; }
 
+        /* ── Hype Button ── */
+        .cdo-hype-wrap {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .cdo-hype-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,107,53,0.12));
+            border: 1px solid rgba(255,215,0,0.25);
+            border-radius: 60px;
+            padding: 14px 36px;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(16px,2vw,22px);
+            font-weight: 700;
+            color: #ffd700;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255,215,0,0.05);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .cdo-hype-btn:hover {
+            background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,107,53,0.2));
+            border-color: rgba(255,215,0,0.5);
+            box-shadow: 0 0 40px rgba(255,215,0,0.15);
+            transform: scale(1.05);
+        }
+        .cdo-hype-btn:active {
+            transform: scale(0.95);
+        }
+        .cdo-hype-btn .cdo-fire {
+            font-size: clamp(20px,2.5vw,28px);
+            transition: transform 0.2s ease;
+        }
+        .cdo-hype-btn:hover .cdo-fire {
+            transform: scale(1.3) rotate(-10deg);
+        }
+        .cdo-hype-count {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(14px,1.8vw,20px);
+            font-weight: 700;
+            color: #fff;
+            min-width: 30px;
+            text-align: center;
+        }
+        .cdo-hype-label {
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.2);
+        }
+        .cdo-hype-burst {
+            animation: cdoBurst 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+        }
+        @keyframes cdoBurst {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .cdo-hype-btn .cdo-spark {
+            position: absolute;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #ffd700;
+            pointer-events: none;
+            opacity: 0;
+        }
+        .cdo-hype-btn .cdo-spark.fly {
+            animation: cdoSparkFly 0.8s ease-out forwards;
+        }
+        @keyframes cdoSparkFly {
+            0% { opacity: 1; transform: translate(0,0) scale(1); }
+            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+        }
+
         @media (max-width: 600px) {
+            .cdo-container { padding: 30px 16px; }
+            .cdo-sep { padding-bottom: 22px; }
+            .cdo-tile { width: clamp(68px,20vw,90px); height: clamp(78px,22vw,100px); border-radius: 12px; }
+            .cdo-number { font-size: clamp(30px,12vw,44px); }
+            .cdo-badge { font-size: 11px; padding: 6px 16px 6px 12px; }
+            .cdo-hype-btn { padding: 12px 24px; }
+        }
             .cdo-container { padding: 30px 16px; }
             .cdo-sep { padding-bottom: 22px; }
             .cdo-tile { width: clamp(68px,20vw,90px); height: clamp(78px,22vw,100px); border-radius: 12px; }
