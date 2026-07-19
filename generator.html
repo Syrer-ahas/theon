@@ -590,7 +590,8 @@
         ].join('\n');
       }
 
-      async function generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette) {
+      async function generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette, cost) {
+        const session = getSessionToken();
         try {
           const response = await fetch('/api/generate', {
             method: 'POST',
@@ -603,13 +604,24 @@
               hardware: hardware,
               palette: palette,
               prompt: prompt,
-              presetName: presetName
+              presetName: presetName,
+              session: session,
+              cost: cost
             })
           });
           const data = await response.json();
-          if (!response.ok) throw new Error(data.error || 'Generation failed.');
+          if (!response.ok) {
+            // Server rejected due to credits or auth
+            if (response.status === 401 || response.status === 403) {
+              throw new Error(data.error || 'Generation rejected by server.');
+            }
+            throw new Error(data.error || 'Generation failed.');
+          }
+          // Server-side credit deduction succeeded, sync credit balance
+          // (Note: the server already deducted credits; we trust the server-side balance)
           return data.preset_ini;
         } catch (error) {
+          // If server generation fails, fall back to local builder (credits were already deducted server-side)
           console.warn('Groq preset generation failed, falling back to local preset builder.', error);
           return buildPresetContent(prompt, presetName, game, styleTag, severity, quality, hardware, palette);
         }
