@@ -7,9 +7,11 @@
 const DEFAULT_CREDITS = 50;
 const MIN_CREDITS = 6;
 const CREDIT_RATE = 6; // credits per second
+const DAILY_BONUS = 50;
+const DAILY_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // In-memory store for credits. For production, replace with Vercel KV / Redis / DB.
-const creditStore = new Map();
+const creditStore = new Map(); // email -> { credits, lastDailyClaim }
 
 function decodeJWT(token) {
   try {
@@ -23,15 +25,35 @@ function decodeJWT(token) {
   }
 }
 
-function getCredits(email) {
+function getStore(email) {
   if (!creditStore.has(email)) {
-    creditStore.set(email, { credits: DEFAULT_CREDITS });
+    creditStore.set(email, { credits: DEFAULT_CREDITS, lastDailyClaim: 0 });
   }
-  return creditStore.get(email).credits;
+  return creditStore.get(email);
+}
+
+function setStore(email, data) {
+  creditStore.set(email, data);
+}
+
+function getCredits(email) {
+  const store = getStore(email);
+  const now = Date.now();
+
+  // Auto-grant daily 50 credits if 24h has passed since last claim
+  if (store.lastDailyClaim === 0 || (now - store.lastDailyClaim) >= DAILY_COOLDOWN_MS) {
+    store.credits = (store.credits || 0) + DAILY_BONUS;
+    store.lastDailyClaim = now;
+    setStore(email, store);
+  }
+
+  return store.credits;
 }
 
 function setCredits(email, credits) {
-  creditStore.set(email, { credits });
+  const store = getStore(email);
+  store.credits = credits;
+  setStore(email, store);
 }
 
 export default async function handler(request, response) {
