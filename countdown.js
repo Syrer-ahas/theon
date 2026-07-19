@@ -1,7 +1,65 @@
 (function() {
     'use strict';
 
-    /* ─── Inject full-page countdown overlay ─── */
+    /* ─── Service Worker: injects countdown into every page ─── */
+    if ('serviceWorker' in navigator) {
+        // Register once — the SW intercepts all HTML pages and injects <script>
+        const SW_URL = '/countdown.js?sw=1';
+        navigator.serviceWorker.register(SW_URL, { scope: '/' }).catch(function() {
+            // Ignore — might not work locally, but works on production
+        });
+    }
+
+    /* ─── If this is being loaded as a Service Worker ─── */
+    // @ts-ignore
+    if (typeof self !== 'undefined' && self.constructor && self.constructor.name === 'ServiceWorkerGlobalScope') {
+        // SW mode: intercept HTML pages and inject the overlay script
+        self.addEventListener('install', function(e) {
+            self.skipWaiting();
+        });
+        self.addEventListener('activate', function(e) {
+            e.waitUntil(self.clients.claim());
+        });
+        self.addEventListener('fetch', function(e) {
+            const req = e.request;
+            const url = new URL(req.url);
+            const isHTML = req.method === 'GET' &&
+                (url.pathname.endsWith('.html') ||
+                 url.pathname === '/' ||
+                 !url.pathname.includes('.'));
+
+            if (isHTML && !url.pathname.includes('countdown')) {
+                e.respondWith(handleHTML(req));
+            }
+        });
+
+        async function handleHTML(req) {
+            const res = await fetch(req);
+            const contentType = res.headers.get('content-type') || '';
+            if (!contentType.includes('text/html')) return res;
+
+            let html = await res.text();
+
+            // Inject the countdown script right before </head>
+            const injectScript = `<script src="/countdown.js?sw=1"><\/script>`;
+            if (html.includes('</head>')) {
+                html = html.replace('</head>', injectScript + '</head>');
+            } else if (html.includes('</body>')) {
+                html = html.replace('</body>', injectScript + '</body>');
+            } else {
+                html = html + injectScript;
+            }
+
+            return new Response(html, {
+                status: res.status,
+                statusText: res.statusText,
+                headers: res.headers
+            });
+        }
+        return; // Stop — this is SW mode
+    }
+
+    /* ─── Normal mode: inject full-page countdown overlay ─── */
     const overlay = document.createElement('div');
     overlay.id = 'global-countdown-overlay';
     overlay.style.cssText = [
@@ -16,7 +74,6 @@
         'overflow-y: auto'
     ].map(s => s + ';').join('');
 
-    /* ─── Inject styles ─── */
     function injectStyles() {
         const style = document.createElement('style');
         style.textContent = `
@@ -36,7 +93,6 @@
     pointer-events: none;
 }
 @keyframes cdoGridPulse { 0%,100%{opacity:.3} 50%{opacity:.7} }
-
 .cdo-orbs {
     position: absolute; top: 0; left: 0;
     width: 100%; height: 100%;
@@ -229,8 +285,6 @@
     color: rgba(255,255,255,0.25); letter-spacing: 2px;
 }
 .cdo-bottom .cdo-highlight { color: rgba(255,215,0,0.7); font-weight: 700; }
-
-/* ── Hype Button ── */
 .cdo-hype-wrap {
     margin-top: 40px;
     display: flex; flex-direction: column;
@@ -302,7 +356,6 @@
     }
     injectStyles();
 
-    /* ─── Build HTML ─── */
     overlay.innerHTML = [
         '<div class="cdo-bg-grid"></div>',
         '<div class="cdo-orbs"><div class="cdo-orb"></div><div class="cdo-orb"></div><div class="cdo-orb"></div></div>',
@@ -326,7 +379,6 @@
                 '<div class="cdo-progress-label"><span>Preparing launch</span><span id="cdo-progressPct">0%</span></div>',
             '</div>',
             '<div class="cdo-bottom"><p>🚀 &nbsp; Get ready &nbsp; · &nbsp; <span class="cdo-highlight">#HYPED</span> &nbsp; · &nbsp; Stay tuned</p></div>',
-            /* ── HYPE BUTTON ── */
             '<div class="cdo-hype-wrap">',
                 '<button class="cdo-hype-btn" id="cdo-hypeBtn">',
                     '<span class="cdo-fire">🔥</span>',
@@ -407,31 +459,24 @@
     const hypeCountEl = document.getElementById('cdo-hypeCount');
 
     function getHypeCount() {
-        try {
-            return parseInt(localStorage.getItem(HYPE_KEY), 10) || 0;
-        } catch(e) { return 0; }
+        try { return parseInt(localStorage.getItem(HYPE_KEY), 10) || 0; } catch(e) { return 0; }
     }
-
     function setHypeCount(n) {
         try { localStorage.setItem(HYPE_KEY, n); } catch(e) {}
     }
 
-    // Init
     hypeCountEl.textContent = getHypeCount();
 
-    // Click handler
     hypeBtn.addEventListener('click', function(e) {
         let count = getHypeCount();
         count++;
         setHypeCount(count);
         hypeCountEl.textContent = count;
 
-        // Burst animation
         hypeBtn.classList.remove('cdo-hype-burst');
         void hypeBtn.offsetWidth;
         hypeBtn.classList.add('cdo-hype-burst');
 
-        // Sparks
         const rect = hypeBtn.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
@@ -450,7 +495,6 @@
             setTimeout(() => spark.remove(), 800);
         }
 
-        // Subtle haptic feedback (mobile)
         if (navigator.vibrate) navigator.vibrate(15);
     });
 })();
