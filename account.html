@@ -58,9 +58,63 @@
     </div>
     <script src="auth-session.js"></script><script src="site-nav.js"></script><script src="auth-ui.js"></script><script>
       const session = window.TacticalAuth.getSession(); const avatar = document.getElementById('avatar'); const selectedPlan = localStorage.getItem('tactical-web-selected-plan'); if (selectedPlan) document.getElementById('planLabel').textContent = `${selectedPlan} selected · Checkout will be available soon.`;
-      if (session) { document.getElementById('accountName').textContent = session.name; document.getElementById('accountEmail').textContent = session.email; if (session.picture) avatar.innerHTML = `<img src="${session.picture}" alt="" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">`; else avatar.textContent = session.name.charAt(0).toUpperCase(); }
+      if (session) {
+        document.getElementById('accountName').textContent = session.name; document.getElementById('accountEmail').textContent = session.email;
+        if (session.picture) avatar.innerHTML = `<img src="${session.picture}" alt="" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">`; else avatar.textContent = session.name.charAt(0).toUpperCase();
+        document.getElementById('googleStatus').textContent = `Connected as ${session.email}`;
+        document.getElementById('googleBadge').textContent = 'Connected';
+        document.getElementById('googleBadge').className = 'badge badge-green';
+        const now = new Date();
+        if (!localStorage.getItem('tactical-web-first-seen')) localStorage.setItem('tactical-web-first-seen', now.toISOString());
+        const firstSeen = new Date(localStorage.getItem('tactical-web-first-seen'));
+        document.getElementById('memberSince').textContent = `Member since ${firstSeen.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}`;
+        const presetCount = Number(localStorage.getItem('tactical-web-preset-count') || '0');
+        const creditsUsed = Number(localStorage.getItem('tactical-web-credits-used') || '0');
+        const firstDay = new Date(localStorage.getItem('tactical-web-first-seen'));
+        const activeDays = Math.max(1, Math.floor((now - firstDay) / (1000 * 60 * 60 * 24)));
+        document.getElementById('statPresets').textContent = presetCount;
+        document.getElementById('statCreditsUsed').textContent = creditsUsed;
+        document.getElementById('statSessionDays').textContent = activeDays;
+        const activityLog = document.getElementById('activityLog'); activityLog.innerHTML = '';
+        const activities = JSON.parse(localStorage.getItem('tactical-web-activity-log') || '[]');
+        if (activities.length === 0) {
+          activityLog.innerHTML = '<div class="activity-item"><div class="left"><span class="activity-dot gray"></span><span class="muted" style="font-size:.88rem;">No recent activity recorded.</span></div></div>';
+        } else {
+          activities.slice(-5).reverse().forEach(a => {
+            const item = document.createElement('div'); item.className = 'activity-item';
+            item.innerHTML = `<div class="left"><span class="activity-dot green"></span><div><strong style="font-size:.88rem;">${a.action}</strong><div class="muted" style="font-size:.78rem;">${a.date}</div></div></div>`;
+            activityLog.appendChild(item);
+          });
+        }
+        const storedAffiliateCode = localStorage.getItem('tactical-affiliate-code');
+        if (storedAffiliateCode) {
+          document.getElementById('affiliateCodeDisplay').textContent = storedAffiliateCode;
+          document.getElementById('referralCount').textContent = localStorage.getItem('tactical-affiliate-referrals') || '0';
+          document.getElementById('affiliateCredits').textContent = localStorage.getItem('tactical-affiliate-credits') || '0';
+        }
+        if (localStorage.getItem('tactical-web-newsletter-subscribed')) {
+          document.getElementById('newsletterStatus').textContent = 'Subscribed to Tactical Dispatch.';
+          document.getElementById('newsletterBadge').textContent = 'Subscribed';
+          document.getElementById('newsletterBadge').className = 'badge badge-green';
+        }
+        const log = JSON.parse(localStorage.getItem('tactical-web-activity-log') || '[]');
+        log.push({ action: 'Account page visited', date: now.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}) });
+        if (log.length > 50) log.splice(0, log.length - 50);
+        localStorage.setItem('tactical-web-activity-log', JSON.stringify(log));
+      } else {
+        document.getElementById('memberSince').textContent = '';
+        document.getElementById('billingHistoryBtn').disabled = true;
+      }
       const preferences = JSON.parse(localStorage.getItem('tactical-web-preferences') || '{}'); document.querySelectorAll('[data-preference]').forEach(input => { input.checked = Boolean(preferences[input.dataset.preference]); input.addEventListener('change', () => { preferences[input.dataset.preference] = input.checked; localStorage.setItem('tactical-web-preferences', JSON.stringify(preferences)); document.getElementById('settingsStatus').textContent = 'Preferences saved on this device.'; }); });
-      document.getElementById('clearPreferences').addEventListener('click', () => { Object.keys(localStorage).filter(key => key.startsWith('tactical-web-')).forEach(key => { if (key !== 'tactical-web-google-session') localStorage.removeItem(key); }); document.querySelectorAll('[data-preference]').forEach(input => input.checked = false); document.getElementById('settingsStatus').textContent = 'Local preferences cleared.'; }); document.getElementById('logoutButton').addEventListener('click', () => { window.TacticalAuth.clearSession(); window.location.href = 'index.html'; });
+      document.getElementById('clearPreferences').addEventListener('click', () => { Object.keys(localStorage).filter(key => key.startsWith('tactical-web-')).forEach(key => { if (key !== 'tactical-web-google-session') localStorage.removeItem(key); }); document.querySelectorAll('[data-preference]').forEach(input => input.checked = false); document.getElementById('settingsStatus').textContent = 'Local preferences cleared.'; });
+      document.getElementById('logoutButton').addEventListener('click', () => { window.TacticalAuth.clearSession(); window.location.href = 'index.html'; });
+      document.getElementById('billingHistoryBtn').addEventListener('click', () => { document.getElementById('settingsStatus').textContent = 'Billing history will appear here once checkout is available.'; });
+      document.getElementById('exportDataBtn').addEventListener('click', () => {
+        const data = { exportedAt: new Date().toISOString(), session: session ? { name: session.name, email: session.email } : null, preferences: JSON.parse(localStorage.getItem('tactical-web-preferences') || '{}'), activityLog: JSON.parse(localStorage.getItem('tactical-web-activity-log') || '[]'), affiliateCode: localStorage.getItem('tactical-affiliate-code') || null, plan: selectedPlan || 'Free' };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'tactical-web-account-data.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        document.getElementById('settingsStatus').textContent = 'Account data exported as JSON.';
+      });
     </script><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script src="turnstile-config.js"></script>
     <script src="newsletter-popup.js"></script>
