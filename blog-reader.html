@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tactical Web — Blog Reader</title>
+    <meta name="description" content="Public blog reader for Tactical Web." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #060814;
+        --surface: rgba(12, 17, 31, 0.82);
+        --border: rgba(255,255,255,0.16);
+        --text: #f6f7ff;
+        --muted: #93a2c1;
+        --accent: #8d7dff;
+        --accent-2: #52d5ff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Inter', system-ui, sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top left, rgba(141,125,255,0.16), transparent 24%), linear-gradient(135deg, #070b17 0%, #0b1227 42%, #060814 100%);
+      }
+      a { color: inherit; text-decoration: none; }
+      .container { width: min(1100px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 48px; }
+      .panel {
+        background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        backdrop-filter: blur(18px);
+        box-shadow: 0 18px 60px rgba(0,0,0,0.18);
+      }
+      .nav { display:flex; justify-content:space-between; align-items:center; padding: 8px 0 18px; gap: 12px; }
+      .brand { display:flex; align-items:center; gap:12px; font-family:'Manrope',sans-serif; font-weight:800; }
+      .brand-logo { width:48px; height:48px; border-radius:0; object-fit:cover; border:0; box-shadow:none; }
+      .nav-actions { display:flex; gap:12px; flex-wrap:wrap; }
+      .btn, button {
+        border: 0;
+        border-radius: 20px;
+        padding: 12px 18px;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        cursor: pointer;
+        color: white;
+        transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .btn:hover, button:hover { transform: translateY(-2px); filter: brightness(1.04); }
+      .btn-primary {
+        background: linear-gradient(180deg, #fff7e6 0%, #ffe7b2 60%);
+        color: #2e1a07;
+        padding: 10px 24px;
+        border-radius: 22px;
+        border: 1px solid rgba(0,0,0,0.16);
+        box-shadow: 0 10px 30px rgba(6,8,12,0.78), 0 0 18px rgba(90,60,20,0.20), inset 0 1px 0 rgba(255,255,255,0.7);
+        font-weight: 900;
+        letter-spacing: 0.01em;
+        outline: 0;
+      }
+      .btn-secondary { background: linear-gradient(180deg, rgba(255,240,245,0.98), rgba(250,210,235,0.9)); color:#3a1f2b; box-shadow: 0 8px 22px rgba(6,8,12,0.7), 0 0 18px rgba(140,80,110,0.12); border:1px solid rgba(0,0,0,0.12); }
+      .btn-ghost { background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color: var(--text); box-shadow:0 6px 18px rgba(6,8,12,0.55); }
+      .btn-yellow { background: linear-gradient(180deg, #fff8c8 0%, #ffd96b 70%); color: #4a2a04; border:1px solid rgba(84,54,12,0.16); box-shadow: 0 8px 22px rgba(255,188,40,0.18); }
+      .hero { padding: 24px 28px; margin-bottom: 18px; }
+      .eyebrow { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); font-size:0.9rem; font-weight:700; margin-bottom: 12px; color:#e8ebff; }
+      h1,h2,h3 { font-family:'Manrope',sans-serif; margin:0; }
+      h1 { font-size: clamp(2rem, 3vw, 2.8rem); line-height: 1.08; margin-bottom: 12px; }
+      .muted { color: var(--muted); line-height: 1.7; }
+      .stack { display:grid; gap: 14px; }
+      .card { padding: 18px; border-radius: 18px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }
+      .post-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      .post-card { padding:0; overflow:hidden; cursor:pointer; }
+      .post-card img { width:100%; height: 180px; object-fit: cover; display:block; }
+      .post-card .content { padding: 16px; display:grid; gap:8px; }
+      .chip-row { display:flex; gap:8px; flex-wrap:wrap; }
+      .chip { display:inline-flex; padding:5px 8px; border-radius:999px; background: rgba(82,213,255,0.12); color:#9de3ff; font-size:0.78rem; font-weight:700; }
+      .modal { position: fixed; inset: 0; background: rgba(5,8,16,0.78); backdrop-filter: blur(8px); display:grid; place-items:center; padding: 20px; z-index: 1800; }
+      .modal.hidden { display:none; }
+      .modal-card { width: min(860px, 100%); max-height: 90vh; overflow:auto; border-radius: 24px; background: rgba(16,23,41,0.94); border:1px solid var(--border); box-shadow: 0 24px 70px rgba(0,0,0,0.4); padding: 24px; }
+      .modal-card img { width:100%; max-height: 280px; object-fit: cover; border-radius: 16px; margin-bottom: 16px; }
+      .close-btn { float:right; border:0; background: rgba(255,255,255,0.08); color:white; padding:8px 12px; border-radius:999px; cursor:pointer; }
+      .article-content p { color: var(--muted); line-height: 1.85; margin: 0 0 12px; }
+      @media (max-width: 900px) { .post-grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="nav">
+        <a class="brand" href="index.html">
+          <img class="brand-logo" src="images/logo.png" alt="Tactical Web logo" />
+          <span>Tactical Web</span>
+        </a>
+        <div class="nav-actions" data-site-nav>
+          <div class="dropdown" style="position:relative; display:flex; align-items:center; gap:8px;">
+            <a class="btn btn-primary" href="generator.html">Start building</a>
+            <button class="btn btn-ghost" data-nav-toggle aria-expanded="false" aria-haspopup="true" type="button" style="padding:8px 10px;">▾</button>
+            <div data-nav-menu hidden style="position:absolute; right:0; top:calc(100% + 10px); background:rgba(16,23,40,.96); border:1px solid var(--border); border-radius:20px; padding:10px; min-width:200px; box-shadow:0 14px 44px rgba(0,0,0,.45); z-index:12000;">
+              <a class="btn btn-secondary" href="blog.html" style="display:block; width:100%; text-align:left; margin:6px 0;">Blog</a>
+              <a class="btn btn-yellow" href="affiliate.html" style="display:block; width:100%; text-align:left; margin:6px 0;">Become Affiliate</a>
+              <a class="btn btn-ghost" href="index.html" style="display:block; width:100%; text-align:left; margin:6px 0;">Landing</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <section class="panel hero">
+        <div class="eyebrow">✦ Public blog reader</div>
+        <h1>Posts appear here for your audience.</h1>
+        <p class="muted">You can add new blog entries by editing the posts array in this file. The public page stays clean and focused on reading.</p>
+        <div class="post-grid" id="postGrid"></div>
+      </section>
+    </div>
+
+    <div class="modal hidden" id="postModal">
+      <div class="modal-card">
+        <button class="close-btn" id="closeModalBtn" type="button">Close</button>
+        <div id="modalContent"></div>
+      </div>
+    </div>
+
+    <script src="auth-session.js"></script>
+    <script src="site-nav.js"></script>
+    <script src="auth-ui.js"></script>
+    <script src="cookie.js"></script>
+    <script src="countdown.js"></script>
+    <script>
+
+      const posts = [
+        {
+          id: 'welcome-post',
+          title: 'Welcome to Tactical Web',
+          description: 'A short introduction for your audience.',
+          readingTime: '3 min read',
+          category: 'News',
+          image: 'images/rdr2.png',
+          date: '2026-07-11',
+          author: 'Tactical Web',
+          content: ['This is the first article placeholder. Replace it with your own content.']
+        }
+      ];
+
+      const postGrid = document.getElementById('postGrid');
+      const modal = document.getElementById('postModal');
+      const modalContent = document.getElementById('modalContent');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+
+      function renderPosts() {
+        postGrid.innerHTML = '';
+        posts.forEach(post => {
+          const card = document.createElement('article');
+          card.className = 'panel post-card';
+          card.innerHTML = `
+            <img src="${post.image}" alt="${post.title}" />
+            <div class="content">
+              <div class="chip-row">
+                <span class="chip">${post.category}</span>
+                <span class="chip">${post.readingTime}</span>
+              </div>
+              <h3>${post.title}</h3>
+              <p class="muted">${post.description}</p>
+              <div class="chip-row">
+                <span class="chip">${post.date}</span>
+                <span class="chip">by ${post.author}</span>
+              </div>
+            </div>`;
+          card.addEventListener('click', () => openPost(post));
+          postGrid.appendChild(card);
+        });
+      }
+
+      function openPost(post) {
+        modalContent.innerHTML = `
+          <div class="eyebrow">${post.category}</div>
+          <h2>${post.title}</h2>
+          <div class="chip-row" style="margin: 12px 0;">
+            <span class="chip">${post.readingTime}</span>
+            <span class="chip">${post.date}</span>
+            <span class="chip">by ${post.author}</span>
+          </div>
+          <img src="${post.image}" alt="${post.title}" />
+          <div class="article-content">
+            ${post.content.map(paragraph => `<p>${paragraph}</p>`).join('')}
+          </div>`;
+        modal.classList.remove('hidden');
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+      }
+
+      closeModalBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', event => {
+        if (event.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeModal();
+      });
+
+      renderPosts();
+    </script>
+  </body>
+</html>

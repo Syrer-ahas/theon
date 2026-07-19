@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tactical Web — ReShade Preset Generator</title>
+    <meta name="description" content="A premium ReShade preset platform with a dedicated generator, polished UI, and advanced AI-assisted workflows, Join the Future of Generation." />
+
+    <script>
+  // Replace these with your actual details from the Supabase API settings page
+  const SUPABASE_URL = "https://sqyypiknuoreipifwhqe.supabase.co"
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxeXlwaWtudW9yZXJpaWZ3aHFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5Njc5NTgsImV4cCI6MjA5OTU0Mzk1OH0.qyCoYexg7JxozqJxBP4-B6fo8nSjJh0mu7-GisaB1gU"
+
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  
+
+</script>
+  <link rel="icon" type="image/png" href="/images/logo.png?v=1" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="3215df08-c413-4b38-b82e-f4ad06e98169";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #060814;
+        --surface: rgba(12, 17, 31, 0.8);
+        --surface-strong: rgba(16, 23, 41, 0.92);
+        --border: rgba(255,255,255,0.16);
+        --text: #f6f7ff;
+        --muted: #93a2c1;
+        --accent: #8d7dff;
+        --accent-2: #52d5ff;
+        --accent-3: #f28dff;
+        --success: #4fe7a3;
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Inter', system-ui, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(141, 125, 255, 0.18), transparent 24%),
+          radial-gradient(circle at 80% 0%, rgba(82, 213, 255, 0.14), transparent 20%),
+          linear-gradient(135deg, #070b17 0%, #0b1227 42%, #060814 100%);
+        overflow-x: hidden;
+        user-select: text;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 22%, transparent 76%, rgba(255,255,255,0.05));
+        mask-image: linear-gradient(180deg, rgba(0,0,0,0.95), transparent 100%);
+      }
+
+      a { color: inherit; text-decoration: none; }
+      .container { width: min(1280px, calc(100% - 32px)); margin: 0 auto; }
+
+      .panel {
+        background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        backdrop-filter: blur(18px);
+        box-shadow: 0 18px 60px rgba(0,0,0,0.18);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .panel::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(110deg, rgba(255,255,255,0.35), rgba(255,255,255,0.05), rgba(255,255,255,0.2));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+
+      .nav { display:flex; justify-content:space-between; align-items:center; padding: 24px 0 18px; }
+      .dropdown { z-index: 1200; }
+      .brand { display:flex; align-items:center; gap:12px; font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:0.02em; }
+      .brand-logo { width:48px; height:48px; border-radius:0; object-fit:cover; border:0; box-shadow:none; }
+      .nav-actions { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+
+      .btn {
+        border: 0;
+        border-radius: 20px;
+        padding: 12px 18px;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        cursor: pointer;
+        color: white;
+        transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .btn:hover { transform: translateY(-2px); filter: brightness(1.04); }
+      .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 12px 28px rgba(141,125,255,0.2); }
+      .btn-secondary { background: linear-gradient(180deg, rgba(255,240,245,0.98), rgba(250,210,235,0.9)); color:#3a1f2b; box-shadow: 0 8px 22px rgba(6,8,12,0.7), 0 0 18px rgba(140,80,110,0.12); border:1px solid rgba(0,0,0,0.12); }
+      .btn-ghost { background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color: var(--text); box-shadow:0 6px 18px rgba(6,8,12,0.55); }
+      .btn-yellow { background: linear-gradient(180deg, #fff8c8 0%, #ffd96b 70%); color: #4a2a04; border:1px solid rgba(84,54,12,0.16); box-shadow: 0 8px 22px rgba(255,188,40,0.18); }
+
+      .cookie-banner {
+        position: fixed;
+        bottom: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(920px, calc(100% - 24px));
+        z-index: 1400;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(8, 12, 24, 0.92);
+        border: 1px solid rgba(255,255,255,0.14);
+        box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+        backdrop-filter: blur(16px);
+      }
+      .cookie-banner.hidden { display: none; }
+      .cookie-banner .cookie-actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+      /* Dropdown item variants (use same shape/weight as .btn) */
+      .btn-blue { background: linear-gradient(180deg,#e6f3ff 0%, #cfeeff 60%); color:#07293d; border:1px solid rgba(3,46,69,0.08); box-shadow: 0 8px 22px rgba(3,46,69,0.12); }
+      .btn-cyan { background: linear-gradient(180deg,#e6fcff 0%, #c8f7ff 60%); color:#003a42; border:1px solid rgba(0,58,66,0.08); box-shadow: 0 8px 22px rgba(0,58,66,0.10); }
+      .btn-purple { background: linear-gradient(180deg,#fae8ff 0%, #f2d3ff 60%); color:#3a1f2b; border:1px solid rgba(80,40,80,0.08); box-shadow: 0 8px 22px rgba(80,40,80,0.10); }
+
+        /* Reference-like pill button: soft top highlight, warm fill, subtle inset and drop shadow */
+        .btn-primary {
+          background: linear-gradient(180deg, #fff7e6 0%, #ffe7b2 60%);
+          color: #2e1a07;
+          padding: 10px 24px;
+          border-radius: 22px;
+          border: 1px solid rgba(0,0,0,0.16);
+          box-shadow: 0 10px 30px rgba(6,8,12,0.78), 0 0 18px rgba(90,60,20,0.20), inset 0 1px 0 rgba(255,255,255,0.7);
+          font-weight: 900;
+          letter-spacing: 0.01em;
+          outline: 0;
+        }
+      .hero { padding: 26px 28px; display:grid; grid-template-columns: 1.1fr 0.9fr; gap:24px; margin-bottom: 18px; }
+      .eyebrow { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); font-size:0.92rem; font-weight:700; margin-bottom: 14px; color:#e8ebff; }
+      h1,h2,h3 { font-family:'Manrope',sans-serif; margin:0; }
+      h1 { font-size: clamp(2rem, 3.6vw, 3.1rem); line-height: 1.05; margin-bottom: 12px; }
+      .hero p, .card p, .feature-card p, .step-card p { color: var(--muted); line-height: 1.7; }
+      .hero-actions { display:flex; gap:12px; flex-wrap:wrap; margin:18px 0 20px; }
+      .stats { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:12px; }
+      .stat { padding: 14px; border-radius: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
+      .stat strong { display:block; font-size:1.1rem; }
+      .stat span { color: var(--muted); font-size:0.88rem; }
+      .side-stack { display:grid; gap:12px; }
+      .card { padding: 16px 18px; border-radius: 18px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }
+      .card h3 { font-size: 1rem; margin-bottom: 7px; }
+
+      .section { padding: 12px 0 24px; display:grid; gap:14px; }
+      .section-title { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 6px; }
+      .section-title h2 { font-size: 1.25rem; }
+      .pill { display:inline-flex; align-items:center; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); color:#dfe7ff; font-size:0.92rem; }
+
+      .feature-grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:14px; }
+      .feature-card { padding: 18px; border-radius: 18px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }
+      .feature-card h3 { margin-bottom:8px; }
+      .world-grid { display:grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap:14px; align-items:center; justify-items:center; }
+      .world-card { padding: 0; border-radius: 50%; background: transparent; border: 0; display:flex; align-items:center; justify-content:center; }
+      .world-thumb { width: 92px; height: 92px; border-radius: 50%; overflow:hidden; border: 2px solid rgba(255,255,255,0.16); box-shadow: 0 12px 28px rgba(0,0,0,0.26); background: rgba(255,255,255,0.05); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+      .world-thumb:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 16px 34px rgba(0,0,0,0.32); }
+      .world-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+
+      .steps { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:14px; }
+      .step-card { padding: 18px; border-radius: 18px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }
+      .step-card strong { display:block; margin-bottom: 6px; }
+
+      .cta { padding: 24px 28px; text-align:center; }
+      .footer { text-align:center; color: var(--muted); padding: 10px 0 26px; font-size: 0.94rem; }
+
+      @media (max-width: 980px) {
+        .hero { grid-template-columns: 1fr; }
+        .feature-grid, .steps, .world-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 620px) {
+        .feature-grid, .steps, .world-grid, .stats { grid-template-columns: 1fr; }
+        .hero, .cta { padding: 20px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cookie-banner" id="cookieBanner">
+      <div>We use cookies to keep your session and preferences intact. <a href="privacy.html" style="color:#8fdfff;">Learn more</a></div>
+      <div class="cookie-actions">
+        <button class="btn btn-ghost" id="cookieDeclineBtn" type="button">Decline</button>
+        <button class="btn btn-primary" id="cookieAcceptBtn" type="button">Accept</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <nav class="nav">
+        <div class="brand">
+          <img class="brand-logo" src="images/logo.png" alt="Tactical Web logo" />
+          <span>Tactical Web</span>
+        </div>
+        <div class="nav-actions">
+          <div class="dropdown" id="startDropdown" style="position:relative; display:flex; align-items:center; gap:8px;">
+            <a class="btn btn-primary" id="startMain" href="generator.html">Start building</a>
+            <button class="btn btn-ghost" id="dropdownToggle" aria-expanded="false" aria-haspopup="true" style="padding:8px 10px;">▾</button>
+            <div class="dropdown-menu" id="dropdownMenu" style="position:fixed; background: rgba(16,23,40,0.62); border:1px solid var(--border); border-radius:20px; padding:10px; min-width:200px; display:none; box-shadow:0 14px 44px rgba(0,0,0,0.45); z-index:12000;">
+              <a class="btn btn-blue" href="blog.html" style="display:block; width:100%; text-align:left; margin:6px 0;">Blog</a>
+              <a class="btn btn-cyan" href="affiliate.html" style="display:block; width:100%; text-align:left; margin:6px 0;">Become Affiliate</a>
+              <a class="btn btn-yellow" href="generator.html" style="display:block; width:100%; text-align:left; margin:6px 0;">Get Pro</a>
+<a class="btn btn-purple" href="https://discord.gg/c2aJ4dBZ4h" target="_blank" rel="noopener" style="display:block; width:100%; text-align:left; margin:6px 0;">Join Discord</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <section class="panel hero">
+        <div>
+          <div class="eyebrow">✦ Premium ReShade orchestration • Tailored presets • Better delivery</div>
+          <h1>Create polished presets for the world’s most demanding games without juggling messy tools.</h1>
+          <p>Tactical Web blends a refined interface, smarter prompt design, and a dedicated generator—so you can create cinematic ReShade presets with professional structure, clean packaging, and a calm workflow.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="generator.html">Launch the generator</a>
+<a class="btn btn-secondary" href="https://youtu.be/rdF7GDwQKcQ" target="_blank" rel="noopener">See how it works</a>
+          </div>
+          <div class="stats">
+            <div class="stat"><strong>500</strong><span>Starting credits</span></div>
+            <div class="stat"><strong>12</strong><span>Curated game profiles</span></div>
+            <div class="stat"><strong>Zip</strong><span>Auto-exported package</span></div>
+          </div>
+        </div>
+
+        <div class="side-stack">
+          <div class="card">
+            <h3>Discord and Gmail access</h3>
+            <p>Sign in with Discord or Gmail to unlock generation, activate your starter credits, and keep your workflow moving with a premium account experience.</p>
+          </div>
+          <div class="card">
+            <h3>Credits that feel intentional</h3>
+            <p>Each generation consumes credits based on the complexity of the task, so your budget stays meaningful while still allowing deep and refined output.</p>
+          </div>
+          <div class="card">
+            <h3>Better outputs, not just faster ones</h3>
+            <p>Every preset is structured with a clear profile, rich notes, a manifest, and a packaged export ready for installation.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>Why creators choose Tactical Web</h2>
+          <span class="pill">Built for clarity, depth, and speed</span>
+        </div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h3>Smarter prompt planning</h3>
+            <p>Write a brief, and the system translates it into a refined preset structure with lighting, contrast, and atmosphere in mind.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Premium visual language</h3>
+            <p>The entire experience uses a glassy, high-end interface with soft outlines and subtle glow rather than noisy neon effects.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Flexible export pack</h3>
+            <p>Packages arrive as a clean ZIP bundle with files ready for installation, documentation, and further tweaking in your preferred setup.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="workflow">
+        <div class="section-title">
+          <h2>How the workflow feels</h2>
+          <span class="pill">Simple to start, powerful to refine</span>
+        </div>
+        <div class="steps">
+          <div class="step-card"><strong>1. Choose your game</strong><p>Pick a supported title and let the platform tailor the preset logic around its visual identity.</p></div>
+          <div class="step-card"><strong>2. Describe the mood</strong><p>Use a prompt with tone, atmosphere, and visual goals so the AI generates a more deliberate result.</p></div>
+          <div class="step-card"><strong>3. Fine-tune the build</strong><p>Adjust severity, quality, and preset style to control how heavy or polished the final deliverable should feel.</p></div>
+          <div class="step-card"><strong>4. Download the package</strong><p>Receive a polished zip bundle with your preset files, manifest, and install notes in one place.</p></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>Supported worlds</h2>
+          <span class="pill">From cinematic adventures to science fiction and fantasy</span>
+        </div>
+        <div class="world-grid">
+          <div class="world-card"><div class="world-thumb"><img src="images/rdr2.png" alt="Red Dead Redemption 2" /></div></div>
+          <div class="world-card"><div class="world-thumb"><img src="images/hitman.jpg" alt="Hitman" /></div></div>
+          <div class="world-card"><div class="world-thumb"><img src="images/cyberpunk2077.jpg" alt="Cyberpunk 2077" /></div></div>
+          <div class="world-card"><div class="world-thumb"><img src="images/eldernring.jpg" alt="Elden Ring" /></div></div>
+          <div class="world-card"><div class="world-thumb"><img src="images/farcry6.jpg" alt="Far Cry 6" /></div></div>
+          <div class="world-card"><div class="world-thumb"><img src="images/subnautica.jpg" alt="Subnautica" /></div></div>
+          <div class="world-card"><div class="world-thumb"><img src="images/forzahorizon6.jpg" alt="Forza Horizon 5" /></div></div>
+          <div class="world-card"><div class="world-thumb"><img src="images/DarkSoulsIII.jpg" alt="Dark Souls III" /></div></div>
+          <div class="world-card"><div class="world-thumb"><img src="images/Fallout4.jpg" alt="Fallout 4" /></div></div>
+          <div class="world-card"><div class="world-thumb"><img src="images/ragnarok.jpg" alt="God of War Ragnarok" /></div></div>
+          <div class="world-card"><div class="world-thumb"><img src="images/godofwar.jpg" alt="God of War" /></div></div>
+          <div class="world-card"><div class="world-thumb"><img src="images/GTA5.jpg" alt="GTA V" /></div></div>
+        </div>
+      </section>
+
+      <section class="panel cta">
+        <h2>Ready for a cleaner, more advanced preset workflow?</h2>
+        <p style="margin: 8px 0 16px;">Open the dedicated generator to begin designing your next preset with richer options, better feedback, and a refined package-ready experience.</p>
+        <a class="btn btn-primary" href="generator.html">Go to the generator</a>
+      </section>
+
+    </div>
+
+    <script>
+      // Dropdown toggle for Start building — position fixed to escape stacking contexts
+      (function(){
+        const toggle = document.getElementById('dropdownToggle');
+        const menu = document.getElementById('dropdownMenu');
+        const joinBtn = document.getElementById('joinDiscordBtn');
+        function closeAll(){ if (!menu) return; menu.style.display = 'none'; }
+        function openMenu(){
+          if (!menu || !toggle) return;
+          // make it fixed so it isn't clipped by ancestor stacking contexts
+          menu.style.position = 'fixed';
+          menu.style.zIndex = '12000';
+          const rect = toggle.getBoundingClientRect();
+          // try to align right edge of menu with right edge of toggle
+          // compute left so menu doesn't overflow viewport
+          const menuW = Math.max(180, menu.offsetWidth || 180);
+          let left = rect.right - menuW;
+          if (left < 8) left = 8;
+          menu.style.left = left + 'px';
+          menu.style.top = (rect.bottom + 10) + 'px';
+          menu.style.display = 'block';
+        }
+        if (toggle && menu) {
+          toggle.addEventListener('click', (e)=>{
+            e.preventDefault();
+            if (menu.style.display === 'block') closeAll(); else openMenu();
+          });
+          document.addEventListener('click', (ev)=>{ if (!ev.target.closest || !ev.target.closest('#startDropdown')) closeAll(); });
+          window.addEventListener('resize', ()=> closeAll());
+        }
+        if (joinBtn) joinBtn.addEventListener('click', ()=>{ window.open('https://discord.gg', '_blank'); });
+      })();
+    </script>
+    <script src="cookie.js"></script>
+    <script src="countdown.js"></script>
+    </div>
+
+    <div class="footer">Tactical Web • Premium preset design • Discord and Gmail access • Clean, advanced delivery</div>
+  </body>
+</html>
+
+

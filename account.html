@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Account Settings — Tactical Web</title>
+    <link rel="icon" type="image/png" href="images/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root { --text:#f6f7ff; --muted:#93a2c1; --border:rgba(255,255,255,.16); }
+      * { box-sizing:border-box; } body { margin:0; min-height:100vh; color:var(--text); font-family:Inter,system-ui,sans-serif; background:radial-gradient(circle at top left,rgba(141,125,255,.16),transparent 24%),linear-gradient(135deg,#070b17,#0b1227 42%,#060814); }
+      a { color:inherit; text-decoration:none; } .container { width:min(1000px,calc(100% - 32px)); margin:0 auto; padding:24px 0 48px; }
+      .nav { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:8px 0 18px; } .brand { display:flex; align-items:center; gap:12px; font-family:Manrope,sans-serif; font-weight:800; } .brand-logo { width:48px; height:48px; object-fit:cover; }
+      .nav-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; } .btn { display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(0,0,0,.16); border-radius:22px; padding:10px 24px; font:900 .9rem Manrope,sans-serif; cursor:pointer; } .btn-primary { background:linear-gradient(180deg,#fff7e6,#ffe7b2 60%); color:#2e1a07; box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.7); } .btn-ghost { background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.14); color:var(--text); }
+      .panel { padding:28px; border:1px solid var(--border); border-radius:24px; background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.03)); box-shadow:0 18px 60px rgba(0,0,0,.18); } h1,h2 { font-family:Manrope,sans-serif; margin:0; } h1 { margin-bottom:8px; } .muted { color:var(--muted); line-height:1.7; } .profile { display:flex; align-items:center; gap:16px; padding:18px 0; border-bottom:1px solid rgba(255,255,255,.1); } .avatar { width:56px; height:56px; border-radius:50%; object-fit:cover; background:#173259; display:grid; place-items:center; font-size:1.2rem; font-weight:800; } .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; } .btn-blue { background:linear-gradient(180deg,#204f88,#12345f); color:#fff; border-color:rgba(138,190,255,.25); } .btn-red { background:linear-gradient(180deg,#d9535e,#9e2635); color:#fff; border-color:rgba(255,180,180,.24); }
+    </style>
+  </head>
+  <body>
+    <div class="container"><nav class="nav"><a class="brand" href="index.html"><img class="brand-logo" src="images/logo.png" alt="Tactical Web logo"><span>Tactical Web</span></a><div class="nav-actions" data-site-nav><div style="position:relative;display:flex;align-items:center;gap:8px"><a class="btn btn-primary" href="generator.html">Start building</a><button class="btn btn-ghost" data-nav-toggle aria-expanded="false" type="button" style="padding:8px 10px">▾</button><div data-nav-menu hidden style="position:absolute;right:0;top:calc(100% + 10px);min-width:200px;padding:10px;border:1px solid var(--border);border-radius:20px;background:#101728;box-shadow:0 14px 44px rgba(0,0,0,.45);z-index:12000"><a class="btn btn-blue" href="account.html" style="display:block;width:100%;margin:6px 0;text-align:left">Get Pro</a><a class="btn btn-ghost" href="blog.html" style="display:block;width:100%;margin:6px 0;text-align:left">Blog</a><a class="btn btn-ghost" href="index.html" style="display:block;width:100%;margin:6px 0;text-align:left">Landing</a></div></div></div></nav><main class="panel"><h1>Account Settings</h1><p class="muted">Manage the Google account connected to Tactical Web on this device.</p><div class="profile"><div class="avatar" id="avatar"></div><div><h2 id="accountName">Not signed in</h2><div class="muted" id="accountEmail">Sign in with Google to use the generator.</div></div></div><div class="actions"><button class="btn btn-blue" id="clearPreferences" type="button">Clear local preferences</button><button class="btn btn-red" id="logoutButton" type="button">Log out</button></div><p class="muted" id="settingsStatus"></p></main></div>
+    <script src="auth-session.js"></script><script src="site-nav.js"></script><script src="auth-ui.js"></script><script>
+      const session = window.TacticalAuth.getSession(); const avatar = document.getElementById('avatar');
+      if (session) { document.getElementById('accountName').textContent = session.name; document.getElementById('accountEmail').textContent = session.email; if (session.picture) { avatar.innerHTML = `<img src="${session.picture}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer">`; } else avatar.textContent = session.name.charAt(0).toUpperCase(); }
+      document.getElementById('clearPreferences').addEventListener('click', () => { Object.keys(localStorage).filter(key => key.startsWith('tactical-web-')).forEach(key => { if (key !== 'tactical-web-google-session') localStorage.removeItem(key); }); document.getElementById('settingsStatus').textContent = 'Local preferences cleared.'; });
+      document.getElementById('logoutButton').addEventListener('click', () => { window.TacticalAuth.clearSession(); window.location.href = 'index.html'; });
+    </script>
+  </body>
+</html>

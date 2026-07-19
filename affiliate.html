@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tactical Web — Affiliate</title>
+    <meta name="description" content="Simple affiliate referral generator for Tactical Web." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #060814;
+        --surface: rgba(12, 17, 31, 0.82);
+        --border: rgba(255,255,255,0.16);
+        --text: #f6f7ff;
+        --muted: #93a2c1;
+        --accent: #8d7dff;
+        --accent-2: #52d5ff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Inter', system-ui, sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top left, rgba(141,125,255,0.16), transparent 24%), linear-gradient(135deg, #070b17 0%, #0b1227 42%, #060814 100%);
+      }
+      a { color: inherit; text-decoration: none; }
+      .container { width: min(960px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 48px; }
+      .panel {
+        background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        backdrop-filter: blur(18px);
+        box-shadow: 0 18px 60px rgba(0,0,0,0.18);
+      }
+      .nav { display:flex; justify-content:space-between; align-items:center; gap: 12px; padding: 8px 0 18px; }
+      .brand { display:flex; align-items:center; gap:12px; font-family:'Manrope',sans-serif; font-weight:800; }
+      .brand-logo { width:48px; height:48px; border-radius:0; object-fit:cover; border:0; box-shadow:none; }
+      .nav-actions { display:flex; gap:12px; flex-wrap:wrap; }
+      .btn, button {
+        border: 0;
+        border-radius: 20px;
+        padding: 12px 18px;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        cursor: pointer;
+        color: white;
+        transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .btn:hover, button:hover { transform: translateY(-2px); filter: brightness(1.04); }
+      .btn-primary {
+        background: linear-gradient(180deg, #fff7e6 0%, #ffe7b2 60%);
+        color: #2e1a07;
+        padding: 10px 24px;
+        border-radius: 22px;
+        border: 1px solid rgba(0,0,0,0.16);
+        box-shadow: 0 10px 30px rgba(6,8,12,0.78), 0 0 18px rgba(90,60,20,0.20), inset 0 1px 0 rgba(255,255,255,0.7);
+        font-weight: 900;
+        letter-spacing: 0.01em;
+        outline: 0;
+      }
+      .btn-secondary { background: linear-gradient(180deg, rgba(255,240,245,0.98), rgba(250,210,235,0.9)); color:#3a1f2b; box-shadow: 0 8px 22px rgba(6,8,12,0.7), 0 0 18px rgba(140,80,110,0.12); border:1px solid rgba(0,0,0,0.12); }
+      .btn-ghost { background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color: var(--text); box-shadow:0 6px 18px rgba(6,8,12,0.55); }
+      .btn-yellow { background: linear-gradient(180deg, #fff8c8 0%, #ffd96b 70%); color: #4a2a04; border:1px solid rgba(84,54,12,0.16); box-shadow: 0 8px 22px rgba(255,188,40,0.18); }
+      .hero { padding: 28px; }
+      .eyebrow { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); font-size:0.9rem; font-weight:700; margin-bottom: 12px; color:#e8ebff; }
+      h1 { font-family:'Manrope',sans-serif; margin:0 0 12px; font-size: clamp(2rem, 3.2vw, 2.7rem); line-height: 1.08; }
+      .muted { color: var(--muted); line-height: 1.75; }
+      .box { margin-top: 16px; padding: 16px; border-radius: 18px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }
+      .code { padding: 12px 14px; border-radius: 14px; background: rgba(7,11,22,0.8); border:1px solid rgba(255,255,255,0.08); color:#f6f7ff; overflow-wrap:anywhere; margin-top: 10px; }
+      .cookie-banner { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); width: min(920px, calc(100% - 24px)); z-index: 1500; display:flex; justify-content:space-between; align-items:center; gap:14px; padding:14px 16px; border-radius:18px; background: rgba(8,12,24,0.94); border:1px solid rgba(255,255,255,0.14); box-shadow: 0 18px 50px rgba(0,0,0,0.28); backdrop-filter: blur(16px); }
+      .cookie-banner.hidden { display:none; }
+      .cookie-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="cookie-banner" id="cookieBanner">
+      <div>We use cookies to keep your session and affiliate state consistent. We keep them minimal and only use them where needed. <a href="privacy.html" style="color:#8fdfff;">Learn more</a></div>
+      <div class="cookie-actions">
+        <button class="btn btn-ghost" id="cookieDeclineBtn" type="button">Decline</button>
+        <button class="btn btn-primary" id="cookieAcceptBtn" type="button">Accept</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <nav class="nav">
+        <a class="brand" href="index.html">
+          <img class="brand-logo" src="images/logo.png" alt="Tactical Web logo" />
+          <span>Tactical Web</span>
+        </a>
+        <div class="nav-actions" data-site-nav>
+          <div class="dropdown" style="position:relative; display:flex; align-items:center; gap:8px;">
+            <a class="btn btn-primary" href="generator.html">Start building</a>
+            <button class="btn btn-ghost" data-nav-toggle aria-expanded="false" aria-haspopup="true" type="button" style="padding:8px 10px;">▾</button>
+            <div data-nav-menu hidden style="position:absolute; right:0; top:calc(100% + 10px); background:rgba(16,23,40,.96); border:1px solid var(--border); border-radius:20px; padding:10px; min-width:200px; box-shadow:0 14px 44px rgba(0,0,0,.45); z-index:12000;">
+              <a class="btn btn-secondary" href="blog.html" style="display:block; width:100%; text-align:left; margin:6px 0;">Blog</a>
+              <a class="btn btn-yellow" href="affiliate.html" style="display:block; width:100%; text-align:left; margin:6px 0;">Become Affiliate</a>
+              <a class="btn btn-ghost" href="index.html" style="display:block; width:100%; text-align:left; margin:6px 0;">Landing</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <section class="panel hero">
+        <div class="eyebrow">✦ Affiliate rewards</div>
+        <h1>Become Affiliate, Earn by Inviting</h1>
+        <p class="muted">Generate a referral code, copy the share link, and send it to friends. When the invite is verified with Gmail for both sides, the reward flow can unlock 500 credits.</p>
+        <div class="nav-actions" style="padding-top: 6px; justify-content:flex-start;">
+          <button class="btn btn-primary" id="generateBtn" type="button">Generate</button>
+          <button class="btn btn-secondary" id="copyLinkBtn" type="button" disabled>Copy affiliate link</button>
+        </div>
+        <div class="box">
+          <div class="muted" id="statusText">Your referral code will appear here after you generate one.</div>
+          <div class="code" id="referralCode">None yet</div>
+          <div class="muted" style="margin-top:10px;">Share link (copy/paste):</div>
+          <div class="code" id="affiliateLink">None yet</div>
+        </div>
+      </section>
+    </div>
+
+    <script src="auth-session.js"></script>
+    <script src="site-nav.js"></script>
+    <script src="auth-ui.js"></script>
+    <script src="cookie.js"></script>
+    <script src="countdown.js"></script>
+    <script>
+
+      const generateBtn = document.getElementById('generateBtn');
+      const copyLinkBtn = document.getElementById('copyLinkBtn');
+      const referralCode = document.getElementById('referralCode');
+      const affiliateLinkEl = document.getElementById('affiliateLink');
+      const statusText = document.getElementById('statusText');
+
+      function isGmail(value) {
+        return /@gmail\.com$/i.test(value.trim()) || /@googlemail\.com$/i.test(value.trim());
+      }
+
+      function getShareLink(code) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('ref', code);
+        return url.toString();
+      }
+
+      async function copyTextToClipboard(text) {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+          }
+        } catch (e) {
+          // fall back
+        }
+
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'absolute';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          const ok = document.execCommand('copy');
+          return ok;
+        } finally {
+          document.body.removeChild(ta);
+        }
+      }
+
+      function generateReferralCode() {
+        const userEmail = window.prompt('Enter your Gmail address');
+        const friendEmail = window.prompt('Enter your friend\'s Gmail address');
+        if (!userEmail || !friendEmail) {
+          statusText.textContent = 'Both Gmail addresses are needed to qualify for the referral reward.';
+          referralCode.textContent = 'None yet';
+          affiliateLinkEl.textContent = 'None yet';
+          copyLinkBtn.disabled = true;
+          return;
+        }
+        if (!isGmail(userEmail) || !isGmail(friendEmail)) {
+          statusText.textContent = 'Both addresses must be verified Gmail accounts to qualify.';
+          referralCode.textContent = 'None yet';
+          affiliateLinkEl.textContent = 'None yet';
+          copyLinkBtn.disabled = true;
+          return;
+        }
+
+        const code = `AFF-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+        referralCode.textContent = code;
+
+        const shareLink = getShareLink(code);
+        affiliateLinkEl.textContent = shareLink;
+
+        statusText.textContent = `Referral code ready. Copy the share link and send it to your friend. Once both Gmail accounts are verified, the reward can unlock 500 credits.`;
+
+        localStorage.setItem('tactical-affiliate-code', code);
+        localStorage.setItem('tactical-affiliate-credits', '500');
+
+        copyLinkBtn.disabled = false;
+      }
+
+      generateBtn.addEventListener('click', generateReferralCode);
+
+      copyLinkBtn.addEventListener('click', async () => {
+        const link = (affiliateLinkEl.textContent || '').trim();
+        if (!link || link === 'None yet') return;
+
+        const ok = await copyTextToClipboard(link);
+        if (ok) {
+          statusText.textContent = 'Affiliate link copied. Paste it in a message to your friend.';
+          copyLinkBtn.textContent = 'Copied!';
+          setTimeout(() => {
+            copyLinkBtn.textContent = 'Copy affiliate link';
+          }, 1400);
+        } else {
+          statusText.textContent = 'Could not copy automatically. Please copy the link manually.';
+        }
+      });
+    </script>
+  </body>
+</html>
