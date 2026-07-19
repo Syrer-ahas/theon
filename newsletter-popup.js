@@ -7,9 +7,6 @@
   // Show on visits 3, 6, 9, etc. Once subscribed, the popup never returns.
   if (localStorage.getItem(subscribedKey) || visits % 3 !== 0) return;
 
-  const turnstileConfig = window.TACTICAL_TURNSTILE_CONFIG || {};
-  const siteKey = turnstileConfig.siteKey || '';
-
   const popup = document.createElement('div');
   popup.className = 'tactical-newsletter-overlay';
   popup.innerHTML = `
@@ -17,11 +14,10 @@
       <button class="tactical-newsletter-close" type="button" aria-label="Close newsletter popup">×</button>
       <span class="tactical-newsletter-kicker">✦ TACTICAL DISPATCH</span>
       <h2 id="newsletter-title">Stay ahead of the next preset drop.</h2>
-      <p>Get product news, Website Updates, Sales on Subscriptions. </p>
+      <p>Get product news, handcrafted preset releases, and Tactical Lumen Engine updates in your inbox.</p>
       <form class="tactical-newsletter-form">
         <label class="tactical-newsletter-label" for="tactical-newsletter-email">Email address</label>
         <div class="tactical-newsletter-row"><input id="tactical-newsletter-email" type="email" autocomplete="email" placeholder="you@example.com" required><button type="submit">Subscribe</button></div>
-        <div id="turnstile-widget" style="margin-top: 12px;"></div>
         <p class="tactical-newsletter-status" aria-live="polite"></p>
       </form>
       <small>By subscribing, you agree to receive Tactical Web updates. Unsubscribe anytime.</small>
@@ -33,22 +29,6 @@
   popup.addEventListener('click', event => { if (event.target === popup) close(); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && document.body.contains(popup)) close(); });
 
-  // Render Turnstile widget — ensure it doesn't steal keyboard input
-  let turnstileWidgetId = null;
-  if (siteKey && typeof turnstile !== 'undefined') {
-    const widgetContainer = document.getElementById('turnstile-widget');
-    // Render the widget after a short delay so the email input gets focus first
-    setTimeout(() => {
-      turnstileWidgetId = turnstile.render(widgetContainer, {
-        sitekey: siteKey,
-        theme: 'dark'
-      });
-      // Ensure the Turnstile iframe doesn't capture keyboard events meant for the email input
-      const widgetIframe = widgetContainer.querySelector('iframe');
-      if (widgetIframe) widgetIframe.setAttribute('tabindex', '-1');
-    }, 300);
-  }
-
   const form = popup.querySelector('form');
   const input = popup.querySelector('input');
   const button = popup.querySelector('[type="submit"]');
@@ -58,27 +38,8 @@
     event.preventDefault();
     button.disabled = true;
     status.textContent = 'Subscribing…';
-
-    // Get Turnstile token
-    let turnstileToken = null;
-    if (turnstileWidgetId && typeof turnstile !== 'undefined') {
-      turnstileToken = turnstile.getResponse(turnstileWidgetId);
-      if (!turnstileToken) {
-        status.textContent = 'Please complete the security check.';
-        button.disabled = false;
-        return;
-      }
-    }
-
     try {
-      const request = await fetch('/api/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: input.value,
-          turnstileToken: turnstileToken
-        })
-      });
+      const request = await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: input.value }) });
       const result = await request.json();
       if (!request.ok) throw new Error(result.error || 'Unable to subscribe.');
       localStorage.setItem(subscribedKey, 'true');
@@ -89,10 +50,6 @@
     } catch (error) {
       status.textContent = error.message || 'Unable to subscribe. Please try again.';
       button.disabled = false;
-      // Reset Turnstile widget so user can try again
-      if (turnstileWidgetId && typeof turnstile !== 'undefined') {
-        turnstile.reset(turnstileWidgetId);
-      }
     }
   });
 })();
