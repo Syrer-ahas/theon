@@ -114,7 +114,7 @@ Output ONLY the JSON object with preset_ini and shader_fx strings. No explanatio
       shader_fx: presetData.shader_fx,
       readme: readmeText,
       presetName: presetName || 'Tactical Preset',
-      binaries: ['dxgi.dll', 'opengl32.dll']
+      binaries: ['dxgi.dll', 'opengl32.dll', 'IMPORTANT.txt']
     });
 
   } catch (error) {
