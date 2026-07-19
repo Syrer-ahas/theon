@@ -1,5 +1,7 @@
 // Vercel serverless function: POST /api/newsletter
-// Required environment variable: RESEND_API_KEY
+// Required environment variables:
+//   RESEND_API_KEY
+//   TURNSTILE_SECRET_KEY (Cloudflare Turnstile secret key)
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'POST');
@@ -11,6 +13,37 @@ export default async function handler(request, response) {
   if (!emailPattern.test(email) || email.length > 254) {
     return response.status(400).json({ error: 'Enter a valid email address.' });
   }
+
+  // --- Cloudflare Turnstile verification ---
+  const turnstileToken = String(request.body?.turnstileToken || '').trim();
+  const turnstileSecretKey = process.env.TURNSTILE_SECRET_KEY;
+  if (turnstileSecretKey) {
+    if (!turnstileToken) {
+      return response.status(400).json({ error: 'Security verification is required. Please refresh and try again.' });
+    }
+    try {
+      const turnstileVerify = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          secret: turnstileSecretKey,
+          response: turnstileToken
+        })
+      });
+      const turnstileResult = await turnstileVerify.json();
+      if (!turnstileResult.success) {
+        console.error('Turnstile verification failed:', turnstileResult);
+        return response.status(403).json({ error: 'Security verification failed. Please refresh and try again.' });
+      }
+    } catch (error) {
+      console.error('Turnstile verification error:', error);
+      return response.status(500).json({ error: 'Security verification could not be completed. Please try again.' });
+    }
+  } else {
+    // If no TURNSTILE_SECRET_KEY is set, skip verification but log a warning
+    console.warn('TURNSTILE_SECRET_KEY not set. Turnstile verification skipped.');
+  }
+  // --- End Turnstile verification ---
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
