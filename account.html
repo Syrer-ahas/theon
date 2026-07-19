@@ -33,6 +33,8 @@
       if (session) { document.getElementById('accountName').textContent = session.name; document.getElementById('accountEmail').textContent = session.email; if (session.picture) avatar.innerHTML = `<img src="${session.picture}" alt="" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">`; else avatar.textContent = session.name.charAt(0).toUpperCase(); }
       const preferences = JSON.parse(localStorage.getItem('tactical-web-preferences') || '{}'); document.querySelectorAll('[data-preference]').forEach(input => { input.checked = Boolean(preferences[input.dataset.preference]); input.addEventListener('change', () => { preferences[input.dataset.preference] = input.checked; localStorage.setItem('tactical-web-preferences', JSON.stringify(preferences)); document.getElementById('settingsStatus').textContent = 'Preferences saved on this device.'; }); });
       document.getElementById('clearPreferences').addEventListener('click', () => { Object.keys(localStorage).filter(key => key.startsWith('tactical-web-')).forEach(key => { if (key !== 'tactical-web-google-session') localStorage.removeItem(key); }); document.querySelectorAll('[data-preference]').forEach(input => input.checked = false); document.getElementById('settingsStatus').textContent = 'Local preferences cleared.'; }); document.getElementById('logoutButton').addEventListener('click', () => { window.TacticalAuth.clearSession(); window.location.href = 'index.html'; });
-    </script><script src="newsletter-popup.js"></script>
+    </script><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="turnstile-config.js"></script>
+    <script src="newsletter-popup.js"></script>
   </body>
 </html>
