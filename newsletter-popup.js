@@ -14,7 +14,7 @@
       <button class="tactical-newsletter-close" type="button" aria-label="Close newsletter popup">×</button>
       <span class="tactical-newsletter-kicker">✦ TACTICAL DISPATCH</span>
       <h2 id="newsletter-title">Stay ahead of the next preset drop.</h2>
-      <p>Get product news, handcrafted preset releases, and Tactical Lumen Engine updates in your inbox.</p>
+      <p>Get product news, Website Updates, and Sales on Subscriptions.</p>
       <form class="tactical-newsletter-form">
         <label class="tactical-newsletter-label" for="tactical-newsletter-email">Email address</label>
         <div class="tactical-newsletter-row"><input id="tactical-newsletter-email" type="email" autocomplete="email" placeholder="you@example.com" required><button type="submit">Subscribe</button></div>
