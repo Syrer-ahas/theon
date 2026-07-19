@@ -14,6 +14,17 @@
     style.textContent = `
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
 
+/* ─── Block all clicks below the countdown ─── */
+#countdown-blocker {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999998;
+    background: transparent;
+    pointer-events: none;
+}
 #countdown-section {
     position: relative;
     width: 100%;
