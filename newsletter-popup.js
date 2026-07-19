@@ -33,17 +33,20 @@
   popup.addEventListener('click', event => { if (event.target === popup) close(); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && document.body.contains(popup)) close(); });
 
-  // Render Turnstile widget — prevent it from stealing keyboard focus
+  // Render Turnstile widget — ensure it doesn't steal keyboard input
   let turnstileWidgetId = null;
   if (siteKey && typeof turnstile !== 'undefined') {
     const widgetContainer = document.getElementById('turnstile-widget');
-    widgetContainer.style.pointerEvents = 'none';
-    turnstileWidgetId = turnstile.render(widgetContainer, {
-      sitekey: siteKey,
-      theme: 'dark'
-    });
-    // Re-enable pointer events but keep the widget non-interfering
-    setTimeout(() => { widgetContainer.style.pointerEvents = 'auto'; }, 100);
+    // Render the widget after a short delay so the email input gets focus first
+    setTimeout(() => {
+      turnstileWidgetId = turnstile.render(widgetContainer, {
+        sitekey: siteKey,
+        theme: 'dark'
+      });
+      // Ensure the Turnstile iframe doesn't capture keyboard events meant for the email input
+      const widgetIframe = widgetContainer.querySelector('iframe');
+      if (widgetIframe) widgetIframe.setAttribute('tabindex', '-1');
+    }, 300);
   }
 
   const form = popup.querySelector('form');
