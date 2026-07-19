@@ -567,66 +567,28 @@
       }
 
       async function generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette) {
-        const systemPrompt = `You are a ReShade Preset Engine. Convert natural language style descriptions into valid ReShade .ini preset files. Use only the listed shaders and parameters. Return ONLY raw .ini content with sections [PRESET], [Techniques], and [TechniqueSettings]. The target game profile is ${game}. Style tag is ${styleTag}. Severity is ${severity}. Quality is ${quality}. Hardware target is ${hardware}. Palette is ${palette}.`;
-        const userPrompt = `Create a ReShade preset for ${game} from this prompt: ${prompt}. Make the preset feel tailored to the selected game profile and package it as a valid .ini file.`;
-        const aiConfig = window.AI_CONFIG || {};
-        const geminiApiKey = aiConfig.geminiApiKey || '';
-        const groqApiKey = aiConfig.groqApiKey || '';
-
         try {
-          if (!geminiApiKey) {
-            throw new Error('Gemini API key not configured.');
-          }
-
-          const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(geminiApiKey)}`, {
+          const response = await fetch('/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-              systemInstruction: { role: 'system', parts: [{ text: systemPrompt }] }
+              game: game,
+              style: styleTag,
+              severity: severity,
+              quality: quality,
+              hardware: hardware,
+              palette: palette,
+              prompt: prompt,
+              presetName: presetName
             })
           });
-          const geminiData = await geminiResponse.json();
-          const geminiText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          const cleanedText = sanitizePresetText(geminiText);
-          if (cleanedText.includes('[PRESET]') && cleanedText.includes('[Techniques]') && cleanedText.includes('[TechniqueSettings]')) {
-            return cleanedText;
-          }
-        } catch (error) {
-          console.warn('Gemini preset generation failed, falling back to local preset builder.', error);
-        }
-
-        try {
-          if (!groqApiKey) {
-            throw new Error('Groq API key not configured.');
-          }
-
-          const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${groqApiKey}`
-            },
-            body: JSON.stringify({
-              model: 'llama-3.3-70b-versatile',
-              messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: userPrompt }
-              ],
-              temperature: 0.6
-            })
-          });
-          const groqData = await groqResponse.json();
-          const groqText = groqData?.choices?.[0]?.message?.content || '';
-          const cleanedText = sanitizePresetText(groqText);
-          if (cleanedText.includes('[PRESET]') && cleanedText.includes('[Techniques]') && cleanedText.includes('[TechniqueSettings]')) {
-            return cleanedText;
-          }
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || 'Generation failed.');
+          return data.preset_ini;
         } catch (error) {
           console.warn('Groq preset generation failed, falling back to local preset builder.', error);
+          return buildPresetContent(prompt, presetName, game, styleTag, severity, quality, hardware, palette);
         }
-
-        return buildPresetContent(prompt, presetName, game, styleTag, severity, quality, hardware, palette);
       }
 
       function buildReadme(presetName, game, styleTag, severity, prompt, quality, hardware, palette) {
