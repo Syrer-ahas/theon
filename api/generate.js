@@ -2,6 +2,37 @@
 // Required environment variable: GROQ_API_KEY
 // Generates a ReShade preset .ini + shader.fx using llama-3.1-8b-instant
 // Returns text content; the client builds the .zip with JSZip
+// Credit deduction: client sends session JWT + cost, server validates and deducts.
+
+const DEFAULT_CREDITS = 50;
+const MIN_CREDITS = 6;
+const CREDIT_RATE = 6; // credits per second
+
+// In-memory store for credits. For production, replace with Vercel KV / Redis / DB.
+const creditStore = new Map();
+
+function decodeJWT(token) {
+  try {
+    const payload = token.split('.')[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+    const padded = payload + '='.repeat((4 - payload.length % 4) % 4);
+    return JSON.parse(Buffer.from(padded, 'base64').toString('utf-8'));
+  } catch {
+    return null;
+  }
+}
+
+function getCredits(email) {
+  if (!creditStore.has(email)) {
+    creditStore.set(email, { credits: DEFAULT_CREDITS });
+  }
+  return creditStore.get(email).credits;
+}
+
+function setCredits(email, credits) {
+  creditStore.set(email, { credits });
+}
 
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
@@ -9,11 +40,45 @@ export default async function handler(request, response) {
     return response.status(405).json({ error: 'Method not allowed.' });
   }
 
-  const { game, style, severity, quality, hardware, palette, prompt, presetName } = request.body || {};
+  const { game, style, severity, quality, hardware, palette, prompt, presetName, session, cost } = request.body || {};
 
   if (!game || !prompt) {
     return response.status(400).json({ error: 'Game and prompt are required.' });
   }
+
+  // --- Credit validation (server-side) ---
+  if (!session) {
+    return response.status(401).json({ error: 'Session token required for generation.' });
+  }
+
+  const decoded = decodeJWT(session);
+  if (!decoded || !decoded.email) {
+    return response.status(401).json({ error: 'Invalid session token.' });
+  }
+
+  const email = decoded.email;
+  const calculatedCost = Math.max(MIN_CREDITS, (cost || MIN_CREDITS));
+  const currentCredits = getCredits(email);
+
+  if (currentCredits < MIN_CREDITS) {
+    return response.status(403).json({
+      error: `Insufficient credits. Minimum ${MIN_CREDITS} required, you have ${currentCredits}.`,
+      creditsRemaining: currentCredits
+    });
+  }
+
+  if (currentCredits < calculatedCost) {
+    return response.status(403).json({
+      error: `Not enough credits. Need ${calculatedCost}, have ${currentCredits}.`,
+      creditsRemaining: currentCredits,
+      cost: calculatedCost
+    });
+  }
+
+  // Deduct credits BEFORE calling the AI (prevents abuse on failed AI calls too)
+  const newBalance = currentCredits - calculatedCost;
+  setCredits(email, newBalance);
+  // --- End credit validation ---
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
