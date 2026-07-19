@@ -136,46 +136,65 @@
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  async function callGenerate(params) {
-    showTyping();
-    try {
-      var resp = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          game: params.game || 'Cyberpunk 2077',
-          style: params.style || 'cinematic',
-          hardware: params.hardware || 'mid',
-          prompt: params.prompt || 'custom preset',
-          presetName: params.presetName || 'Tactical Preset'
-        })
-      });
-      var data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || 'Generation failed.');
-      
-      // Build .zip
-      var zip = new JSZip();
-      zip.file('preset.ini', data.preset_ini);
-      zip.file('shader.fx', data.shader_fx);
-      zip.file('README.txt', data.readme);
-      var blob = await zip.generateAsync({ type: 'blob' });
-      var url = URL.createObjectURL(blob);
-      var filename = data.presetName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-package.zip';
-      
-      var typingMsg = document.getElementById('typingMsg');
-      if (typingMsg) typingMsg.remove();
-      
-      addMessage('agent', '✅ Your preset package is ready! Click below to download:', 
-        '<a class="btn btn-download" href="' + url + '" download="' + filename + '" style="display:inline-flex;padding:10px 20px;text-decoration:none;font-weight:800;border-radius:14px">⬇ Download Preset Package</a>');
-    } catch (err) {
-      showError(err.message || 'Generation failed.');
-    } finally {
-      chatInput.disabled = false;
-      sendBtn.disabled = false;
-      sendBtn.textContent = 'Send';
-      chatInput.focus();
-    }
-  }
+      async function fetchBinaryAsBlob(name) {
+        var resp = await fetch('binaries/' + name);
+        if (!resp.ok) throw new Error('Could not fetch ' + name);
+        return await resp.blob();
+      }
+
+      async function callGenerate(params) {
+        showTyping();
+        try {
+          var resp = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              game: params.game || 'Cyberpunk 2077',
+              style: params.style || 'cinematic',
+              hardware: params.hardware || 'mid',
+              prompt: params.prompt || 'custom preset',
+              presetName: params.presetName || 'Tactical Preset'
+            })
+          });
+          var data = await resp.json();
+          if (!resp.ok) throw new Error(data.error || 'Generation failed.');
+          
+          // Build .zip
+          var zip = new JSZip();
+          zip.file('preset.ini', data.preset_ini);
+          zip.file('shader.fx', data.shader_fx);
+          zip.file('README.txt', data.readme);
+          
+          // Include required binaries
+          if (data.binaries && data.binaries.length) {
+            for (var i = 0; i < data.binaries.length; i++) {
+              try {
+                var dllBlob = await fetchBinaryAsBlob(data.binaries[i]);
+                zip.file('binaries/' + data.binaries[i], dllBlob);
+              } catch (e) {
+                console.warn('Could not include binary: ' + data.binaries[i], e);
+              }
+            }
+          }
+          
+          var blob = await zip.generateAsync({ type: 'blob' });
+          var url = URL.createObjectURL(blob);
+          var filename = data.presetName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-package.zip';
+          
+          var typingMsg = document.getElementById('typingMsg');
+          if (typingMsg) typingMsg.remove();
+          
+          addMessage('agent', '✅ Your preset package is ready! Click below to download:', 
+            '<a class="btn btn-download" href="' + url + '" download="' + filename + '" style="display:inline-flex;padding:10px 20px;text-decoration:none;font-weight:800;border-radius:14px">⬇ Download Preset Package</a>');
+        } catch (err) {
+          showError(err.message || 'Generation failed.');
+        } finally {
+          chatInput.disabled = false;
+          sendBtn.disabled = false;
+          sendBtn.textContent = 'Send';
+          chatInput.focus();
+        }
+      }
 
   async function handleSend() {
     var text = chatInput.value.trim();
