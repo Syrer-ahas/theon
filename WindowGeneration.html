@@ -25,8 +25,35 @@
   var svgHtml = '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-3-9.5c0-.83-.67-1.5-1.5-1.5S6 9.67 6 10.5 6.67 12 7.5 12 9 11.33 9 10.5zm9 0c0-.83-.67-1.5-1.5-1.5S15 9.67 15 10.5 15.67 12 16.5 12 18 11.33 18 10.5zM12 17c2.33 0 4.31-1.46 5.11-3.5H6.89C7.69 15.54 9.67 17 12 17z"/></svg>';
 
   headerTime.textContent = new Date().toLocaleDateString();
+  var credits = 50;
   var conversationHistory = [];
   var isGenerating = false;
+  var startTime = 0;
+
+  function getCreditDisplay() {
+    return '\n\n⚡ Credits remaining: ' + credits;
+  }
+
+  function deductCredits(cost) {
+    credits = Math.max(0, credits - cost);
+  }
+
+  function updateCreditsInUI() {
+    var el = document.getElementById('creditDisplay');
+    if (el) el.textContent = '⚡ Credits remaining: ' + credits;
+  }
+
+  // Add credit display to the chat header
+  var creditDisplayDiv = document.createElement('div');
+  creditDisplayDiv.id = 'creditDisplay';
+  creditDisplayDiv.className = 'credits-pill';
+  creditDisplayDiv.style.cssText = 'display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;background:rgba(79,230,162,0.1);color:#dffceb;border:1px solid rgba(79,230,162,0.18);font-size:0.88rem;margin-right:8px;margin-left:auto;';
+  creditDisplayDiv.textContent = '⚡ Credits remaining: ' + credits;
+  var headerEl = document.querySelector('.chat-header');
+  if (headerEl) {
+    headerEl.appendChild(creditDisplayDiv);
+    if (document.getElementById('headerTime')) document.getElementById('headerTime').style.marginLeft = '0';
+  }
 
   // Add agent button in nav when signed in
   if (session) {
@@ -187,7 +214,7 @@
       var typingMsg = document.getElementById('typingMsg');
       if (typingMsg) typingMsg.remove();
 
-      addMessage('agent', '✅ Your preset package is ready! Click below to download:',
+      addMessage('agent', '✅ Your preset package is ready!' + getCreditDisplay(),
         '<a class="btn btn-download" href="' + url + '" download="' + filename + '" style="display:inline-flex;padding:10px 20px;text-decoration:none;font-weight:800;border-radius:14px">⬇ Download Preset Package</a>');
     } catch (err) {
       showError(err.message || 'Generation failed.');
@@ -208,6 +235,12 @@
       return;
     }
 
+    // Credit check: minimum 6 credits (1 second)
+    if (credits < 6) {
+      showError('You need at least 6 credits to start a generation. Credits remaining: ' + credits);
+      return;
+    }
+
     // Ensure chat is started
     startChat();
 
@@ -219,6 +252,8 @@
     sendBtn.disabled = true;
     sendBtn.textContent = '...';
     showTyping();
+
+    startTime = performance.now();
 
     try {
       var response = await fetch('/api/chat', {
@@ -235,21 +270,34 @@
       if (typingMsg) typingMsg.remove();
 
       conversationHistory.push({ role: 'model', text: data.reply });
-      addMessage('agent', data.reply || 'Let me generate that preset for you...');
+      addMessage('agent', (data.reply || 'Let me generate that preset for you...') + getCreditDisplay());
+
+      // Calculate and deduct credits based on elapsed time
+      var elapsedMs = performance.now() - startTime;
+      var elapsedSec = Math.ceil(elapsedMs / 1000);
+      var cost = Math.max(6, elapsedSec * 6);
+      if (credits >= cost) {
+        deductCredits(cost);
+        updateCreditsInUI();
+      }
 
       if (data.generate) {
         isGenerating = true;
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
         setTimeout(function() { callGenerate(data.generate); }, 500);
-      }
-    } catch (err) {
-      showError(err.message || 'Something went wrong. Please try again.');
-    } finally {
-      if (!isGenerating) {
+      } else {
         chatInput.disabled = false;
         sendBtn.disabled = false;
         sendBtn.textContent = 'Send';
         chatInput.focus();
       }
+    } catch (err) {
+      showError(err.message || 'Something went wrong. Please try again.');
+      chatInput.disabled = false;
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Send';
+      chatInput.focus();
     }
   }
 
