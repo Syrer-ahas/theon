@@ -17,6 +17,7 @@
       .profile { display:flex; align-items:center; gap:16px; padding:18px 0 22px; border-bottom:1px solid rgba(255,255,255,.1); } .avatar { width:56px; height:56px; border-radius:50%; overflow:hidden; background:#173259; display:grid; place-items:center; font-size:1.2rem; font-weight:800; } .settings-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:14px; } .setting { padding:16px; border:1px solid rgba(255,255,255,.09); border-radius:16px; background:var(--surface); } .setting label { display:flex; justify-content:space-between; gap:12px; align-items:center; cursor:pointer; font-weight:700; } .setting p { margin:8px 0 0; font-size:.88rem; } input[type="checkbox"] { accent-color:#8d7dff; width:18px; height:18px; } .status { min-height:24px; margin:16px 0 0; } .plan { display:flex; align-items:center; justify-content:space-between; gap:16px; } .plan strong { color:#ffe7a6; }
       @media (max-width:680px) { .settings-grid { grid-template-columns:1fr; } .nav { align-items:flex-start; } .profile,.plan { align-items:flex-start; flex-direction:column; } }
     </style>
+    <link rel="stylesheet" href="newsletter-popup.css" />
   </head>
   <body>
     <div class="container">
@@ -32,6 +33,6 @@
       if (session) { document.getElementById('accountName').textContent = session.name; document.getElementById('accountEmail').textContent = session.email; if (session.picture) avatar.innerHTML = `<img src="${session.picture}" alt="" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer">`; else avatar.textContent = session.name.charAt(0).toUpperCase(); }
       const preferences = JSON.parse(localStorage.getItem('tactical-web-preferences') || '{}'); document.querySelectorAll('[data-preference]').forEach(input => { input.checked = Boolean(preferences[input.dataset.preference]); input.addEventListener('change', () => { preferences[input.dataset.preference] = input.checked; localStorage.setItem('tactical-web-preferences', JSON.stringify(preferences)); document.getElementById('settingsStatus').textContent = 'Preferences saved on this device.'; }); });
       document.getElementById('clearPreferences').addEventListener('click', () => { Object.keys(localStorage).filter(key => key.startsWith('tactical-web-')).forEach(key => { if (key !== 'tactical-web-google-session') localStorage.removeItem(key); }); document.querySelectorAll('[data-preference]').forEach(input => input.checked = false); document.getElementById('settingsStatus').textContent = 'Local preferences cleared.'; }); document.getElementById('logoutButton').addEventListener('click', () => { window.TacticalAuth.clearSession(); window.location.href = 'index.html'; });
-    </script>
+    </script><script src="newsletter-popup.js"></script>
   </body>
 </html>
