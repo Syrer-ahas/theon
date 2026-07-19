@@ -403,6 +403,13 @@
       if (savedGoogleSession) {
         authStatus.textContent = 'Signed in with Google';
         authInfo.textContent = `Welcome back, ${savedGoogleSession.name}`;
+        document.getElementById('openLoginBtn').style.display = 'none';
+        document.getElementById('openLoginBtn').disabled = true;
+        document.getElementById('logoutBtn').textContent = 'Log out';
+      } else {
+        document.getElementById('openLoginBtn').style.display = 'inline-flex';
+        document.getElementById('openLoginBtn').disabled = false;
+        document.getElementById('logoutBtn').style.display = 'none';
       }
       function restoreCookies() {
         // Cookie consent is handled by the CookieInfo widget. Keep a lightweight check for the consent cookie.
