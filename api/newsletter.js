@@ -1,5 +1,5 @@
 // Vercel serverless function: POST /api/newsletter
-// Required environment variables: RESEND_API_KEY and RESEND_AUDIENCE_ID
+// Required environment variable: RESEND_API_KEY
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'POST');
@@ -13,15 +13,18 @@ export default async function handler(request, response) {
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-  const audienceId = process.env.RESEND_AUDIENCE_ID;
-  if (!apiKey || !audienceId) {
+  if (!apiKey) {
     return response.status(500).json({ error: 'Newsletter is not configured yet.' });
   }
 
   try {
-    const resendResponse = await fetch(`https://api.resend.com/audiences/${encodeURIComponent(audienceId)}/contacts`, {
+    // Point directly to Resend's global contacts API endpoint
+    const resendResponse = await fetch('https://api.resend.com/contacts', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      headers: { 
+        'Authorization': `Bearer ${apiKey}`, 
+        'Content-Type': 'application/json' 
+      },
       body: JSON.stringify({ email, unsubscribed: false })
     });
     const result = await resendResponse.json().catch(() => ({}));
