@@ -20,15 +20,6 @@
   const chatInput = document.getElementById('chatInput');
   const sendBtn = document.getElementById('sendBtn');
 
-  // Agent emoji face
-  var agentFace = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  agentFace.setAttribute('viewBox', '0 0 24 24');
-  agentFace.setAttribute('width', '22');
-  agentFace.setAttribute('height', '22');
-  var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('d', 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-3-9.5c0-.83-.67-1.5-1.5-1.5S6 9.67 6 10.5 6.67 12 7.5 12 9 11.33 9 10.5zm9 0c0-.83-.67-1.5-1.5-1.5S15 9.67 15 10.5 15.67 12 16.5 12 18 11.33 18 10.5zM12 17c2.33 0 4.31-1.46 5.11-3.5H6.89C7.69 15.54 9.67 17 12 17z');
-  path.setAttribute('fill', 'currentColor');
-  agentFace.appendChild(path);
   var svgHtml = '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-3-9.5c0-.83-.67-1.5-1.5-1.5S6 9.67 6 10.5 6.67 12 7.5 12 9 11.33 9 10.5zm9 0c0-.83-.67-1.5-1.5-1.5S15 9.67 15 10.5 15.67 12 16.5 12 18 11.33 18 10.5zM12 17c2.33 0 4.31-1.46 5.11-3.5H6.89C7.69 15.54 9.67 17 12 17z"/></svg>';
 
   // Add agent button when signed in
