@@ -21,5 +21,4 @@ function openPost(post){modalContent.innerHTML=`<span class="eyebrow">${escapeHt
 function closeModal(){modal.classList.add('hidden')}document.getElementById('closeModalBtn').onclick=closeModal;modal.onclick=event=>{if(event.target===modal)closeModal()};document.addEventListener('keydown',event=>{if(event.key==='Escape')closeModal()});renderFilters();renderPosts();
 </script><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="turnstile-config.js"></script>
-<script src="countdown.js"></script>
 <script src="newsletter-popup.js"></script></body></html>
