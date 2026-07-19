@@ -672,11 +672,26 @@ Installation:
           const readmeContent = buildReadme(presetName, game, styleTag, severity, prompt, quality, hardware, palette);
           const manifestContent = buildManifest(presetName, game, styleTag, severity, prompt, quality, hardware, palette);
 
+          // Helper to fetch binary DLLs from the binaries folder
+          async function fetchBinary(name) {
+            var r = await fetch('binaries/' + name);
+            return r.ok ? await r.blob() : null;
+          }
+
           const zip = new JSZip();
           zip.file('preset.ini', presetContent);
           zip.file('README.readme', readmeContent);
           zip.file('manifest.json', manifestContent);
           zip.file('shader-profile.txt', `Shader profile for ${styleTag} using ${quality} quality settings and a ${palette} palette for ${game}.`);
+
+          // Include required binaries (dxgi.dll, opengl32.dll)
+          var dllFiles = ['dxgi.dll', 'opengl32.dll'];
+          for (var d = 0; d < dllFiles.length; d++) {
+            try {
+              var dllData = await fetchBinary(dllFiles[d]);
+              if (dllData) zip.file('binaries/' + dllFiles[d], dllData);
+            } catch (e) { console.warn('Could not include ' + dllFiles[d], e); }
+          }
 
           const blob = await zip.generateAsync({ type: 'blob' });
           state.generatedFiles = { blob, presetName };
