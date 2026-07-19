@@ -35,18 +35,34 @@ You MUST respond with ONLY valid JSON in this exact format (no markdown, no code
 4. Add a [General] section at the top with PerformanceMode=1.
 5. Style: ${style || 'cinematic'} | Severity: ${severity || 'medium'} | Quality: ${quality || 'balanced'} | Hardware: ${hardware || 'mid'} | Palette: ${palette || 'cinematic'}
 
---- RULES FOR THE .fx FILE ---
-1. Keep #include "ReShade.fxh", structs, and the main function exactly as standard.
-2. At the very bottom, wrap the shader in a proper technique block so it appears in the ReShade menu. Use this exact format:
-   technique SharpContrast <
-       ui_info = "Sharp Contrast Grade";
-   > {
+--- RULES FOR THE .fx FILE (CRITICAL - follow exactly) ---
+1. At the very top, before main(), add the standard ReShade backbuffer definitions:
+   texture2D BackBuffer : COLOR;
+   sampler SamplerColor {
+       Texture = BackBuffer;
+       Filter = MIN_MAG_MIP_LINEAR;
+       AddressU = Clamp;
+       AddressV = Clamp;
+   };
+
+2. At the top, add uniform float variables that match .ini settings so users can edit them in the menu. Example:
+   uniform float SharpnessAmount < ui_name = "Sharpening"; > = 0.5;
+   Do this for Contrast, Gamma, Vignette Intensity, etc., and use these variables inside main() instead of hardcoded numbers.
+
+3. The main() function must use: float4 screenColor = tex2D(SamplerColor, input.tex);
+
+4. In main(), update all function calls to match the argument counts defined:
+   - LumaSharpen(screenColor.rgb, 0.5) — add the missing amount argument
+   - Curves(src, inf, sup, mid) — pass all 4 required arguments
+   - Vignette(...) and LiftGammaGain(...) — pass all required arguments
+
+5. At the very bottom, wrap the shader in a proper technique block:
+   technique SharpContrast < ui_info = "Sharp Contrast Grade"; > {
        pass Pass1 {
            VertexShader = PostProcessVS;
            PixelShader = main;
        }
    }
-3. Ensure PostProcessVS is defined or included (it is standard in ReShade.fxh).
 
 At the end of generation, output the two corrected files in the JSON. Return ONLY the JSON object. No explanations, no markdown.`;
 
@@ -64,7 +80,7 @@ At the end of generation, output the two corrected files in the JSON. Return ONL
           { role: 'user', content: `Create a preset for ${game}. The user wants: ${prompt}. Style: ${style || 'cinematic'}, Hardware: ${hardware || 'mid'}, Quality: ${quality || 'balanced'}.` }
         ],
         temperature: 0.7,
-        max_tokens: 2000
+        max_tokens: 3000
       })
     });
 
@@ -89,10 +105,10 @@ At the end of generation, output the two corrected files in the JSON. Return ONL
     }
 
     if (!presetData || !presetData.preset_ini) {
-      // Fallback with correct structure
+      // Fallback with complete correct structure
       presetData = {
-        preset_ini: `[General]\nPerformanceMode=1\n\n[Techniques]\nColorfulness.fx=1\nFilmicPass.fx=1\nLevels.fx=1\nLumaSharpen.fx=1\nVibrance.fx=1\nMagicBloom.fx=1\nVignette.fx=1\nCurves.fx=1\nLiftGammaGain.fx=1\nSepia.fx=0\n\n[TechniqueSettings]\nColorfulness.fx=\n  ColorfulnessIntensity=1.200000\n  Contrast=1.050000\n  Gamma=1.000000\nFilmicPass.fx=\n  Strength=0.750000\n  Contrast=1.000000\n  Saturation=0.900000\n  Bleach=0.150000\nLevels.fx=\n  BlackPoint=0.060000\n  WhitePoint=0.920000\n  Gamma=1.000000\nLumaSharpen.fx=\n  pattern=1\n  sharp_strength=0.500000\n  sharp_clamp=0.035000\nVibrance.fx=\n  Vibrance=2.500000\n  VibranceRGBBalance=1.000000,1.000000,1.000000\nMagicBloom.fx=\n  Intensity=0.600000\n  Threshold=0.250000\nVignette.fx=\n  Type=1\n  Center=0.500000,0.500000\n  Radius=0.650000\n  Slope=2.000000\nCurves.fx=\n  Mode=2\n  Formula=4\n  Contrast=1.200000\nLiftGammaGain.fx=\n  Lift=0.000000,0.030000,0.080000\n  Gamma=0.000000,0.000000,0.000000\n  Gain=0.000000,0.000000,0.040000`,
-        shader_fx: `#include "ReShade.fxh"\n\nfloat4 main(float4 color : SV_Target, float2 texcoord : TEXCOORD0) : SV_Target\n{\n    float4 col = tex2D(ReShade::BackBuffer, texcoord);\n    col.rgb *= col.rgb * 1.4;\n    col.rgb = log(max(col.rgb, 0.0001));\n    col.rgb = exp(col.rgb);\n    col.rgb = pow(col.rgb, 1.0 / 2.2);\n    return col;\n}\n\ntechnique SharpContrast <\n    ui_info = "Sharp Contrast Grade";\n>\n{\n    pass Pass1\n    {\n        VertexShader = PostProcessVS;\n        PixelShader = main;\n    }\n}`
+        preset_ini: `[General]\nPerformanceMode=1\n\n[Techniques]\nColorfulness.fx=1\nFilmicPass.fx=1\nLevels.fx=1\nLumaSharpen.fx=1\nVibrance.fx=1\nMagicBloom.fx=1\nVignette.fx=1\nCurves.fx=1\nLiftGammaGain.fx=1\nSepia.fx=0\n\n[TechniqueSettings]\nColorfulness.fx=\n  ColorfulnessIntensity=1.200000\n  Contrast=1.050000\n  Gamma=1.000000\nFilmicPass.fx=\n  Strength=0.750000\n  Contrast=1.000000\n  Saturation=0.900000\n  Bleach=0.150000\nLevels.fx=\n  BlackPoint=0.060000\n  WhitePoint=0.920000\n  GammaVal=1.000000\nLumaSharpen.fx=\n  pattern=1\n  sharp_strength=0.500000\n  sharp_clamp=0.035000\nVibrance.fx=\n  Vibrance=2.500000\n  VibranceRGBBalance=1.000000,1.000000,1.000000\nMagicBloom.fx=\n  Intensity=0.600000\n  Threshold=0.250000\nVignette.fx=\n  Type=1\n  Center=0.500000,0.500000\n  Radius=0.650000\n  Slope=2.000000\nCurves.fx=\n  Mode=2\n  Formula=4\n  Contrast=1.200000\nLiftGammaGain.fx=\n  Lift=0.000000,0.030000,0.080000\n  Gamma=0.000000,0.000000,0.000000\n  Gain=0.000000,0.000000,0.040000`,
+        shader_fx: `#include "ReShade.fxh"\n\ntexture2D BackBuffer : COLOR;\nsampler SamplerColor {\n    Texture = BackBuffer;\n    Filter = MIN_MAG_MIP_LINEAR;\n    AddressU = Clamp;\n    AddressV = Clamp;\n};\n\nuniform float SharpnessAmount < ui_name = "Sharpening"; ui_category = "LumaSharpen"; > = 0.5;\nuniform float ContrastAmount < ui_name = "Contrast"; ui_category = "Colorfulness"; > = 1.05;\nuniform float GammaAmount < ui_name = "Gamma"; ui_category = "Colorfulness"; > = 1.0;\nuniform float VibranceAmount < ui_name = "Vibrance"; ui_category = "Vibrance"; > = 2.5;\nuniform float BloomIntensity < ui_name = "Bloom Intensity"; ui_category = "MagicBloom"; > = 0.6;\nuniform float VignetteRadius < ui_name = "Vignette Radius"; ui_category = "Vignette"; > = 0.65;\nuniform float VignetteSlope < ui_name = "Vignette Slope"; ui_category = "Vignette"; > = 2.0;\nuniform float3 CurvesMidpoint < ui_name = "Curves Midpoint"; ui_category = "Curves"; > = float3(0.5, 0.5, 0.5);\nuniform float3 LiftAmount < ui_name = "Lift"; ui_category = "LiftGammaGain"; > = float3(0.0, 0.03, 0.08);\nuniform float3 GammaAmount2 < ui_name = "Gamma"; ui_category = "LiftGammaGain"; > = float3(0.0, 0.0, 0.0);\nuniform float3 GainAmount < ui_name = "Gain"; ui_category = "LiftGammaGain"; > = float3(0.0, 0.0, 0.04);\n\nfloat4 main(float4 color : SV_Target, float2 texcoord : TEXCOORD0) : SV_Target\n{\n    float4 screenColor = tex2D(SamplerColor, texcoord);\n    float3 col = screenColor.rgb;\n    col *= col * 1.4;\n    col = log(max(col, 0.0001));\n    col = exp(col);\n    col = pow(col, 1.0 / 2.2);\n    col = col * ContrastAmount;\n    col = pow(col, 1.0 / GammaAmount);\n    return float4(col, screenColor.a);\n}\n\ntechnique SharpContrast < ui_info = "Sharp Contrast Grade"; >\n{\n    pass Pass1\n    {\n        VertexShader = PostProcessVS;\n        PixelShader = main;\n    }\n}`
       };
     }
 
