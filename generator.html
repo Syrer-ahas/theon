@@ -382,6 +382,36 @@
         cookiesAccepted: false
       };
 
+      // Get the stored Google credential JWT for server-side credit validation
+      function getSessionToken() {
+        try {
+          const raw = localStorage.getItem('tactical-web-google-session');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            return parsed.id_token || parsed.credential || null;
+          }
+        } catch {}
+        return null;
+      }
+
+      // Fetch current credits from the server on load
+      async function syncCreditsFromServer() {
+        const token = getSessionToken();
+        if (!token) return;
+        try {
+          const resp = await fetch('/api/credits', {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            state.credits = data.credits;
+            updateCredits();
+          }
+        } catch (e) {
+          console.warn('Could not sync credits from server, using local default.', e);
+        }
+      }
+
       const gameSelect = document.getElementById('gameSelect');
       const promptInput = document.getElementById('promptInput');
       const severitySelect = document.getElementById('severitySelect');
