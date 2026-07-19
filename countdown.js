@@ -9,6 +9,35 @@
     /* ─── Already injected? ─── */
     if (document.getElementById('countdown-section')) return;
 
+    /* ─── Create click blocker overlay ─── */
+    const blocker = document.createElement('div');
+    blocker.id = 'countdown-blocker';
+    blocker.style.cssText = [
+        'position: fixed',
+        'top: 0',
+        'left: 0',
+        'width: 100%',
+        'height: 100%',
+        'z-index: 2147483647',
+        'background: transparent',
+        'cursor: default'
+    ].map(s => s + ';').join('');
+    document.body.appendChild(blocker);
+
+    /* ─── Captures all clicks and touch events ─── */
+    function blockEvent(e) {
+        // Allow clicks only on elements inside the countdown section
+        if (document.getElementById('countdown-section') && document.getElementById('countdown-section').contains(e.target)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+    }
+    document.addEventListener('click', blockEvent, true);
+    document.addEventListener('mousedown', blockEvent, true);
+    document.addEventListener('mouseup', blockEvent, true);
+    document.addEventListener('touchstart', blockEvent, { capture: true, passive: false });
+    document.addEventListener('touchend', blockEvent, { capture: true, passive: false });
+
     /* ─── Inject styles ─── */
     const style = document.createElement('style');
     style.textContent = `
