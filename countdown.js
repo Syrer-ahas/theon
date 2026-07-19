@@ -411,18 +411,44 @@
     tick();
     setInterval(tick, 1000);
 
-    /* ─── HYPE BUTTON ─── */
-    const HYPE_KEY = 'cs_hype_count';
+    /* ─── HYPE BUTTON — global via API ─── */
+    const HYPE_API = '/api/hype';
     const hypeBtn = document.getElementById('cs-hypeBtn');
     const hypeCountEl = document.getElementById('cs-hypeCount');
-    function getHype() { try { return parseInt(localStorage.getItem(HYPE_KEY), 10) || 0; } catch(e) { return 0; } }
-    function setHype(n) { try { localStorage.setItem(HYPE_KEY, n); } catch(e) {} }
-    hypeCountEl.textContent = getHype();
+    let clicked = false;
+
+    // Fetch global hype count
+    async function fetchHype() {
+        try {
+            const res = await fetch(HYPE_API);
+            const data = await res.json();
+            if (typeof data.count === 'number') {
+                hypeCountEl.textContent = data.count;
+            }
+        } catch(e) {}
+    }
+
+    // Post to increment hype
+    async function postHype() {
+        try {
+            const res = await fetch(HYPE_API, { method: 'POST' });
+            const data = await res.json();
+            if (typeof data.count === 'number') {
+                hypeCountEl.textContent = data.count;
+            }
+        } catch(e) {}
+    }
+
+    // Initial fetch
+    fetchHype();
+
+    // Poll every 30 seconds for updates
+    setInterval(fetchHype, 30000);
+
     hypeBtn.addEventListener('click', function() {
-        let c = getHype();
-        c++;
-        setHype(c);
-        hypeCountEl.textContent = c;
+        if (clicked) return; // only once per page session
+        clicked = true;
+        postHype();
         hypeBtn.classList.remove('cs-hype-burst');
         void hypeBtn.offsetWidth;
         hypeBtn.classList.add('cs-hype-burst');
