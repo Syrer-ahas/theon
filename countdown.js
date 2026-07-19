@@ -12,11 +12,8 @@
         'height: 100%',
         'z-index: 2147483647',
         'background: #0a0a0f',
-        'display: flex',
-        'align-items: center',
-        'justify-content: center',
         'font-family: "Rajdhani", sans-serif',
-        'overflow: hidden'
+        'overflow-y: auto'
     ].map(s => s + ';').join('');
 
     /* ─── Inject styles ─── */
