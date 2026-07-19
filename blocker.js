@@ -6,12 +6,23 @@
         if (localStorage.getItem('cdo_released') === 'true') {
             const existing = document.getElementById('click-blocker-overlay');
             if (existing) existing.remove();
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
             return;
         }
     } catch(e) {}
 
     /* ─── Already blocked? ─── */
     if (document.getElementById('click-blocker-overlay')) return;
+
+    /* ─── Lock page scroll completely ─── */
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = '0';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.bottom = '0';
 
     /* ─── Create the blocker overlay ─── */
     const overlay = document.createElement('div');
@@ -30,27 +41,21 @@
 
     /* ─── Block all clicks/touches outside countdown section ─── */
     function blockEvent(e) {
-        // Allow clicks inside the countdown section
         const cs = document.getElementById('countdown-section');
         if (cs && cs.contains(e.target)) return;
-        
-        // Allow clicks on the blocker itself (so it doesn't interfere with itself)
         if (e.target === overlay) return;
-
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
         return false;
     }
 
-    // Capture phase — highest priority
     document.addEventListener('click', blockEvent, true);
     document.addEventListener('mousedown', blockEvent, true);
     document.addEventListener('mouseup', blockEvent, true);
     document.addEventListener('touchstart', blockEvent, { capture: true, passive: false });
     document.addEventListener('touchend', blockEvent, { capture: true, passive: false });
 
-    // Block keyboard interactions too
     document.addEventListener('keydown', function(e) {
         const cs = document.getElementById('countdown-section');
         if (cs && cs.contains(e.target)) return;
@@ -58,24 +63,33 @@
         e.stopPropagation();
     }, true);
 
-    // Block scrolling of the page behind
-    document.addEventListener('scroll', function(e) {
+    // Prevent wheel/scroll
+    document.addEventListener('wheel', function(e) {
         const cs = document.getElementById('countdown-section');
-        if (cs && cs.contains(e.target)) return;
-        window.scrollTo(0, 0);
-    }, true);
-
-    // Keep page from scrolling back to top — allow only countdown scroll
-    let lastScrollY = 0;
-    window.addEventListener('scroll', function() {
-        const cs = document.getElementById('countdown-section');
-        if (!cs) return;
-        const rect = cs.getBoundingClientRect();
-        // If countdown is still fully visible, block page scroll
-        if (rect.top >= 0 && rect.bottom >= window.innerHeight) {
-            window.scrollTo(0, 0);
+        if (cs && cs.contains(e.target)) {
+            // Allow scroll inside countdown if it overflows
+            const rect = cs.getBoundingClientRect();
+            if (rect.top <= 0 && rect.bottom >= window.innerHeight) {
+                e.preventDefault();
+                return;
+            }
+            return;
         }
+        e.preventDefault();
     }, { passive: false });
 
-    console.log('🔒 Click blocker active — countdown must finish first.');
+    document.addEventListener('touchmove', function(e) {
+        const cs = document.getElementById('countdown-section');
+        if (cs && cs.contains(e.target)) {
+            const rect = cs.getBoundingClientRect();
+            if (rect.top <= 0 && rect.bottom >= window.innerHeight) {
+                e.preventDefault();
+                return;
+            }
+            return;
+        }
+        e.preventDefault();
+    }, { passive: false });
+
+    console.log('🔒 Page locked — countdown must finish first.');
 })();
