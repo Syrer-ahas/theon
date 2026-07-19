@@ -406,6 +406,83 @@
             }
         }
 
+        /* ── Hype Button ── */
+        .hype-wrap {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .hype-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,107,53,0.12));
+            border: 1px solid rgba(255,215,0,0.25);
+            border-radius: 60px;
+            padding: 14px 36px;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(16px,2vw,22px);
+            font-weight: 700;
+            color: #ffd700;
+            transition: all .3s ease;
+            box-shadow: 0 0 20px rgba(255,215,0,0.05);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .hype-btn:hover {
+            background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,107,53,0.2));
+            border-color: rgba(255,215,0,0.5);
+            box-shadow: 0 0 40px rgba(255,215,0,0.15);
+            transform: scale(1.05);
+        }
+        .hype-btn:active { transform: scale(0.95); }
+        .hype-btn .fire {
+            font-size: clamp(20px,2.5vw,28px);
+            transition: transform .2s ease;
+        }
+        .hype-btn:hover .fire { transform: scale(1.3) rotate(-10deg); }
+        .hype-count {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(14px,1.8vw,20px);
+            font-weight: 700;
+            color: #fff;
+            min-width: 30px;
+            text-align: center;
+        }
+        .hype-label {
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.2);
+        }
+        .hype-burst {
+            animation: hypeBurst .6s cubic-bezier(.34,1.56,.64,1) forwards;
+        }
+        @keyframes hypeBurst {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .spark {
+            position: absolute;
+            pointer-events: none;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #ffd700;
+            opacity: 0;
+        }
+        .spark.fly {
+            animation: sparkFly .8s ease-out forwards;
+        }
+        @keyframes sparkFly {
+            0% { opacity: 1; transform: translate(0,0) scale(1); }
+            100% { opacity: 0; transform: translate(var(--tx),var(--ty)) scale(0); }
+        }
+
         /* ── Responsive ── */
         @media (max-width: 600px) {
             .countdown-container { padding: 30px 16px; }
@@ -413,6 +490,7 @@
             .tile { width: clamp(68px, 20vw, 90px); height: clamp(78px, 22vw, 100px); border-radius: 12px; }
             .tile-number { font-size: clamp(30px, 12vw, 44px); }
             .badge { font-size: 11px; padding: 6px 16px 6px 12px; }
+            .hype-btn { padding: 12px 24px; }
         }
     </style>
 </head>
@@ -496,6 +574,16 @@
             <p>🚀 &nbsp; Get ready &nbsp; · &nbsp; <span class="highlight">#HYPED</span> &nbsp; · &nbsp; Stay tuned</p>
         </div>
 
+        <!-- HYPE BUTTON -->
+        <div class="hype-wrap">
+            <button class="hype-btn" id="hypeBtn">
+                <span class="fire">🔥</span>
+                <span>HYPE</span>
+                <span class="hype-count" id="hypeCount">0</span>
+            </button>
+            <div class="hype-label">Click if you're hyped!</div>
+        </div>
+
     </div>
 
     <script>
@@ -508,7 +596,7 @@
             let startTime = localStorage.getItem(COUNTDOWN_KEY);
             if (!startTime) {
                 startTime = Date.now();
-                localStorage.setItem(COUNTDOWN_KEY, startTime);
+                try { localStorage.setItem(COUNTDOWN_KEY, startTime); } catch(e) {}
             } else {
                 startTime = parseInt(startTime, 10);
             }
@@ -524,19 +612,15 @@
             const fillBar  = document.getElementById('progressFill');
             const pctEl    = document.getElementById('progressPct');
 
-            // Track previous values for flip animation
             let prev = { days: -1, hours: -1, minutes: -1, seconds: -1 };
 
-            // ── Pad ──
             function pad(n) {
                 return String(n).padStart(2, '0');
             }
 
-            // ── Update ──
             function tick() {
                 const now = Date.now();
                 let diff = endTime - now;
-
                 if (diff < 0) diff = 0;
 
                 const totalSec = Math.floor(diff / 1000);
@@ -545,19 +629,16 @@
                 const m = Math.floor((totalSec % 3600) / 60);
                 const s = totalSec % 60;
 
-                // Update numbers
                 daysEl.textContent = pad(d);
                 hoursEl.textContent = pad(h);
                 minutesEl.textContent = pad(m);
                 secondsEl.textContent = pad(s);
 
-                // Flip trigger
                 if (prev.days !== -1) {
                     if (d !== prev.days)   daysEl.classList.remove('flip');
                     if (h !== prev.hours)  hoursEl.classList.remove('flip');
                     if (m !== prev.minutes) minutesEl.classList.remove('flip');
                     if (s !== prev.seconds) secondsEl.classList.remove('flip');
-                    // Force reflow then add
                     void daysEl.offsetWidth;
                     if (d !== prev.days)   daysEl.classList.add('flip');
                     if (h !== prev.hours)  hoursEl.classList.add('flip');
@@ -567,7 +648,6 @@
 
                 prev = { days: d, hours: h, minutes: m, seconds: s };
 
-                // Progress
                 const elapsed = now - startTime;
                 let pct = (elapsed / TOTAL_DURATION) * 100;
                 if (pct > 100) pct = 100;
@@ -577,6 +657,51 @@
 
             tick();
             setInterval(tick, 1000);
+
+            /* ── HYPE BUTTON ── */
+            const HYPE_KEY = 'cdo_hype_count';
+            const hypeBtn = document.getElementById('hypeBtn');
+            const hypeCountEl = document.getElementById('hypeCount');
+
+            function getHypeCount() {
+                try { return parseInt(localStorage.getItem(HYPE_KEY), 10) || 0; } catch(e) { return 0; }
+            }
+            function setHypeCount(n) {
+                try { localStorage.setItem(HYPE_KEY, n); } catch(e) {}
+            }
+
+            hypeCountEl.textContent = getHypeCount();
+
+            hypeBtn.addEventListener('click', function(e) {
+                let count = getHypeCount();
+                count++;
+                setHypeCount(count);
+                hypeCountEl.textContent = count;
+
+                hypeBtn.classList.remove('hype-burst');
+                void hypeBtn.offsetWidth;
+                hypeBtn.classList.add('hype-burst');
+
+                const rect = hypeBtn.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                for (let i = 0; i < 8; i++) {
+                    const spark = document.createElement('div');
+                    spark.className = 'spark';
+                    const angle = (i / 8) * Math.PI * 2;
+                    const dist = 60 + Math.random() * 40;
+                    spark.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                    spark.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                    spark.style.left = cx + 'px';
+                    spark.style.top = cy + 'px';
+                    document.body.appendChild(spark);
+                    void spark.offsetWidth;
+                    spark.classList.add('fly');
+                    setTimeout(() => spark.remove(), 800);
+                }
+
+                if (navigator.vibrate) navigator.vibrate(15);
+            });
         })();
     </script>
 
