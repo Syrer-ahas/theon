@@ -254,8 +254,8 @@
             </div>
           </div>
           <div class="hero-metrics">
-            <div class="metric"><strong id="creditMetric">500</strong><span>Starting credits</span></div>
-            <div class="metric"><strong id="burstMetric">3</strong><span>Credits / second</span></div>
+            <div class="metric"><strong id="creditMetric">50</strong><span>Starting credits</span></div>
+            <div class="metric"><strong id="burstMetric">6</strong><span>Credits / second</span></div>
             <div class="metric"><strong id="suiteMetric">3</strong><span>Files in package</span></div>
           </div>
           <a class="btn" href="WindowGeneration.html" style="background:linear-gradient(180deg,#c8e6ff,#8fd3ff);color:#1a3855;border:1px solid rgba(130,190,255,.3);box-shadow:0 8px 22px rgba(6,8,12,.55),0 0 18px rgba(100,180,255,.12);margin-top:16px;width:100%;padding:13px 20px;font-size:.95rem">Switch to Window Agent</a>
@@ -342,7 +342,7 @@
             </div>
             <div class="meta-badge">Premium mode</div>
           </div>
-          <div class="credits-pill">⚡ Credits remaining: <span id="creditValue">500</span></div>
+          <div class="credits-pill">⚡ Credits remaining: <span id="creditValue">50</span></div>
           <div class="console-card system">The generator has been tuned for a deliberate, premium pace. It will walk through each layer of your preset instead of rushing the result.</div>
           <div class="console-card" id="statusCard">Waiting for authentication and prompt input.</div>
           <div class="progress"><span id="progressFill"></span></div>
@@ -376,7 +376,7 @@
 
       const savedGoogleSession = window.TacticalAuth.getSession();
       const state = {
-        credits: 500,
+        credits: 50,
         authenticated: Boolean(savedGoogleSession),
         generatedFiles: null,
         cookiesAccepted: false
@@ -475,12 +475,6 @@
 
       function escapeFilename(value) {
         return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      }
-
-      function getCost() {
-        const severity = severitySelect.value;
-        const base = severity === 'light' ? 35 : severity === 'medium' ? 55 : severity === 'heavy' ? 80 : 120;
-        return base;
       }
 
       function sanitizePresetText(rawText) {
@@ -617,12 +611,6 @@ Installation:
       }
 
       async function generatePackage() {
-        if (!state.authenticated) {
-          statusCard.textContent = 'Please sign in with Google before generating.';
-          log('Authentication is required before the mission can begin.', 'system');
-          return;
-        }
-
         const prompt = promptInput.value.trim();
         const presetName = presetNameInput.value.trim() || 'Velvet Horizon';
         const game = gameSelect.value;
@@ -637,12 +625,14 @@ Installation:
           return;
         }
 
-        const cost = getCost();
-        if (state.credits < cost) {
-          statusCard.textContent = `You need ${cost} credits for this task.`;
-          log('Insufficient credits for the selected complexity.', 'system');
+        // Minimum credit check: need at least 6 credits (1 second minimum)
+        if (state.credits < 6) {
+          statusCard.textContent = 'You need at least 6 credits to start generation.';
+          log('Insufficient credits. Minimum 6 credits required.', 'system');
           return;
         }
+
+        const startTime = performance.now();
 
         generateBtn.disabled = true;
         downloadBtn.disabled = true;
@@ -665,7 +655,19 @@ Installation:
 
         setTimeout(async () => {
           clearInterval(interval);
-          state.credits -= cost + 15;
+
+          const elapsedMs = performance.now() - startTime;
+          const elapsedSec = Math.ceil(elapsedMs / 1000);
+          const cost = Math.max(6, elapsedSec * 6);
+
+          if (state.credits < cost) {
+            statusCard.textContent = `Generation took ${elapsedSec}s costing ${cost} credits, but you only have ${state.credits}.`;
+            log('Not enough credits to complete this generation.', 'system');
+            generateBtn.disabled = false;
+            return;
+          }
+
+          state.credits -= cost;
           updateCredits();
 
           const presetContent = await generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette);
@@ -698,8 +700,8 @@ Installation:
 
           progressFill.style.width = '100%';
           statusLine.textContent = 'Package complete.';
-          statusCard.textContent = `Package ready. ${state.credits} credits remain.`;
-          log('Export bundle generated successfully and is ready to download.', 'success');
+          statusCard.textContent = `Package ready. ${state.credits} credits remain (${elapsedSec}s × 6 credits/s = ${cost} used).`;
+          log(`Export bundle generated in ${elapsedSec}s using ${cost} credits (6 credits/s).`, 'success');
           downloadBtn.disabled = false;
           generateBtn.disabled = false;
         }, 7000);
