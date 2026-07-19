@@ -1,0 +1,16 @@
+models:
+  - title: DeepSeek-V4
+    provider: deepseek
+    model: deepseek-chat
+    apiKey: sk-1dd3d21971bb4893bbf5182891d46ac1
+
+tabAutocompleteModel:
+  title: DeepSeek-V4
+  provider: deepseek
+  model: deepseek-chat
+  apiKey: sk-1dd3d21971bb4893bbf5182891d46ac1
+
+embeddingsProvider:
+  provider: deepseek
+  model: deepseek-chat
+  apiKey: sk-1dd3d21971bb4893bbf5182891d46ac1
