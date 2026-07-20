@@ -35,4 +35,18 @@
       if (!menu.contains(event.target)) { panel.hidden = true; toggle.setAttribute('aria-expanded', 'false'); }
     });
   });
+
+  /* Inject "Visit Dashboard" button for admin user */
+  if (session.email === 'alkhidirea@gmail.com') {
+    document.querySelectorAll('.nav-actions, .topbar .nav-actions').forEach((actions) => {
+      if (actions.querySelector('[data-admin-dashboard]')) return;
+      const dash = document.createElement('a');
+      dash.className = 'btn-dashboard';
+      dash.href = 'dashboard.html';
+      dash.textContent = 'Visit Dashboard';
+      dash.dataset.adminDashboard = '';
+      dash.style.marginRight = '4px';
+      actions.insertBefore(dash, actions.firstChild);
+    });
+  }
 })();
