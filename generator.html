@@ -375,12 +375,24 @@
       ];
 
       const savedGoogleSession = window.TacticalAuth.getSession();
+      // Restore credits from localStorage so they persist across refreshes
+      const savedCredits = (function() {
+        try {
+          const v = localStorage.getItem('tactical-web-credits');
+          const n = Number(v);
+          return (n >= 0) ? n : 50;
+        } catch(e) { return 50; }
+      })();
       const state = {
-        credits: 50,
+        credits: savedCredits,
         authenticated: Boolean(savedGoogleSession),
         generatedFiles: null,
         cookiesAccepted: false
       };
+      // Persist credits to localStorage whenever they change
+      function persistCredits() {
+        try { localStorage.setItem('tactical-web-credits', String(state.credits)); } catch(e) {}
+      }
 
       // Get the stored Google credential JWT for server-side credit validation
       function getSessionToken() {
