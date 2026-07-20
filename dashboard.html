@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Dashboard — Tactical Web</title>
+    <link rel="icon" type="image/png" href="images/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+    <script src="auth-config.js"></script>
+    <script src="auth-session.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <style>
+      :root { --text:#f6f7ff; --muted:#93a2c1; --border:rgba(255,255,255,.16); --surface:rgba(255,255,255,.055); --accent:#8d7dff; --accent-2:#52d5ff; --success:#4fe7a3; }
+      * { box-sizing:border-box; } body { margin:0; min-height:100vh; color:var(--text); font-family:Inter,system-ui,sans-serif; background:radial-gradient(circle at top left,rgba(141,125,255,.16),transparent 24%),linear-gradient(135deg,#070b17,#0b1227 42%,#060814); } a { color:inherit; text-decoration:none; }
+      .container { width:min(1000px,calc(100% - 32px)); margin:0 auto; padding:24px 0 60px; }
+      .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:8px 0 18px; }
+      .brand { display:flex; align-items:center; gap:12px; font-family:Manrope,sans-serif; font-weight:800; } .brand-logo { width:48px; height:48px; object-fit:cover; }
+      .nav-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+      .btn { display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(0,0,0,.16); border-radius:22px; padding:10px 20px; font:800 .9rem Manrope,sans-serif; cursor:pointer; text-decoration:none; transition:transform .18s ease,filter .18s ease; }
+      .btn:hover { transform:translateY(-2px); filter:brightness(1.04); }
+      .btn-primary { background:linear-gradient(180deg,#fff7e6,#ffe7b2 60%); color:#2e1a07; box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.7); }
+      .btn-ghost { background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.14); color:var(--text); }
+      .btn-purple { background:linear-gradient(180deg,#fae8ff 0%,#f2d3ff 60%); color:#3a1f2b; border:1px solid rgba(80,40,80,0.08); box-shadow:0 8px 22px rgba(80,40,80,0.10); }
+      .btn-red { background:linear-gradient(180deg,#d9535e,#9e2635); color:#fff; border-color:rgba(255,180,180,.24); }
+      .panel { border:1px solid var(--border); border-radius:24px; background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.03)); box-shadow:0 18px 60px rgba(0,0,0,.18); padding:28px; }
+      h1,h2,h3 { font-family:Manrope,sans-serif; margin:0; } h1 { margin-bottom:4px; font-size:1.6rem; } h2 { font-size:1.12rem; margin-bottom:12px; } .muted { color:var(--muted); line-height:1.7; font-size:.92rem; }
+      .stats-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-top:18px; }
+      .stat-card { padding:18px; border:1px solid rgba(255,255,255,.09); border-radius:16px; background:var(--surface); text-align:center; }
+      .stat-card strong { display:block; font-size:1.8rem; color:#ffe7a6; } .stat-card span { font-size:.82rem; color:var(--muted); }
+      .divider { height:1px; background:rgba(255,255,255,.08); margin:24px 0; }
+      .section-card { padding:20px; border:1px solid rgba(255,255,255,.09); border-radius:16px; background:var(--surface); margin-top:14px; }
+      .section-card h3 { font-size:1rem; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+      .badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:.78rem; font-weight:700; }
+      .badge-green { background:rgba(79,230,162,.15); color:#b8f5d4; border:1px solid rgba(79,230,162,.2); }
+      .badge-yellow { background:rgba(255,215,80,.15); color:#ffe7a6; border:1px solid rgba(255,215,80,.2); }
+      .badge-purple { background:rgba(141,125,255,.15); color:#c8bfff; border:1px solid rgba(141,125,255,.2); }
+      .admin-email { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:999px; background:rgba(141,125,255,.12); color:#c8bfff; border:1px solid rgba(141,125,255,.2); font-size:.82rem; font-weight:700; }
+      .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+      @media (max-width:720px) { .stats-grid,.row { grid-template-columns:1fr; } .topbar { align-items:flex-start; } }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="topbar">
+        <a class="brand" href="index.html">
+          <img class="brand-logo" src="images/logo.png" alt="Tactical Web logo" />
+          <span>Admin Dashboard</span>
+        </a>
+        <div class="nav-actions">
+          <a class="btn btn-ghost" href="index.html">Landing</a>
+          <a class="btn btn-ghost" href="generator.html">Generator</a>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div>
+            <h1>Admin Dashboard</h1>
+            <p class="muted" id="adminGreeting">Welcome, Admin</p>
+          </div>
+          <span class="admin-email" id="adminEmail">alkhidirea@gmail.com</span>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card"><strong id="statUsers">—</strong><span>Registered Users</span></div>
+          <div class="stat-card"><strong id="statCredits">—</strong><span>Total Credits Used</span></div>
+          <div class="stat-card"><strong id="statPresets">—</strong><span>Presets Generated</span></div>
+          <div class="stat-card"><strong id="statRevenue">—</strong><span>Revenue ($)</span></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="row">
+        <div class="section-card">
+          <h3>🛡️ Site Management</h3>
+          <p class="muted" style="margin:0 0 14px;">Quick links to manage the platform.</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a class="btn btn-purple" href="account.html">Account Settings</a>
+            <a class="btn btn-ghost" href="generator.html">Generator</a>
+            <a class="btn btn-ghost" href="blog.html">Blog</a>
+          </div>
+        </div>
+        <div class="section-card">
+          <h3>📊 System Health</h3>
+          <p class="muted" style="margin:0 0 14px;">Current platform status indicators.</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <span class="badge badge-green">● Generator Online</span>
+            <span class="badge badge-green">● Auth Active</span>
+            <span class="badge badge-yellow">● API Nominal</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3>📋 Admin Actions</h3>
+        <p class="muted" style="margin:0 0 14px;">Tools available to the admin account.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-primary" id="refreshStatsBtn" type="button">Refresh Dashboard</button>
+          <button class="btn btn-red" id="adminLogoutBtn" type="button">Sign Out</button>
+        </div>
+        <div id="dashboardStatus" class="muted" style="margin-top:12px; font-size:.85rem;"></div>
+      </div>
+
+      <div class="divider"></div>
+      <p class="muted" style="text-align:center; font-size:.82rem;">Tactical Web Admin Panel — Restricted Access</p>
+    </div>
+
+    <script src="auth-ui.js"></script>
+    <script>
+      (function() {
+        const session = window.TacticalAuth?.getSession();
+
+        function enforceAdmin() {
+          if (!session || session.email !== 'alkhidirea@gmail.com') {
+            window.location.href = 'index.html';
+          }
+        }
+        enforceAdmin();
+
+        document.getElementById('adminGreeting').textContent = 'Welcome, ' + (session.name || 'Admin');
+        document.getElementById('adminEmail').textContent = session.email;
+
+        function updateStats() {
+          const stats = JSON.parse(localStorage.getItem('tactical-web-dashboard-stats') || '{}');
+          document.getElementById('statUsers').textContent = stats.users ?? 'N/A';
+          document.getElementById('statCredits').textContent = stats.credits ?? 'N/A';
+          document.getElementById('statPresets').textContent = stats.presets ?? 'N/A';
+          document.getElementById('statRevenue').textContent = stats.revenue ?? 'N/A';
+        }
+        updateStats();
+
+        document.getElementById('refreshStatsBtn').addEventListener('click', function() {
+          const status = document.getElementById('dashboardStatus');
+          status.textContent = 'Dashboard refreshed. Stats will populate once backend reporting is connected.';
+          // Seed some demo data for now
+          localStorage.setItem('tactical-web-dashboard-stats', JSON.stringify({
+            users: 12,
+            credits: 847,
+            presets: 39,
+            revenue: '0.00'
+          }));
+          updateStats();
+        });
+
+        document.getElementById('adminLogoutBtn').addEventListener('click', function() {
+          window.TacticalAuth.clearSession();
+          window.location.href = 'index.html';
+        });
+      })();
+    </script>
+  </body>
+</html>
