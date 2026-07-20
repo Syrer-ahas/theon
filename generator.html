@@ -723,6 +723,7 @@ Installation:
 
           state.credits -= cost;
           updateCredits();
+          persistCredits();
 
           const presetContent = await generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette, cost);
           const readmeContent = buildReadme(presetName, game, styleTag, severity, prompt, quality, hardware, palette);
