@@ -24,7 +24,7 @@
     document.body.style.right = '0';
     document.body.style.bottom = '0';
 
-    /* ─── Create the blocker overlay ─── */
+    /* ─── Create the blocker overlay (transparent — just visual barrier) ─── */
     const overlay = document.createElement('div');
     overlay.id = 'click-blocker-overlay';
     overlay.style.cssText = [
@@ -35,15 +35,18 @@
         'height: 100%',
         'z-index: 2147483647',
         'background: transparent',
+        'pointer-events: none',
         'cursor: default'
     ].map(s => s + ';').join('');
     document.body.appendChild(overlay);
 
     /* ─── Block all clicks/touches outside countdown section ─── */
+    // Uses capture phase (fires before event reaches target)
     function blockEvent(e) {
         const cs = document.getElementById('countdown-section');
+        // Allow clicks inside the countdown section (hype button, etc.)
         if (cs && cs.contains(e.target)) return;
-        if (e.target === overlay) return;
+        // Block everything else
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
