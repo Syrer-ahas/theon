@@ -353,6 +353,9 @@
 
     // Insert at the very top of body
     document.body.insertBefore(section, document.body.firstChild);
+    // Ensure countdown sits above the blocker overlay
+    section.style.position = 'relative';
+    section.style.zIndex = '2147483647';
 
     /* ─── Countdown timer ─── */
     const KEY = 'epic_launch_countdown_start';
