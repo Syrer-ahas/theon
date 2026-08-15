@@ -397,14 +397,7 @@
 
       // Get the stored Google credential JWT for server-side credit validation
       function getSessionToken() {
-        try {
-          const raw = localStorage.getItem('tactical-web-google-session');
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            return parsed.id_token || parsed.credential || null;
-          }
-        } catch {}
-        return null;
+        return window.TacticalSignIn.getSessionToken();
       }
 
       // Fetch current credits from the server on load
@@ -494,24 +487,6 @@
         } catch (error) {
           return null;
         }
-      }
-
-      function completeGoogleProfile(profile) {
-        if (!profile || !profile.email || !profile.exp || profile.exp * 1000 <= Date.now()) {
-          statusCard.textContent = 'Google sign-in could not be verified. Please try again.';
-          log('Google returned an invalid or expired credential.', 'system');
-          return;
-        }
-        state.authenticated = true;
-        state.googleCredential = null;
-        window.TacticalAuth.saveSession(profile);
-        authStatus.textContent = 'Signed in with Google';
-        authInfo.textContent = `Welcome, ${profile.name || profile.email}`;
-        statusCard.textContent = 'Google sign-in verified. You are ready to generate.';
-        updateCredits();
-        log(`Google authentication complete for ${profile.email}.`, 'success');
-        closeLogin();
-        window.setTimeout(() => window.location.reload(), 150);
       }
 
       let googleTokenClient = null;
@@ -785,59 +760,35 @@ Installation:
       }
 
       function initialiseGoogleSignIn() {
-        const clientId = window.TACTICAL_AUTH_CONFIG && window.TACTICAL_AUTH_CONFIG.googleClientId;
-        if (!clientId || clientId.startsWith('YOUR_GOOGLE')) {
-          showGoogleSetupError('Google sign-in is not configured yet. Add your Google OAuth Web client ID to auth-config.js.');
-          return false;
-        }
-        if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
-          return false;
-        }
-        googleTokenClient = window.google.accounts.oauth2.initTokenClient({
-          client_id: clientId,
-          scope: 'openid email profile',
-          callback: async (tokenResponse) => {
-            if (tokenResponse.error || !tokenResponse.access_token) {
-              showGoogleSetupError('Google sign-in was cancelled or could not be completed. Please try again.');
-              return;
-            }
-            try {
-              const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-              });
-              if (!response.ok) throw new Error('Google profile request failed');
-              const profile = await response.json();
-              profile.exp = Math.floor(Date.now() / 1000) + Number(tokenResponse.expires_in || 3600);
-              completeGoogleProfile(profile);
-            } catch (_) {
-              showGoogleSetupError('Google sign-in completed, but your profile could not be loaded. Please try again.');
-            }
-          }
-        });
-        return true;
+        // Use the shared strict sign-in client (auth-google.js)
+        return window.TacticalSignIn.ensureGoogleInit();
       }
 
       function loadGoogleSignIn() {
-        if (initialiseGoogleSignIn()) return;
-        let attempts = 0;
-        const waitForGoogle = window.setInterval(() => {
-          attempts += 1;
-          if (initialiseGoogleSignIn()) {
-            window.clearInterval(waitForGoogle);
-          } else if (attempts >= 30) {
-            window.clearInterval(waitForGoogle);
-            showGoogleSetupError('Google sign-in could not load. Check your connection, browser privacy extensions, and Google Cloud authorized JavaScript origins.');
-          }
-        }, 250);
+        // Not needed for the shared flow; kept for compatibility.
       }
 
       document.getElementById('openLoginBtn').addEventListener('click', openLogin);
-      document.getElementById('loginGoogleBtn').addEventListener('click', () => {
-        if (!googleTokenClient && !initialiseGoogleSignIn()) {
-          showGoogleSetupError('Google sign-in is still loading. Please try again in a moment.');
-          return;
+      document.getElementById('loginGoogleBtn').addEventListener('click', async () => {
+        loginGoogleBtn.disabled = true;
+        loginGoogleBtn.textContent = 'Signing in…';
+        try {
+          const session = await window.TacticalSignIn.signInWithGoogle();
+          if (!session) throw new Error('Sign-in returned no valid session.');
+          state.authenticated = true;
+          authStatus.textContent = 'Signed in with Google';
+          authInfo.textContent = `Welcome, ${session.name || session.email}`;
+          statusCard.textContent = 'Google sign-in verified. You are ready to generate.';
+          updateCredits();
+          log(`Google authentication complete for ${session.email}.`, 'success');
+          closeLogin();
+          syncCreditsFromServer();
+        } catch (error) {
+          showGoogleSetupError(error.message || 'Google sign-in could not be completed. Please try again.');
+        } finally {
+          loginGoogleBtn.disabled = false;
+          loginGoogleBtn.textContent = 'Continue with Google';
         }
-        googleTokenClient.requestAccessToken({ prompt: 'select_account' });
       });
       document.getElementById('logoutBtn').addEventListener('click', async () => {
         state.authenticated = false;
@@ -868,7 +819,6 @@ Installation:
       renderGames();
       updateCredits();
       restoreCookies();
-      loadGoogleSignIn();
       syncCreditsFromServer();
       log('Welcome to Tactical Web. Sign in to begin the premium generation experience.', 'system');
     </script>
