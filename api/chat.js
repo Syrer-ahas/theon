@@ -1,15 +1,55 @@
 // Vercel serverless function: POST /api/chat
 // Required environment variable: GOOGLE_API_KEY
 // Dual mode: conversation + intent detection for preset generation
+// SECURITY: Every request MUST carry a strictly-verified Google ID token.
+// Unauthenticated requests are rejected with 401.
+
+import { verifyGoogleJWT, extractSessionToken } from './_auth.js';
+
+const CHAT_COOLDOWN_MS = 1500; // minimum gap between messages per user
+
+// In-memory rate limiter: email -> last message timestamp
+const rateLimitStore = new Map();
+
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'POST');
     return response.status(405).json({ error: 'Method not allowed.' });
   }
 
+  // ───────────────────────────────────────────────────────────────────────────
+  // STRICT SIGN-IN GATE
+  // ───────────────────────────────────────────────────────────────────────────
+  const token = extractSessionToken(request);
+  if (!token) {
+    return response.status(401).json({ error: 'You must be signed in to talk to the AI agent.' });
+  }
+
+  let user;
+  try {
+    user = await verifyGoogleJWT(token);
+  } catch {
+    user = null;
+  }
+
+  if (!user) {
+    return response.status(401).json({ error: 'Invalid or expired session. Please sign in again.' });
+  }
+
+  // Rate limit: one message per ~1.5s per user to prevent flooding the agent.
+  const now = Date.now();
+  const lastSent = rateLimitStore.get(user.email) || 0;
+  if (now - lastSent < CHAT_COOLDOWN_MS) {
+    return response.status(429).json({ error: 'You are sending messages too quickly. Please slow down.' });
+  }
+  rateLimitStore.set(user.email, now);
+
   const { message, history } = request.body || {};
   if (!message || typeof message !== 'string' || message.trim().length === 0) {
     return response.status(400).json({ error: 'Message is required.' });
+  }
+  if (message.length > 2000) {
+    return response.status(400).json({ error: 'Message too long (max 2000 characters).' });
   }
 
   const apiKey = process.env.GOOGLE_API_KEY;
@@ -38,7 +78,7 @@ OUTPUT FORMAT:
 
 Example: "I've got everything I need! Let me generate that preset for you. [GENERATE:game=Cyberpunk 2077|style=cinematic night|hardware=high-end|prompt=Create a cinematic night preset with soft contrast and warm highlights|presetName=Night City Dreams]"
 
-The website is tacticalweb.online — a ReShade preset generation platform.`;
+The website is tacticalweb.online — a ReShade preset generation platform. The signed-in user's email is ${user.email}. You may address them by their name if you know it.`;
 
   const contents = [
     { role: 'user', parts: [{ text: systemPrompt }] },
@@ -99,7 +139,7 @@ The website is tacticalweb.online — a ReShade preset generation platform.`;
       });
     }
 
-    return response.status(200).json({ reply });
+    return response.status(200).json({ reply, user: { email: user.email } });
   } catch (error) {
     console.error('Chat endpoint error:', error);
     return response.status(500).json({ error: 'Something went wrong. Please try again.' });
