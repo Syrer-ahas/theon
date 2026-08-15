@@ -2,7 +2,10 @@
 // Required environment variable: GROQ_API_KEY
 // Generates a ReShade preset .ini + shader.fx using llama-3.1-8b-instant
 // Returns text content; the client builds the .zip with JSZip
-// Credit deduction: client sends session JWT + cost, server validates and deducts.
+// SECURITY: Requires a strictly-verified Google ID token (cryptographic signature,
+// issuer, audience, expiry, and email_verified). Rejects all anonymous access.
+
+import { verifyGoogleJWT, extractSessionToken } from './_auth.js';
 
 const DEFAULT_CREDITS = 50;
 const MIN_CREDITS = 6;
@@ -12,18 +15,6 @@ const DAILY_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // In-memory store for credits. For production, replace with Vercel KV / Redis / DB.
 const creditStore = new Map(); // email -> { credits, lastDailyClaim }
-
-function decodeJWT(token) {
-  try {
-    const payload = token.split('.')[1]
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
-    const padded = payload + '='.repeat((4 - payload.length % 4) % 4);
-    return JSON.parse(Buffer.from(padded, 'base64').toString('utf-8'));
-  } catch {
-    return null;
-  }
-}
 
 function getStore(email) {
   if (!creditStore.has(email)) {
@@ -68,17 +59,26 @@ export default async function handler(request, response) {
     return response.status(400).json({ error: 'Game and prompt are required.' });
   }
 
-  // --- Credit validation (server-side) ---
-  if (!session) {
+  // ───────────────────────────────────────────────────────────────────────────
+  // STRICT SIGN-IN GATE — cryptographically verify the Google ID token.
+  // ───────────────────────────────────────────────────────────────────────────
+  const token = extractSessionToken(request);
+  if (!token) {
     return response.status(401).json({ error: 'Session token required for generation.' });
   }
 
-  const decoded = decodeJWT(session);
-  if (!decoded || !decoded.email) {
-    return response.status(401).json({ error: 'Invalid session token.' });
+  let user;
+  try {
+    user = await verifyGoogleJWT(token);
+  } catch {
+    user = null;
   }
 
-  const email = decoded.email;
+  if (!user) {
+    return response.status(401).json({ error: 'Invalid or expired session. Please sign in again.' });
+  }
+
+  const email = user.email;
   const calculatedCost = Math.max(MIN_CREDITS, (cost || MIN_CREDITS));
   const currentCredits = getCredits(email);
 
