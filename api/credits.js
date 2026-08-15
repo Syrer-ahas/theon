@@ -2,25 +2,16 @@
 // Manages server-side credit balances with daily login bonus.
 // GET: returns current balance (auto-grants 50 daily credits if 24h elapsed)
 // POST: deduct/reset/claim actions
+// SECURITY: Every request MUST carry a strictly-verified Google ID token.
 // For production, replace the in-memory Map with Vercel KV, Upstash Redis, or a database.
+
+import { verifyGoogleJWT, extractSessionToken } from './_auth.js';
 
 const creditStore = new Map(); // email -> { credits, lastDailyClaim }
 const DEFAULT_CREDITS = 50;
 const MIN_CREDITS = 6;
 const DAILY_BONUS = 50;
 const DAILY_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-function decodeJWT(token) {
-  try {
-    const payload = token.split('.')[1]
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
-    const padded = payload + '='.repeat((4 - payload.length % 4) % 4);
-    return JSON.parse(Buffer.from(padded, 'base64').toString('utf-8'));
-  } catch {
-    return null;
-  }
-}
 
 function getStore(email) {
   if (!creditStore.has(email)) {
@@ -61,27 +52,32 @@ function setCredits(email, credits) {
 export default async function handler(request, response) {
   response.setHeader('Access-Control-Allow-Origin', '*');
   response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (request.method === 'OPTIONS') {
     return response.status(200).end();
   }
 
-  const authHeader = request.headers.authorization || '';
-  const sessionToken = authHeader.startsWith('Bearer ')
-    ? authHeader.slice(7)
-    : (request.body?.session || '');
-
-  if (!sessionToken) {
+  // ───────────────────────────────────────────────────────────────────────────
+  // STRICT SIGN-IN GATE — cryptographically verify the Google ID token.
+  // ───────────────────────────────────────────────────────────────────────────
+  const token = extractSessionToken(request);
+  if (!token) {
     return response.status(401).json({ error: 'Session token required.' });
   }
 
-  const decoded = decodeJWT(sessionToken);
-  if (!decoded || !decoded.email) {
-    return response.status(401).json({ error: 'Invalid session token.' });
+  let user;
+  try {
+    user = await verifyGoogleJWT(token);
+  } catch {
+    user = null;
   }
 
-  const email = decoded.email;
+  if (!user) {
+    return response.status(401).json({ error: 'Invalid session token. Please sign in again.' });
+  }
+
+  const email = user.email;
   const now = Date.now();
 
   if (request.method === 'GET') {
