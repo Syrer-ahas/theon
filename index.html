@@ -295,65 +295,206 @@
     <link rel="stylesheet" href="newsletter-popup.css" />
   </head>
   <body>
-    <div class="page-shell">
-      <div class="topbar">
-        <div class="upgrade-wrap">
-          <button class="upgrade-btn" id="upgradeBtn" type="button">
-            <span class="spark">✦</span>
-            UPGRADE
-          </button>
-          <div class="upgrade-menu hidden" id="upgradeMenu">
-            <button type="button">Generator</button>
-            <button type="button">Pro</button>
-            <button type="button">Support</button>
-          </div>
-        </div>
+    <div class="cookie-banner" id="cookieBanner">
+      <div>We use cookies to keep your session and preferences intact. <a href="privacy.html" style="color:#8fdfff;">Learn more</a></div>
+      <div class="cookie-actions">
+        <button class="btn btn-ghost" id="cookieDeclineBtn" type="button">Decline</button>
+        <button class="btn btn-primary" id="cookieAcceptBtn" type="button">Accept</button>
       </div>
-
-      <main class="hero">
-        <h1 class="headline">
-          <span>DESCRIBE A</span>
-          <span class="highlight">GAME MECHANIC</span>
-        </h1>
-
-        <div class="tag-row">
-          <div class="tag"><span class="emoji">⚙️</span> Build a shop UI</div>
-          <div class="tag"><span class="emoji">✨</span> Create climbable platforms</div>
-          <div class="tag"><span class="emoji">🎯</span> Add timed rounds</div>
-          <div class="tag"><span class="emoji">🧩</span> Add building mechanic</div>
-        </div>
-
-        <div class="composer">
-          <textarea id="promptInput" placeholder="Add double-jump with particles"></textarea>
-          <div class="composer-controls">
-            <div class="mini-pill"><span>GPT-5.6 Luna</span></div>
-            <div class="mini-pill"><span>1.04</span></div>
-            <button class="generate-btn" type="button">Generate</button>
-          </div>
-        </div>
-      </main>
     </div>
 
-    <script>
-      const promptInput = document.getElementById('promptInput');
-      const upgradeBtn = document.getElementById('upgradeBtn');
-      const upgradeMenu = document.getElementById('upgradeMenu');
+        <div class="container">
+      <div class="shell">
 
-      promptInput.addEventListener('click', function () {
-        window.location.href = 'generator.html';
-      });
+        <!-- ===== Left rail ===== -->
+        <aside class="rail">
+          <a class="brand" href="index.html">
+            <img class="brand-logo" src="images/logo.png" alt="Tactical Web logo" />
+            <span>Tactical Web</span>
+          </a>
 
-      upgradeBtn.addEventListener('click', function (event) {
-        event.stopPropagation();
-        upgradeMenu.classList.toggle('hidden');
-      });
+          <nav class="rail-card">
+            <h4>Navigate</h4>
+            <div class="rail-nav">
+              <a class="active" href="index.html"><span class="ic">🏠</span> Home</a>
+              <a href="generator.html"><span class="ic">⚙️</span> Generator</a>
+              <a href="blog.html"><span class="ic">📰</span> Blog</a>
+              <a href="pro.html"><span class="ic">⭐</span> Get Pro</a>
+              <a href="affiliate.html"><span class="ic">🤝</span> Affiliate</a>
+            </div>
+          </nav>
 
-      document.addEventListener('click', function (event) {
-        if (!event.target.closest('.upgrade-wrap')) {
-          upgradeMenu.classList.add('hidden');
-        }
-      });
-    </script>
+          <div class="rail-card rail-stats">
+            <h4>At a glance</h4>
+            <div class="rail-stat"><strong>500</strong><span>Starting<br>credits</span></div>
+            <div class="rail-stat"><strong>12</strong><span>Game<br>profiles</span></div>
+            <div class="rail-stat"><strong>Zip</strong><span>Auto-export<br>package</span></div>
+          </div>
+
+          <div class="rail-card rail-cta">
+            <a class="btn btn-primary" id="startMain" href="generator.html">Start building</a>
+            <a class="btn btn-ghost" href="https://discord.gg/c2aJ4dBZ4h" target="_blank" rel="noopener">Join Discord</a>
+          </div>
+        </aside>
+
+        <!-- ===== Main content ===== -->
+        <main class="main">
+
+          <section class="hero">
+            <div>
+              <div class="eyebrow">✦ Premium ReShade orchestration • Tailored presets • Better delivery</div>
+              <h1>Craft cinematic presets with more control.</h1>
+              <p class="hero-lead">Turn your ideas into production-ready ReShade looks with a calmer workflow, cleaner organization, and a prompt-first generator built for visual precision.</p>
+              <div class="hero-actions">
+                <a class="btn btn-primary" href="generator.html">Launch the generator</a>
+                <a class="btn btn-secondary" href="https://youtu.be/rdF7GDwQKcQ" target="_blank" rel="noopener">See how it works</a>
+              </div>
+            </div>
+
+            <div class="prompt-panel">
+              <div class="panel-header">
+                <div>
+                  <div class="eyebrow" style="margin-bottom:0;">Composer</div>
+                  <h3>Prompt studio</h3>
+                </div>
+                <div class="meta-badge">AI-assisted</div>
+              </div>
+
+              <div class="field">
+                <label for="homePrompt">Prompt</label>
+                <textarea id="homePrompt" placeholder="DESCRIBE SOMETHING"></textarea>
+              </div>
+
+              <div class="prompt-row">
+                <div class="field">
+                  <label for="homeGame">Game</label>
+                  <select id="homeGame">
+                    <option>Cyberpunk 2077</option>
+                    <option>Red Dead Redemption 2</option>
+                    <option>Elden Ring</option>
+                    <option>Far Cry 6</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="homeStyle">Style</label>
+                  <select id="homeStyle">
+                    <option>Cinematic Night</option>
+                    <option>Warm Glow</option>
+                    <option>Cool Contrast</option>
+                    <option>Clean Realism</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="stack-actions">
+                <button class="btn btn-primary" type="button">Generate preset</button>
+                <button class="btn btn-ghost" type="button">View examples</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="trust">
+            <div class="stat"><strong>500</strong><span>Starting credits</span></div>
+            <div class="stat"><strong>12</strong><span>Curated game profiles</span></div>
+            <div class="stat"><strong>Zip</strong><span>Auto-exported package</span></div>
+          </section>
+
+          <section class="section">
+            <div class="section-title">
+              <h2>Why creators choose Tactical Web</h2>
+              <span class="pill">Built for clarity, depth, and speed</span>
+            </div>
+            <div class="feature-grid">
+              <div class="feature-card">
+                <span class="ico">🧠</span>
+                <div>
+                  <h3>Smarter prompt planning</h3>
+                  <p>Write a brief, and the system translates it into a refined preset structure with lighting, contrast, and atmosphere in mind.</p>
+                </div>
+              </div>
+              <div class="feature-card">
+                <span class="ico">✨</span>
+                <div>
+                  <h3>Premium visual language</h3>
+                  <p>A glassy, high-end interface with soft outlines and subtle glow rather than noisy neon effects.</p>
+                </div>
+              </div>
+              <div class="feature-card">
+                <span class="ico">📦</span>
+                <div>
+                  <h3>Flexible export pack</h3>
+                  <p>Packages arrive as a clean ZIP bundle with files ready for installation, documentation, and further tweaking.</p>
+                </div>
+              </div>
+              <div class="feature-card">
+                <span class="ico">⚡</span>
+                <div>
+                  <h3>Calm, fast workflow</h3>
+                  <p>From game selection to download, the whole flow stays focused, deliberate, and quick to refine.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section" id="workflow">
+            <div class="section-title">
+              <h2>How the workflow feels</h2>
+              <span class="pill">Simple to start, powerful to refine</span>
+            </div>
+            <div class="steps">
+              <div class="step-card"><strong>Choose your game</strong><p>Pick a supported title and let the platform tailor the preset logic around its visual identity.</p></div>
+              <div class="step-card"><strong>Describe the mood</strong><p>Use a prompt with tone, atmosphere, and visual goals so the AI generates a more deliberate result.</p></div>
+              <div class="step-card"><strong>Fine-tune the build</strong><p>Adjust severity, quality, and preset style to control how heavy or polished the final deliverable should feel.</p></div>
+              <div class="step-card"><strong>Download the package</strong><p>Receive a polished zip bundle with your preset files, manifest, and install notes in one place.</p></div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section-title">
+              <h2>Supported worlds</h2>
+              <span class="pill">From cinematic adventures to science fiction and fantasy</span>
+            </div>
+            <div class="world-grid">
+              <div class="world-card"><div class="world-thumb"><img src="images/rdr2.png" alt="Red Dead Redemption 2" /></div></div>
+              <div class="world-card"><div class="world-thumb"><img src="images/hitman.jpg" alt="Hitman" /></div></div>
+              <div class="world-card"><div class="world-thumb"><img src="images/cyberpunk2077.jpg" alt="Cyberpunk 2077" /></div></div>
+              <div class="world-card"><div class="world-thumb"><img src="images/eldernring.jpg" alt="Elden Ring" /></div></div>
+              <div class="world-card"><div class="world-thumb"><img src="images/farcry6.jpg" alt="Far Cry 6" /></div></div>
+              <div class="world-card"><div class="world-thumb"><img src="images/subnautica.jpg" alt="Subnautica" /></div></div>
+              <div class="world-card"><div class="world-thumb"><img src="images/forzahorizon6.jpg" alt="Forza Horizon 5" /></div></div>
+              <div class="world-card"><div class="world-thumb"><img src="images/DarkSoulsIII.jpg" alt="Dark Souls III" /></div></div>
+              <div class="world-card"><div class="world-thumb"><img src="images/Fallout4.jpg" alt="Fallout 4" /></div></div>
+              <div class="world-card"><div class="world-thumb"><img src="images/ragnarok.jpg" alt="God of War Ragnarok" /></div></div>
+              <div class="world-card"><div class="world-thumb"><img src="images/godofwar.jpg" alt="God of War" /></div></div>
+              <div class="world-card"><div class="world-thumb"><img src="images/GTA5.jpg" alt="GTA V" /></div></div>
+            </div>
+          </section>
+
+          <section class="panel cta">
+            <div>
+              <h2>Ready for a cleaner, more advanced preset workflow?</h2>
+              <p>Open the dedicated generator to begin designing your next preset with richer options, better feedback, and a refined package-ready experience.</p>
+            </div>
+            <div class="cta-actions">
+              <a class="btn btn-primary" href="generator.html">Go to the generator</a>
+            </div>
+          </section>
+
+        </main>
+            </div>
+    </div>
+
+    <div class="footer">Tactical Web • Premium preset design • Discord and Gmail access • Clean, advanced delivery</div>
+    <script src="cookie.js"></script>
+    <script src="countdown.js"></script>
+    <script src="auth-config.js"></script>
+    <script src="auth-session.js"></script>
+    <script src="auth-google.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <script src="auth-ui.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="turnstile-config.js"></script>
+    <script src="newsletter-popup.js"></script>
   </body>
 </html>
 
