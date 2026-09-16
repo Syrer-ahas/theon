@@ -167,7 +167,7 @@
 
             /* Hero band inside main */
             .hero {
-              padding: 46px 44px;
+              padding: 42px 36px;
               border-radius: 26px;
               border:1px solid var(--border);
               background:
@@ -175,6 +175,10 @@
                 radial-gradient(circle at 10% 90%, rgba(141,125,255,0.20), transparent 46%),
                 linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
               position:relative; overflow:hidden;
+              display:grid;
+              grid-template-columns: 1.05fr 0.95fr;
+              gap:28px;
+              align-items:start;
             }
             .hero h1 {
               font-size: clamp(2.1rem, 3.6vw, 3.2rem);
@@ -185,6 +189,35 @@
             }
             .hero-lead { color: var(--muted); line-height: 1.75; font-size:1.05rem; max-width: 560px; }
             .hero-actions { display:flex; gap:14px; flex-wrap:wrap; margin: 26px 0 0; }
+
+            .prompt-panel {
+              padding: 24px;
+              border-radius: 22px;
+              background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+              border: 1px solid rgba(255,255,255,0.1);
+              display:grid;
+              gap:14px;
+            }
+            .panel-header { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom: 10px; }
+            .panel-header h3 { font-size: 1rem; margin:0; }
+            .meta-badge { padding:7px 10px; border-radius:999px; background: rgba(80,212,255,0.12); border:1px solid rgba(80,212,255,0.24); color:#9fe2ff; font-size:0.78rem; font-weight:700; }
+            .field { display:grid; gap:6px; }
+            .field label { font-size:0.92rem; font-weight:700; }
+            .field input, .field textarea, .field select {
+              width: 100%;
+              border: 1px solid rgba(255,255,255,0.12);
+              border-radius: 14px;
+              padding: 12px 13px;
+              background: rgba(7, 11, 22, 0.8);
+              color: var(--text);
+              font: inherit;
+              resize: vertical;
+            }
+            .field textarea { min-height: 160px; }
+            .field input:focus, .field textarea:focus, .field select:focus { outline: 2px solid rgba(82,213,255,0.24); outline-offset: 1px; }
+            .prompt-row { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+            .stack-actions { display:flex; gap:12px; flex-wrap:wrap; margin-top: 4px; }
+            .stack-actions .btn { flex: 1 1 190px; }
 
             /* Stat strip */
             .trust { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px; }
@@ -308,12 +341,55 @@
         <main class="main">
 
           <section class="hero">
-            <div class="eyebrow">✦ Premium ReShade orchestration • Tailored presets • Better delivery</div>
-            <h1>Create polished presets for the world’s most demanding games.</h1>
-            <p class="hero-lead">Tactical Web blends a refined interface, smarter prompt design, and a dedicated generator—so you can create cinematic ReShade presets with professional structure, clean packaging, and a calm workflow.</p>
-            <div class="hero-actions">
-              <a class="btn btn-primary" href="generator.html">Launch the generator</a>
-              <a class="btn btn-secondary" href="https://youtu.be/rdF7GDwQKcQ" target="_blank" rel="noopener">See how it works</a>
+            <div>
+              <div class="eyebrow">✦ Premium ReShade orchestration • Tailored presets • Better delivery</div>
+              <h1>Craft cinematic presets with more control.</h1>
+              <p class="hero-lead">Turn your ideas into production-ready ReShade looks with a calmer workflow, cleaner organization, and a prompt-first generator built for visual precision.</p>
+              <div class="hero-actions">
+                <a class="btn btn-primary" href="generator.html">Launch the generator</a>
+                <a class="btn btn-secondary" href="https://youtu.be/rdF7GDwQKcQ" target="_blank" rel="noopener">See how it works</a>
+              </div>
+            </div>
+
+            <div class="prompt-panel">
+              <div class="panel-header">
+                <div>
+                  <div class="eyebrow" style="margin-bottom:0;">Composer</div>
+                  <h3>Prompt studio</h3>
+                </div>
+                <div class="meta-badge">AI-assisted</div>
+              </div>
+
+              <div class="field">
+                <label for="homePrompt">Prompt</label>
+                <textarea id="homePrompt" placeholder="DESCRIBE SOMETHING"></textarea>
+              </div>
+
+              <div class="prompt-row">
+                <div class="field">
+                  <label for="homeGame">Game</label>
+                  <select id="homeGame">
+                    <option>Cyberpunk 2077</option>
+                    <option>Red Dead Redemption 2</option>
+                    <option>Elden Ring</option>
+                    <option>Far Cry 6</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="homeStyle">Style</label>
+                  <select id="homeStyle">
+                    <option>Cinematic Night</option>
+                    <option>Warm Glow</option>
+                    <option>Cool Contrast</option>
+                    <option>Clean Realism</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="stack-actions">
+                <button class="btn btn-primary" type="button">Generate preset</button>
+                <button class="btn btn-ghost" type="button">View examples</button>
+              </div>
             </div>
           </section>
 
