@@ -43,6 +43,7 @@
 <script src="auth-config.js"></script>
 <script src="auth-session.js"></script>
 <script src="auth-google.js"></script>
+<script src="credit-system.js"></script>
 <script src="https://accounts.google.com/gsi/client" async></script>
 <script src="tactical-layout.js"></script>
 <script src="auth-ui.js"></script>
@@ -66,22 +67,17 @@
   var svgHtml = '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-3-9.5c0-.83-.67-1.5-1.5-1.5S6 9.67 6 10.5 6.67 12 7.5 12 9 11.33 9 10.5zm9 0c0-.83-.67-1.5-1.5-1.5S15 9.67 15 10.5 15.67 12 16.5 12 18 11.33 18 10.5zM12 17c2.33 0 4.31-1.46 5.11-3.5H6.89C7.69 15.54 9.67 17 12 17z"/></svg>';
 
   headerTime.textContent = new Date().toLocaleDateString();
-  var credits = 50;
+  var credits = 0;
   var conversationHistory = [];
   var isGenerating = false;
-  var startTime = 0;
 
   function getCreditDisplay() {
-    return '\n\n⚡ Credits remaining: ' + credits;
-  }
-
-  function deductCredits(cost) {
-    credits = Math.max(0, credits - cost);
+    return '\n\nCredits remaining: ' + credits;
   }
 
   function updateCreditsInUI() {
     var el = document.getElementById('creditDisplay');
-    if (el) el.textContent = '⚡ Credits remaining: ' + credits;
+    if (el) el.textContent = 'Credits remaining: ' + credits;
   }
 
   // Add credit display to the chat header
@@ -89,7 +85,7 @@
   creditDisplayDiv.id = 'creditDisplay';
   creditDisplayDiv.className = 'credits-pill';
   creditDisplayDiv.style.cssText = 'display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;background:rgba(79,230,162,0.1);color:#dffceb;border:1px solid rgba(79,230,162,0.18);font-size:0.88rem;margin-right:8px;margin-left:auto;';
-  creditDisplayDiv.textContent = '⚡ Credits remaining: ' + credits;
+  creditDisplayDiv.textContent = 'Credits remaining: ' + credits;
   var headerEl = document.querySelector('.chat-header');
   if (headerEl) {
     headerEl.appendChild(creditDisplayDiv);
@@ -128,7 +124,11 @@
         agentBtn.innerHTML = svgHtml;
         navActions.appendChild(agentBtn);
       }
+      window.TacticalCredits.sync({ force: true });
     } else {
+      credits = 0;
+      window.TacticalCredits.reset();
+      updateCreditsInUI();
       authBanner.hidden = true;
       chatInput.disabled = true;
       chatInput.placeholder = 'Sign in to send a message to the agent...';
@@ -140,6 +140,11 @@
       if (navAgentBtn) navAgentBtn.remove();
     }
   }
+
+  window.addEventListener('tw-credits-changed', function(event) {
+    credits = event.detail && event.detail.authenticated ? Number(event.detail.credits || 0) : 0;
+    updateCreditsInUI();
+  });
 
   function getSessionToken() {
     return window.TacticalSignIn.getSessionToken();
@@ -282,6 +287,9 @@
         return;
       }
       if (!resp.ok) throw new Error(data.error || 'Generation failed.');
+      window.TacticalCredits.acceptServerBalance(data);
+      credits = window.TacticalCredits.getSnapshot().credits;
+      updateCreditsInUI();
 
       var zip = new JSZip();
       zip.file('preset.ini', data.preset_ini);
@@ -332,12 +340,6 @@
       return;
     }
 
-    // Credit check: minimum 6 credits (1 second)
-    if (credits < 6) {
-      showError('You need at least 6 credits to start a generation. Credits remaining: ' + credits);
-      return;
-    }
-
     // Ensure chat is started
     startChat();
 
@@ -349,8 +351,6 @@
     sendBtn.disabled = true;
     sendBtn.textContent = '...';
     showTyping();
-
-    startTime = performance.now();
 
     try {
       var response = await fetch('/api/chat', {
@@ -377,16 +377,14 @@
       conversationHistory.push({ role: 'model', text: data.reply });
       addMessage('agent', (data.reply || 'Let me generate that preset for you...') + getCreditDisplay());
 
-      // Calculate and deduct credits based on elapsed time
-      var elapsedMs = performance.now() - startTime;
-      var elapsedSec = Math.ceil(elapsedMs / 1000);
-      var cost = Math.max(6, elapsedSec * 6);
-      if (credits >= cost) {
-        deductCredits(cost);
-        updateCreditsInUI();
-      }
-
       if (data.generate) {
+        if (credits < 1) {
+          showError('You need 1 credit to generate a package. Your next daily credit is added automatically.');
+          chatInput.disabled = false;
+          sendBtn.disabled = false;
+          sendBtn.textContent = 'Send';
+          return;
+        }
         isGenerating = true;
         chatInput.disabled = true;
         sendBtn.disabled = true;
@@ -445,6 +443,7 @@
   document.getElementById('authGateSignInBtn').addEventListener('click', doSignIn);
   document.getElementById('signOutAgentBtn').addEventListener('click', function() {
     window.TacticalSignIn.signOut();
+    window.TacticalCredits.reset();
     refreshSession();
     showError('You have been signed out. Sign in to send messages to the agent again.');
   });
@@ -455,6 +454,7 @@
       var newSession = await window.TacticalSignIn.signInWithGoogle();
       if (!newSession) throw new Error('Sign-in returned no valid session.');
       refreshSession();
+      await window.TacticalCredits.sync({ force: true });
       chatIntro.textContent = newSession.email + ' — verified sign-in active. You may communicate with the agent.';
       startChat();
     } catch (err) {
