@@ -15,6 +15,7 @@
     <script src="auth-config.js"></script>
     <script src="auth-session.js"></script>
     <script src="auth-google.js"></script>
+    <script src="credit-system.js"></script>
     <script src="https://accounts.google.com/gsi/client" async></script>
     <style>
       .gen-head { margin-bottom: 22px; }
@@ -216,42 +217,28 @@
       ];
 
       const savedGoogleSession = window.TacticalAuth.getSession();
-      const savedCredits = (function() {
-        try {
-          const v = localStorage.getItem('tactical-web-credits');
-          const n = Number(v);
-          return (n >= 0) ? n : 50;
-        } catch (e) { return 50; }
-      })();
       const state = {
-        credits: savedCredits,
+        credits: 0,
         authenticated: Boolean(savedGoogleSession),
         generatedFiles: null,
         cookiesAccepted: false
       };
-      function persistCredits() {
-        try { localStorage.setItem('tactical-web-credits', String(state.credits)); } catch (e) {}
-        window.dispatchEvent(new CustomEvent('tw-credits-changed'));
-      }
 
       function getSessionToken() {
         return window.TacticalSignIn.getSessionToken();
       }
 
       async function syncCreditsFromServer() {
-        const token = getSessionToken();
-        if (!token) return;
-        try {
-          const resp = await fetch('/api/credits', { headers: { 'Authorization': 'Bearer ' + token } });
-          if (resp.ok) {
-            const data = await resp.json();
-            state.credits = data.credits;
-            updateCredits();
-          }
-        } catch (e) {
-          console.warn('Could not sync credits from server, using local default.', e);
-        }
+        const snapshot = await window.TacticalCredits.sync({ force: true });
+        state.credits = snapshot.credits;
+        state.authenticated = snapshot.authenticated;
+        updateCredits();
       }
+
+      window.addEventListener('tw-credits-changed', (event) => {
+        state.credits = event.detail && event.detail.authenticated ? Number(event.detail.credits || 0) : 0;
+        updateCredits();
+      });
 
       const gameSelect = document.getElementById('gameSelect');
       const promptInput = document.getElementById('promptInput');
@@ -366,23 +353,18 @@
         ].join('\n');
       }
 
-      async function generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette, cost) {
-        const session = getSessionToken();
-        try {
-          const response = await fetch('/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ game, style: styleTag, severity, quality, hardware, palette, prompt, presetName, session, cost })
-          });
-          const data = await response.json();
-          if (!response.ok) {
-            throw new Error(data.error || 'Generation failed.');
-          }
-          return data.preset_ini;
-        } catch (error) {
-          console.warn('Groq preset generation failed, falling back to local preset builder.', error);
-          return buildPresetContent(prompt, presetName, game, styleTag, severity, quality, hardware, palette);
-        }
+      async function generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette) {
+        const token = getSessionToken();
+        if (!token) throw new Error('Verified sign-in required.');
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+          body: JSON.stringify({ game, style: styleTag, severity, quality, hardware, palette, prompt, presetName })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Generation failed.');
+        window.TacticalCredits.acceptServerBalance(data);
+        return data;
       }
 
       function buildReadme(presetName, game, styleTag, severity, prompt, quality, hardware, palette) {
@@ -420,9 +402,14 @@
           statusCard.textContent = 'Enter a prompt so the generator can build a package.';
           return;
         }
-        if (state.credits < 6) {
-          statusCard.textContent = 'You need at least 6 credits to start generation.';
-          log('Insufficient credits. Minimum 6 credits required.', 'system');
+        if (!state.authenticated || !getSessionToken()) {
+          statusCard.textContent = 'Sign in with Google before generating.';
+          openLogin();
+          return;
+        }
+        if (state.credits < 1) {
+          statusCard.textContent = 'You need 1 credit to generate a package.';
+          log('No credits available. Your next daily credit is added automatically.', 'system');
           return;
         }
 
@@ -450,25 +437,20 @@
           clearInterval(interval);
           const elapsedMs = performance.now() - startTime;
           const elapsedSec = Math.ceil(elapsedMs / 1000);
-          const cost = Math.max(6, elapsedSec * 6);
-
-          if (state.credits < cost) {
-            statusCard.textContent = 'Generation took ' + elapsedSec + 's costing ' + cost + ' credits, but you only have ' + state.credits + '.';
-            log('Not enough credits to complete this generation.', 'system');
+          let modelResult;
+          try {
+            modelResult = await generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette);
+          } catch (error) {
+            clearInterval(interval);
+            progressFill.style.width = '0%';
+            statusLine.textContent = 'Generation stopped.';
+            statusCard.textContent = error.message || 'Generation failed.';
+            log(statusCard.textContent, 'system');
             generateBtn.disabled = false;
+            await syncCreditsFromServer();
             return;
           }
-
-          state.credits -= cost;
-          updateCredits();
-          persistCredits();
-
-          try {
-            const used = Number(localStorage.getItem('tactical-web-credits-used') || '0') + cost;
-            localStorage.setItem('tactical-web-credits-used', String(used));
-          } catch (e) {}
-
-          const presetContent = await generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette, cost);
+          const presetContent = modelResult.preset_ini;
           const readmeContent = buildReadme(presetName, game, styleTag, severity, prompt, quality, hardware, palette);
           const manifestContent = buildManifest(presetName, game, styleTag, severity, prompt, quality, hardware, palette);
 
@@ -505,8 +487,8 @@
 
           progressFill.style.width = '100%';
           statusLine.textContent = 'Package complete.';
-          statusCard.textContent = 'Package ready. ' + state.credits + ' credits remain (' + elapsedSec + 's x 6 credits/s = ' + cost + ' used).';
-          log('Export bundle generated in ' + elapsedSec + 's using ' + cost + ' credits (6 credits/s).', 'success');
+          statusCard.textContent = 'Package ready. ' + state.credits + ' credits remain.';
+          log('Export bundle generated in ' + elapsedSec + 's using 1 credit.', 'success');
           downloadBtn.disabled = false;
           generateBtn.disabled = false;
         }, 7000);
@@ -547,7 +529,7 @@
           updateCredits();
           log('Google authentication complete for ' + session.email + '.', 'success');
           closeLogin();
-          syncCreditsFromServer();
+          await syncCreditsFromServer();
         } catch (error) {
           showGoogleSetupError(error.message || 'Google sign-in could not be completed. Please try again.');
         } finally {
@@ -558,6 +540,9 @@
       document.getElementById('logoutBtn').addEventListener('click', function () {
         state.authenticated = false;
         window.TacticalAuth.clearSession();
+        window.TacticalCredits.reset();
+        state.credits = 0;
+        updateCredits();
         authStatus.textContent = 'Anonymous session';
         authInfo.textContent = 'Sign in to unlock generation.';
         statusCard.textContent = 'Sign in again to unlock the generator.';
