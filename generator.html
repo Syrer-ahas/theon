@@ -169,7 +169,7 @@
               <h3>Generation stream</h3>
               <div class="meta-badge">Premium mode</div>
             </div>
-            <div class="credits-pill">Credits remaining: <span id="creditValue">50</span></div>
+            <div class="credits-pill">Credits remaining: <span id="creditValue">0</span></div>
             <div class="console-card">The generator has been tuned for a deliberate, premium pace. It will walk through each layer of your preset instead of rushing the result.</div>
             <div class="console-card" id="statusCard">Waiting for authentication and prompt input.</div>
             <div class="progress"><span id="progressFill"></span></div>
@@ -299,58 +299,6 @@
 
       function escapeFilename(value) {
         return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      }
-
-      function buildPresetContent(prompt, presetName, game, styleTag, severity, quality, hardware, palette) {
-        const lowerPrompt = String(prompt || '').toLowerCase();
-        const techniques = [];
-        const techniqueSettings = [];
-
-        const addTechnique = (shaderName, settingsLines) => {
-          techniques.push(shaderName + '=1');
-          techniqueSettings.push(shaderName + '=', ...settingsLines.map((line) => '  ' + line));
-        };
-
-        if (/(vibrant|neon|pop)/.test(lowerPrompt)) {
-          addTechnique('Colorfulness.fx', ['Colorfulness=1.450000', 'Contrast=1.100000', 'Gamma=1.000000']);
-          addTechnique('Vibrance.fx', ['Vibrance=0.450000', 'VibranceRGBBalance=1.000000,1.000000,1.000000']);
-          addTechnique('MagicBloom.fx', ['Intensity=0.900000', 'Threshold=0.250000']);
-        }
-        if (/(dark|gritty|military)/.test(lowerPrompt)) {
-          addTechnique('Curves.fx', ['Mode=2', 'Formula=4', 'Contrast=1.250000']);
-          addTechnique('Levels.fx', ['BlackPoint=0.120000', 'WhitePoint=0.900000', 'Gamma=1.000000']);
-          addTechnique('FilmicPass.fx', ['Strength=0.850000', 'Contrast=1.050000', 'Saturation=0.800000', 'Bleach=0.300000']);
-        }
-        if (/(sharp|clear|crisp)/.test(lowerPrompt)) {
-          addTechnique('LumaSharpen.fx', ['pattern=1', 'sharp_strength=0.650000', 'sharp_clamp=0.035000']);
-          addTechnique('SMAA.fx', ['EdgeDetectionType=1', 'EdgeDetectionThreshold=0.100000', 'MaxSearchSteps=16']);
-        }
-        if (/(cinematic|movie|dramatic)/.test(lowerPrompt)) {
-          addTechnique('Vignette.fx', ['Type=1', 'Center=0.500000,0.500000', 'Radius=0.650000', 'Slope=2.000000']);
-          addTechnique('ChromaticAberration.fx', ['Shift=1.000000', 'Strength=0.050000']);
-        }
-        if (/(soft|dreamy|foggy)/.test(lowerPrompt)) {
-          addTechnique('MagicBloom.fx', ['Intensity=1.100000', 'Threshold=0.150000']);
-          addTechnique('Colorfulness.fx', ['Colorfulness=0.900000', 'Contrast=0.850000', 'Gamma=1.000000']);
-        }
-        if (/(warm|sunset|gold)/.test(lowerPrompt)) {
-          addTechnique('Sepia.fx', ['Tint=0.980000,0.700000,0.350000', 'Strength=0.180000']);
-        }
-        if (/(cold|blue|frost)/.test(lowerPrompt)) {
-          addTechnique('LiftGammaGain.fx', ['Lift=0.000000,0.030000,0.080000', 'Gamma=0.000000,0.000000,0.000000', 'Gain=0.000000,0.000000,0.040000']);
-        }
-        if (techniques.length === 0) {
-          addTechnique('Colorfulness.fx', ['Colorfulness=1.100000', 'Contrast=1.000000', 'Gamma=1.000000']);
-          addTechnique('FilmicPass.fx', ['Strength=0.750000', 'Contrast=1.000000', 'Saturation=0.900000', 'Bleach=0.150000']);
-          addTechnique('Vignette.fx', ['Type=1', 'Center=0.500000,0.500000', 'Radius=0.600000', 'Slope=2.000000']);
-        }
-
-        return [
-          '[PRESET]', 'Name=' + presetName, 'Game=' + game, 'StyleTag=' + styleTag,
-          'Severity=' + severity, 'Quality=' + quality, 'Hardware=' + hardware, 'Palette=' + palette,
-          'Author=Tactical Web', 'Description=Generated from text prompt', 'Screenshot=', '',
-          '[Techniques]', ...techniques, '', '[TechniqueSettings]', ...techniqueSettings
-        ].join('\n');
       }
 
       async function generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette) {
