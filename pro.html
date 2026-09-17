@@ -20,14 +20,13 @@
     .plan::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 85% 5%, rgba(192,132,252,.11), transparent 34%); }
     .plan:hover { transform: translateY(-5px); border-color: rgba(192,132,252,.42); box-shadow: 0 25px 60px rgba(0,0,0,.34); }
     .plan.featured { border-color: rgba(192,132,252,.62); background: linear-gradient(150deg, rgba(107,57,151,.46), rgba(38,18,65,.86)); box-shadow: 0 24px 65px rgba(68,25,115,.4), inset 0 1px 0 rgba(255,255,255,.08); }
-    .badge-pop { position: absolute; right: 14px; top: 14px; z-index: 2; border-radius: 999px; padding: 4px 8px; background: linear-gradient(135deg,#c084fc,#7c3aed); color:#fff; font-size:.56rem; font-weight:800; letter-spacing:.055em; box-shadow:0 6px 16px rgba(124,58,237,.3); }
+    .badge-pop { position:relative; z-index:2; align-self:center; margin:-10px auto 17px; border-radius:999px; padding:7px 15px; background:linear-gradient(135deg,#c084fc,#7c3aed); color:#fff; font-size:.65rem; font-weight:800; letter-spacing:.065em; box-shadow:0 7px 18px rgba(124,58,237,.3); }
     .plan-audience { margin: 0 0 8px; color: #bba8db; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
     .plan h2 { position: relative; z-index: 1; font-size: 1.38rem; }
     .plan-description { min-height: 42px; margin: 8px 0 0; color: #bfaedb; font-size: .82rem; line-height: 1.5; }
     .price-row { display: flex; align-items: flex-end; gap: 8px; margin: 20px 0 5px; }
     .price { font-family:'Montserrat',sans-serif; font-weight:800; font-size:2.35rem; line-height: 1; letter-spacing: -.04em; }
     .price small { font-family:'Inter',sans-serif; font-weight:600; font-size:.78rem; color:var(--muted); letter-spacing: 0; }
-    .quota { display: inline-flex; width: fit-content; margin-top: 8px; padding: 6px 9px; border-radius: 9px; background: rgba(192,132,252,.1); color: #e7d7ff; font-size: .72rem; font-weight: 700; }
     .feature-label { margin-top: 20px; padding-top: 17px; border-top: 1px solid rgba(192,132,252,.14); color: #f5edff; font-size: .76rem; font-weight: 700; }
     .plan ul { padding:0; margin:13px 0 24px; list-style:none; display:grid; gap:10px; flex:1; }
     .plan li { color:#ddd2ee; font-size:.82rem; line-height:1.45; padding-left:22px; position:relative; }
@@ -65,7 +64,6 @@
           <h2>Tactical PRO</h2>
           <p class="plan-description">The essentials for building and refining presets regularly.</p>
           <div class="price-row"><div class="price" data-price="6.99">$6.99 <small>/ month</small></div></div>
-          <span class="quota">50 generations per month</span>
           <div class="feature-label">Included with PRO</div>
           <ul><li>Enhanced generation quality</li><li>Faster generation queue</li><li>4K optimization tools</li><li>Advanced customization controls</li></ul>
           <button class="btn btn-quiet" data-plan="Tactical PRO" type="button">Choose PRO</button>
@@ -77,7 +75,6 @@
           <h2>Tactical Premium</h2>
           <p class="plan-description">More capacity, curated presets, and help when you need it.</p>
           <div class="price-row"><div class="price" data-price="9.99">$9.99 <small>/ month</small></div></div>
-          <span class="quota">80 generations per month</span>
           <div class="feature-label">Everything in PRO, plus</div>
           <ul><li>Priority support</li><li>Monthly handcrafted preset collection</li><li>Increased monthly generation capacity</li></ul>
           <button class="btn btn-primary" data-plan="Tactical Premium" type="button">Choose Premium</button>
@@ -88,7 +85,6 @@
           <h2>Tactical Enterprise</h2>
           <p class="plan-description">Maximum performance and support for demanding workflows.</p>
           <div class="price-row"><div class="price" data-price="49.99">$49.99 <small>/ month</small></div></div>
-          <span class="quota">100 generations per month</span>
           <div class="feature-label">Everything in Premium, plus</div>
           <ul><li>Access to the strongest AI model</li><li>Fastest generation queue</li><li>One-click preset execution</li><li>Early Tactical Lumen Engine access</li><li>24/7 priority support</li><li>Weekly professional presets</li></ul>
           <button class="btn btn-quiet" data-plan="Tactical Enterprise" type="button">Choose Enterprise</button>
