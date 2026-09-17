@@ -32,6 +32,18 @@
     }
   });
 
+  function ensureCreditSystem() {
+    if (window.TacticalCredits || document.querySelector('script[data-tactical-credits]')) return;
+    const script = document.createElement('script');
+    script.src = 'credit-system.js';
+    script.dataset.tacticalCredits = '';
+    script.addEventListener('load', () => {
+      renderUser();
+      if (window.TacticalCredits) window.TacticalCredits.sync();
+    });
+    document.head.appendChild(script);
+  }
+
   function ensurePageLoader() {
     let loader = document.getElementById('tacticalPageLoader');
     if (loader) return loader;
@@ -251,28 +263,17 @@
         avatarEl.style.backgroundImage = '';
         avatarEl.textContent = displayName.trim().charAt(0).toUpperCase() || '?';
       }
-      let credits = null;
-      try {
-        const stored = localStorage.getItem('tactical-web-credits');
-        if (stored !== null && stored !== '') {
-          const n = Number(stored);
-          if (!Number.isNaN(n) && n >= 0) credits = n;
-        }
-      } catch (_) {}
-      if (credits == null && session.credits != null) credits = Number(session.credits);
-      if (credits != null) {
-        creditValue.textContent = Number(credits).toLocaleString(undefined, { maximumFractionDigits: 2 });
-        creditsChip.hidden = false;
-      } else {
-        creditsChip.hidden = true;
-      }
+      const snapshot = window.TacticalCredits ? window.TacticalCredits.getSnapshot() : { credits: 0 };
+      creditValue.textContent = Number(snapshot.credits || 0).toLocaleString();
+      creditsChip.hidden = false;
     } else {
       card.classList.add('signed-out');
       nameEl.textContent = 'Not signed in';
       statusEl.textContent = 'Sign in';
       avatarEl.style.backgroundImage = '';
       avatarEl.textContent = '?';
-      creditsChip.hidden = true;
+      creditValue.textContent = '0';
+      creditsChip.hidden = false;
     }
   }
 
@@ -387,6 +388,7 @@
   // ---- Boot --------------------------------------------------------------
   function boot() {
     document.body.classList.add('tw-body');
+    ensureCreditSystem();
     if (!document.querySelector('.tw-page')) {
       const page = document.createElement('div');
       page.className = 'tw-page';
@@ -400,7 +402,7 @@
 
     document.addEventListener('tactical-auth-changed', renderUser);
     window.addEventListener('storage', (e) => {
-      if (e.key === 'tactical-web-google-session' || e.key === 'tactical-web-credits') renderUser();
+      if (e.key === 'tactical-web-google-session') renderUser();
     });
     const topbar = document.querySelector('.tw-topbar');
     if (topbar && window.MutationObserver) {
