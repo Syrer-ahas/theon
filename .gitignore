@@ -23,3 +23,8 @@ COHERE_API_KEY
 MISTRAL_API_KEY
 HUGGINGFACEHUB_API_TOKEN
 OPENROUTER_API_KEY
+
+# Local browser visual-test artifacts
+.edge-headless*/
+homepage-after.png
+homepage-mobile*.png
