@@ -143,17 +143,14 @@ export async function verifyGoogleJWT(token) {
 }
 
 /**
- * Extract the session token from the Authorization header (preferred) or request body.
+ * Extract the session token exclusively from the Authorization header.
+ * Credit-bearing requests never trust credentials supplied in request bodies.
  */
 export function extractSessionToken(request) {
   const authHeader = request.headers?.authorization || '';
   if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
     const token = authHeader.slice(7).trim();
     if (token) return token;
-  }
-  // Legacy fallback: allow session in body.
-  if (request.body && typeof request.body?.session === 'string' && request.body.session.trim()) {
-    return request.body.session.trim();
   }
   return null;
 }
