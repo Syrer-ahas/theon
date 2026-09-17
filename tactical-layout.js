@@ -10,6 +10,27 @@
   const TRANSITION_STYLE_ID = 'tactical-page-transition-style';
   const PAGE_LOAD_DELAY = 300;
   let navigationPending = false;
+  let serviceErrorPending = false;
+
+  function showServiceError() {
+    if (serviceErrorPending || /(?:^|\/)503\.html$/i.test(window.location.pathname)) return;
+    serviceErrorPending = true;
+    window.location.replace(new URL('503.html', document.baseURI).href);
+  }
+
+  window.TacticalServiceError = Object.freeze({ show: showServiceError });
+  window.addEventListener('error', (event) => {
+    if (event.error && !event.defaultPrevented) {
+      console.error('[Tactical Web] Unhandled service error:', event.error);
+      showServiceError();
+    }
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    if (!event.defaultPrevented) {
+      console.error('[Tactical Web] Unhandled service rejection:', event.reason);
+      showServiceError();
+    }
+  });
 
   function ensurePageLoader() {
     let loader = document.getElementById('tacticalPageLoader');
