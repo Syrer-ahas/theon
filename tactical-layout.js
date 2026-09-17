@@ -8,6 +8,31 @@
 // ==========================================================================
 (function () {
   const TRANSITION_STYLE_ID = 'tactical-page-transition-style';
+  const PAGE_LOAD_DELAY = 420;
+
+  function ensurePageLoader() {
+    let loader = document.getElementById('tacticalPageLoader');
+    if (loader) return loader;
+    loader = document.createElement('div');
+    loader.className = 'tw-page-loader';
+    loader.id = 'tacticalPageLoader';
+    loader.setAttribute('aria-hidden', 'true');
+    loader.innerHTML = `
+      <div class="tw-loader-mark" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="tw-loader-label">Loading</div>`;
+    document.body.appendChild(loader);
+    return loader;
+  }
+
+  function navigateWithLoader(href) {
+    const loader = ensurePageLoader();
+    loader.classList.add('show');
+    loader.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('tactical-page-exit');
+    window.setTimeout(() => { window.location.href = href; }, PAGE_LOAD_DELAY);
+  }
 
   function installPageTransitions() {
     if (!document.getElementById(TRANSITION_STYLE_ID)) {
@@ -15,9 +40,31 @@
       style.id = TRANSITION_STYLE_ID;
       style.textContent = `
         @keyframes tactical-page-exit { from { opacity: 1; } to { opacity: 0; } }
-        body.tactical-page-exit > * { animation: tactical-page-exit .18s ease-in both; }
+        @keyframes tactical-loader-spin { to { transform: rotate(360deg); } }
+        @keyframes tactical-loader-pulse { 0%, 100% { opacity: .42; transform: scale(.82); } 50% { opacity: 1; transform: scale(1); } }
+        body.tactical-page-exit > *:not(.tw-page-loader) { animation: tactical-page-exit .2s ease-in both; }
+        .tw-page-loader {
+          position: fixed; inset: 0; z-index: 30000; display: flex; flex-direction: column;
+          align-items: center; justify-content: center; gap: 16px; pointer-events: none;
+          opacity: 0; visibility: hidden; background: rgba(16, 7, 30, .72);
+          backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+          transition: opacity .2s ease, visibility .2s ease;
+        }
+        .tw-page-loader.show { opacity: 1; visibility: visible; }
+        .tw-loader-mark {
+          position: relative; width: 66px; height: 66px; border-radius: 50%;
+          border: 2px solid rgba(192, 132, 252, .2);
+          border-top-color: #d8b4fe; border-right-color: #8b5cf6;
+          box-shadow: 0 0 34px rgba(168, 85, 247, .3);
+          animation: tactical-loader-spin .8s linear infinite;
+        }
+        .tw-loader-mark span { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #e9d5ff; box-shadow: 0 0 14px #a855f7; }
+        .tw-loader-mark span:nth-child(1) { top: 10px; left: 12px; }
+        .tw-loader-mark span:nth-child(2) { right: 9px; top: 27px; animation: tactical-loader-pulse .8s ease-in-out infinite .15s; }
+        .tw-loader-mark span:nth-child(3) { bottom: 9px; left: 23px; animation: tactical-loader-pulse .8s ease-in-out infinite .3s; }
+        .tw-loader-label { color: #eadcff; font: 700 .72rem/1 'Inter', sans-serif; letter-spacing: .2em; text-transform: uppercase; }
         @media (prefers-reduced-motion: reduce) {
-          body.tactical-page-exit > * { animation: none; }
+          body.tactical-page-exit > *:not(.tw-page-loader), .tw-loader-mark, .tw-loader-mark span { animation: none; }
         }
       `;
       document.head.appendChild(style);
@@ -28,9 +75,21 @@
       const link = event.target.closest && event.target.closest('a[href]');
       if (!link || link.target === '_blank' || link.hasAttribute('download')) return;
       const destination = new URL(link.href, window.location.href);
+      if (!/^https?:$/.test(destination.protocol) && destination.protocol !== 'file:') return;
       if (destination.origin !== window.location.origin || destination.pathname === window.location.pathname && destination.hash) return;
-      document.body.classList.add('tactical-page-exit');
+      if (destination.pathname.endsWith('/account.html') && !getSession()) return;
+      event.preventDefault();
+      navigateWithLoader(destination.href);
     }, true);
+
+    window.addEventListener('pageshow', () => {
+      document.body.classList.remove('tactical-page-exit');
+      const loader = document.getElementById('tacticalPageLoader');
+      if (loader) {
+        loader.classList.remove('show');
+        loader.setAttribute('aria-hidden', 'true');
+      }
+    });
   }
 
   installPageTransitions();
@@ -49,6 +108,7 @@
   const activePage = (document.body.dataset.page || '').trim();
 
   window.TacticalAuth = window.TacticalAuth || {};
+  window.TacticalPageLoader = { navigate: navigateWithLoader };
 
   // ---- Build sidebar -----------------------------------------------------
   function navLinksHtml() {
@@ -59,9 +119,6 @@
   }
 
   function injectSidebar() {
-    // The landing page is intentionally full-width. App pages keep the
-    // persistent sidebar, while the homepage uses a lightweight top nav.
-    if (activePage === 'home') return;
     if (document.querySelector('.tw-sidebar')) return;
     const aside = document.createElement('aside');
     aside.className = 'tw-sidebar';
@@ -112,26 +169,6 @@
     const topbar = document.querySelector('.tw-topbar');
     if (!topbar) return;
 
-    if (activePage === 'home') {
-      topbar.classList.add('tw-topbar-home');
-      topbar.innerHTML = `
-        <a class="home-brand" href="index.html" aria-label="Tactical Web home">
-          <img src="images/logo.png" alt="" />
-          <span>Tactical Web</span>
-        </a>
-        <nav class="home-nav-links" aria-label="Primary navigation">
-          <a href="generator.html">Generator</a>
-          <a href="blog.html">Blog</a>
-          <a href="pro.html">Get Pro</a>
-          <a href="affiliate.html">Affiliate</a>
-        </nav>
-        <div class="home-nav-actions" data-site-nav>
-          <a class="home-account-link" href="account.html">Account</a>
-          <a class="btn btn-primary" href="generator.html">Start building</a>
-        </div>`;
-      return;
-    }
-
     const nav = document.createElement('div');
     nav.className = 'nav-actions';
     nav.dataset.siteNav = '';
@@ -153,7 +190,7 @@
       up.className = 'upgrade-btn';
       up.type = 'button';
       up.innerHTML = '<span>UPGRADE</span>';
-      up.addEventListener('click', () => { window.location.href = 'pro.html'; });
+      up.addEventListener('click', () => { navigateWithLoader('pro.html'); });
       topbar.appendChild(up);
     }
   }
@@ -245,7 +282,7 @@
     dismiss.addEventListener('click', closeModal);
     signInBtn.addEventListener('click', async () => {
       if (!window.TacticalSignIn || !window.TacticalSignIn.signInWithGoogle) {
-        window.location.href = 'account.html';
+        navigateWithLoader('account.html');
         return;
       }
       signInBtn.disabled = true;
@@ -254,7 +291,7 @@
       try {
         await window.TacticalSignIn.signInWithGoogle();
         closeModal();
-        window.location.href = 'account.html';
+        navigateWithLoader('account.html');
       } catch (err) {
         signInBtn.disabled = false;
         signInBtn.textContent = original;
@@ -317,7 +354,6 @@
   // ---- Boot --------------------------------------------------------------
   function boot() {
     document.body.classList.add('tw-body');
-    if (activePage === 'home') document.body.classList.add('tw-home');
     if (!document.querySelector('.tw-page')) {
       const page = document.createElement('div');
       page.className = 'tw-page';
