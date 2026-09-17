@@ -127,7 +127,7 @@ Output ONLY the JSON object with preset_ini and shader_fx strings. No explanatio
         creditsRemaining = await refundGenerationCredit(user.sub);
         creditReserved = false;
       }
-      return response.status(502).json({ error: 'Preset generation failed.' });
+      return response.status(502).json({ error: 'Preset generation failed.', creditsRemaining });
     }
 
     const text = data?.choices?.[0]?.message?.content || '';
@@ -171,6 +171,6 @@ Output ONLY the JSON object with preset_ini and shader_fx strings. No explanatio
         console.error('Credit refund error:', refundError);
       }
     }
-    return response.status(500).json({ error: 'Something went wrong during generation.' });
+    return response.status(500).json({ error: 'Something went wrong during generation.', creditsRemaining });
   }
 }
