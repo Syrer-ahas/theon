@@ -11,6 +11,7 @@
     <script src="auth-config.js"></script>
     <script src="auth-session.js"></script>
     <script src="auth-google.js"></script>
+    <script src="credit-system.js"></script>
     <script src="https://accounts.google.com/gsi/client" async></script>
     <style>
       :root {
@@ -236,7 +237,7 @@
         <div class="stat-row">
           <div class="stat-card"><span class="num accent" id="sUsers">0</span><span class="lbl">Users</span></div>
           <div class="stat-card"><span class="num blue" id="sPresets">0</span><span class="lbl">Presets</span></div>
-          <div class="stat-card"><span class="num green" id="sCredits">0</span><span class="lbl">Credits Used</span></div>
+          <div class="stat-card"><span class="num green" id="sCredits">0</span><span class="lbl">Credits Available</span></div>
           <div class="stat-card"><span class="num warn" id="sVisits">0</span><span class="lbl">Page Visits</span></div>
           <div class="stat-card"><span class="num" id="sNewsletter">0</span><span class="lbl">Newsletter</span></div>
           <div class="stat-card"><span class="num green" id="sAffiliates">0</span><span class="lbl">Affiliates</span></div>
@@ -333,10 +334,6 @@
               <div style="display:flex; gap:8px; align-items:center;">
                 <span class="small muted" style="min-width:100px;">Preset count:</span>
                 <input type="number" id="editPresetCount" style="flex:1; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:rgba(7,11,22,.6); color:var(--text); font:inherit; font-size:.82rem;">
-              </div>
-              <div style="display:flex; gap:8px; align-items:center;">
-                <span class="small muted" style="min-width:100px;">Credits used:</span>
-                <input type="number" id="editCreditsUsed" style="flex:1; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:rgba(7,11,22,.6); color:var(--text); font:inherit; font-size:.82rem;">
               </div>
               <button class="btn btn-purple btn-sm" id="applyEditsBtn" type="button">Apply Changes</button>
             </div>
@@ -476,7 +473,7 @@
 
           // ---- Primary Stats (REAL localStorage data only) ----
           const presetCount = LSN('tactical-web-preset-count', 0);
-          const creditsUsed = LSN('tactical-web-credits-used', 0);
+          const creditsAvailable = window.TacticalCredits.getSnapshot().credits;
           const visitCount = LSN('tactical-web-visit-count', 0);
           const isSubscribed = LS('tactical-web-newsletter-subscribed') === 'true';
           const referrals = LSN('tactical-web-affiliate-referrals', 0);
@@ -485,7 +482,7 @@
           // Users: only the admin is a registered user we can verify
           $('sUsers').textContent = '1'; // Only the admin account can be confirmed
           $('sPresets').textContent = presetCount;
-          $('sCredits').textContent = creditsUsed;
+          $('sCredits').textContent = creditsAvailable;
           $('sVisits').textContent = visitCount;
           $('sNewsletter').textContent = isSubscribed ? '1' : '0';
           $('sAffiliates').textContent = referrals;
@@ -533,7 +530,6 @@
 
           // ---- Edit fields ----
           $('editPresetCount').value = presetCount;
-          $('editCreditsUsed').value = creditsUsed;
 
           // ---- Timestamp ----
           $('lastRefresh').textContent = 'updated ' + new Date().toLocaleTimeString();
@@ -616,11 +612,9 @@
         // ===== Apply edits =====
         $('applyEditsBtn').addEventListener('click', function() {
           const pc = parseInt($('editPresetCount').value);
-          const cu = parseInt($('editCreditsUsed').value);
           if (!isNaN(pc) && pc >= 0) localStorage.setItem('tactical-web-preset-count', String(pc));
-          if (!isNaN(cu) && cu >= 0) localStorage.setItem('tactical-web-credits-used', String(cu));
           refreshAll();
-          toast('Preset count and credits updated.');
+          toast('Preset count updated.');
         });
 
         // ===== Log activity =====
@@ -650,10 +644,6 @@
           const pc = LSN('tactical-web-preset-count', 0) + 1;
           localStorage.setItem('tactical-web-preset-count', String(pc));
 
-          // Bump credits
-          const cr = LSN('tactical-web-credits-used', 0) + Math.floor(Math.random() * 15) + 5;
-          localStorage.setItem('tactical-web-credits-used', String(cr));
-
           // Log activity
           const log = LSJ('tactical-web-activity-log', []);
           if (Array.isArray(log)) {
@@ -666,7 +656,7 @@
           }
 
           refreshAll();
-          $('simStatus').textContent = 'Simulated: "' + game + '" — +1 preset, +' + cr + ' credits';
+          $('simStatus').textContent = 'Simulated: "' + game + '" — +1 preset. Credits were not changed.';
           toast('Simulated generation for ' + game);
         });
 
@@ -691,6 +681,7 @@
         });
 
         // ===== Init =====
+        window.addEventListener('tw-credits-changed', refreshAll);
         refreshAll();
         runHealthChecks();
         $('dashboardStatus').textContent = 'Dashboard ready — showing real data from browser localStorage. No fake data.';
