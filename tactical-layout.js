@@ -109,7 +109,7 @@
     { key: 'account', label: 'Account', href: 'account.html' }
   ];
 
-  const LOCK_SVG = '<svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>';
+  const LOCK_SVG = '<img src="images/lock.svg" alt="" />';
 
   const activePage = (document.body.dataset.page || '').trim();
 
@@ -274,6 +274,7 @@
         <div class="ns-icon" aria-hidden="true">${LOCK_SVG}</div>
         <h2 class="ns-title" id="nsTitle">NOT SIGNED IN!</h2>
         <p class="ns-text">You need an account to view this page. Sign in with Google to continue.</p>
+        <p class="ns-auth-error" id="nsAuthError" role="alert" hidden></p>
         <div class="ns-actions">
           <button class="ns-btn ns-btn-primary" id="nsSignInBtn" type="button">Sign in with Google</button>
           <button class="ns-btn ns-btn-ghost" id="nsDismissBtn" type="button">Maybe later</button>
@@ -285,6 +286,7 @@
 
     const dismiss = modal.querySelector('#nsDismissBtn');
     const signInBtn = modal.querySelector('#nsSignInBtn');
+    const authError = modal.querySelector('#nsAuthError');
     dismiss.addEventListener('click', closeModal);
     signInBtn.addEventListener('click', async () => {
       if (!window.TacticalSignIn || !window.TacticalSignIn.signInWithGoogle) {
@@ -292,6 +294,8 @@
         return;
       }
       signInBtn.disabled = true;
+      authError.hidden = true;
+      authError.textContent = '';
       const original = signInBtn.textContent;
       signInBtn.textContent = 'Signing in...';
       try {
@@ -301,6 +305,8 @@
       } catch (err) {
         signInBtn.disabled = false;
         signInBtn.textContent = original;
+        authError.textContent = err && err.message ? err.message : 'Google sign-in could not be completed. Please try again.';
+        authError.hidden = false;
         console.warn('Sign-in failed:', err && err.message ? err.message : err);
       }
     });

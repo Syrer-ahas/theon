@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="body" x1="24" y1="47" x2="106" y2="112" gradientUnits="userSpaceOnUse"><stop stop-color="#FFE861"/><stop offset=".5" stop-color="#FFC400"/><stop offset="1" stop-color="#E89B00"/></linearGradient>
+    <linearGradient id="metal" x1="42" y1="9" x2="91" y2="57" gradientUnits="userSpaceOnUse"><stop stop-color="#F6F8FF"/><stop offset=".38" stop-color="#9AA3B5"/><stop offset=".68" stop-color="#E3E8F2"/><stop offset="1" stop-color="#6E7788"/></linearGradient>
+    <linearGradient id="key" x1="56" y1="70" x2="76" y2="101" gradientUnits="userSpaceOnUse"><stop stop-color="#343747"/><stop offset="1" stop-color="#11131B"/></linearGradient>
+    <filter id="shadow" x="8" y="4" width="112" height="122" filterUnits="userSpaceOnUse"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#160820" flood-opacity=".5"/></filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M37 51V38C37 21.43 49.98 8 66 8s29 13.43 29 30v17H82V38c0-9.28-7.16-16.8-16-16.8S50 28.72 50 38v13H37Z" fill="url(#metal)" stroke="#70798B" stroke-width="2"/>
+    <rect x="17" y="47" width="94" height="72" rx="16" fill="url(#body)" stroke="#FFD83D" stroke-width="2"/>
+    <path d="M66 67c-7.18 0-13 5.82-13 13 0 4.63 2.42 8.69 6.07 10.99L56 105h20l-3.07-14.01A12.98 12.98 0 0 0 79 80c0-7.18-5.82-13-13-13Z" fill="url(#key)" stroke="#454957" stroke-width="2"/>
+    <path d="M27 59c14-7 51-8 73-1" stroke="white" stroke-opacity=".42" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>
