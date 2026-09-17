@@ -8,7 +8,7 @@
 // ==========================================================================
 (function () {
   const TRANSITION_STYLE_ID = 'tactical-page-transition-style';
-  const PAGE_LOAD_DELAY = 420;
+  const PAGE_LOAD_DELAY = 300;
 
   function ensurePageLoader() {
     let loader = document.getElementById('tacticalPageLoader');
@@ -17,11 +17,13 @@
     loader.className = 'tw-page-loader';
     loader.id = 'tacticalPageLoader';
     loader.setAttribute('aria-hidden', 'true');
+    loader.setAttribute('role', 'status');
+    loader.setAttribute('aria-live', 'polite');
     loader.innerHTML = `
-      <div class="tw-loader-mark" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </div>
-      <div class="tw-loader-label">Loading</div>`;
+      <div class="tw-loader-card">
+        <span class="tw-loader-spinner" aria-hidden="true"></span>
+        <span class="tw-loader-label">Loading page…</span>
+      </div>`;
     document.body.appendChild(loader);
     return loader;
   }
@@ -41,30 +43,30 @@
       style.textContent = `
         @keyframes tactical-page-exit { from { opacity: 1; } to { opacity: 0; } }
         @keyframes tactical-loader-spin { to { transform: rotate(360deg); } }
-        @keyframes tactical-loader-pulse { 0%, 100% { opacity: .42; transform: scale(.82); } 50% { opacity: 1; transform: scale(1); } }
         body.tactical-page-exit > *:not(.tw-page-loader) { animation: tactical-page-exit .2s ease-in both; }
         .tw-page-loader {
-          position: fixed; inset: 0; z-index: 30000; display: flex; flex-direction: column;
-          align-items: center; justify-content: center; gap: 16px; pointer-events: none;
-          opacity: 0; visibility: hidden; background: rgba(16, 7, 30, .72);
-          backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-          transition: opacity .2s ease, visibility .2s ease;
+          position: fixed; inset: 0; z-index: 30000; display: grid; place-items: center;
+          pointer-events: none; opacity: 0; visibility: hidden;
+          background: rgba(16, 7, 30, .56);
+          backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+          transition: opacity .16s ease, visibility .16s ease;
         }
         .tw-page-loader.show { opacity: 1; visibility: visible; }
-        .tw-loader-mark {
-          position: relative; width: 66px; height: 66px; border-radius: 50%;
-          border: 2px solid rgba(192, 132, 252, .2);
-          border-top-color: #d8b4fe; border-right-color: #8b5cf6;
-          box-shadow: 0 0 34px rgba(168, 85, 247, .3);
-          animation: tactical-loader-spin .8s linear infinite;
+        .tw-loader-card {
+          display: inline-flex; align-items: center; gap: 12px;
+          padding: 14px 18px; border-radius: 16px;
+          color: #f5edff; background: rgba(35, 18, 56, .94);
+          border: 1px solid rgba(192, 132, 252, .3);
+          box-shadow: 0 16px 42px rgba(0, 0, 0, .34);
         }
-        .tw-loader-mark span { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #e9d5ff; box-shadow: 0 0 14px #a855f7; }
-        .tw-loader-mark span:nth-child(1) { top: 10px; left: 12px; }
-        .tw-loader-mark span:nth-child(2) { right: 9px; top: 27px; animation: tactical-loader-pulse .8s ease-in-out infinite .15s; }
-        .tw-loader-mark span:nth-child(3) { bottom: 9px; left: 23px; animation: tactical-loader-pulse .8s ease-in-out infinite .3s; }
-        .tw-loader-label { color: #eadcff; font: 700 .72rem/1 'Inter', sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+        .tw-loader-spinner {
+          width: 20px; height: 20px; flex: 0 0 auto; border-radius: 50%;
+          border: 2px solid rgba(216, 180, 254, .25); border-top-color: #d8b4fe;
+          animation: tactical-loader-spin .7s linear infinite;
+        }
+        .tw-loader-label { font: 600 .88rem/1.2 'Inter', sans-serif; }
         @media (prefers-reduced-motion: reduce) {
-          body.tactical-page-exit > *:not(.tw-page-loader), .tw-loader-mark, .tw-loader-mark span { animation: none; }
+          body.tactical-page-exit > *:not(.tw-page-loader), .tw-loader-spinner { animation: none; }
         }
       `;
       document.head.appendChild(style);
