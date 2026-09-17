@@ -21,6 +21,10 @@
       .gen-head h1 { font-size: clamp(2rem, 4vw, 2.9rem); line-height: 1.08; margin: 14px 0 12px; }
       .gen-head p { max-width: 720px; }
       .gen-grid { display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 22px; align-items: start; }
+      .generator-card { display: grid; gap: 22px; max-width: 880px; margin: 0 auto; }
+      .generator-tools { display: flex; align-items: stretch; gap: 12px; }
+      .generator-tools .auth-card { flex: 1; }
+      .generator-tools > .btn { flex: 0 0 auto; min-width: 190px; }
       .gen-grid h3 { font-size: 1.05rem; margin: 0; }
       .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px; }
       .meta-badge { padding: 7px 12px; border-radius: 999px; background: rgba(80, 212, 255, 0.12); border: 1px solid rgba(80, 212, 255, 0.24); color: #9fe2ff; font-size: 0.78rem; font-weight: 700; }
@@ -29,10 +33,12 @@
       .auth-card { padding: 16px 18px; border-radius: 18px; background: var(--surface); border: 1px solid rgba(168, 85, 247, 0.18); }
       .auth-state { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
       .auth-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-      .hero-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-      .metric { padding: 14px; border-radius: 16px; background: var(--surface); border: 1px solid rgba(168, 85, 247, 0.16); }
-      .metric strong { display: block; font-size: 1.2rem; color: #e9d5ff; }
-      .metric span { color: var(--muted); font-size: 0.85rem; }
+      .advanced-options { border: 1px solid rgba(168, 85, 247, 0.18); border-radius: 16px; background: rgba(168, 85, 247, 0.05); overflow: hidden; }
+      .advanced-options summary { padding: 13px 15px; color: #e9d5ff; font-size: .86rem; font-weight: 700; cursor: pointer; list-style: none; }
+      .advanced-options summary::-webkit-details-marker { display: none; }
+      .advanced-options summary::after { content: '+'; float: right; color: #c084fc; font-size: 1rem; }
+      .advanced-options[open] summary::after { content: '\2212'; }
+      .advanced-fields { display: grid; gap: 12px; padding: 0 15px 15px; }
       .console-card { padding: 16px 18px; border-radius: 16px; background: var(--surface); border: 1px solid rgba(168, 85, 247, 0.14); color: #edf2ff; line-height: 1.6; }
       .console-card.success { border-color: rgba(79, 230, 162, 0.35); background: rgba(79, 230, 162, 0.08); }
       .progress { height: 10px; border-radius: 999px; overflow: hidden; background: rgba(168, 85, 247, 0.12); }
@@ -50,7 +56,8 @@
       @media (max-width: 980px) {
         .gen-grid { grid-template-columns: 1fr; }
         .row2 { grid-template-columns: 1fr; }
-        .hero-metrics { grid-template-columns: 1fr; }
+        .generator-tools { flex-direction: column; }
+        .generator-tools > .btn { width: 100%; }
       }
     </style>
     <link rel="stylesheet" href="newsletter-popup.css" />
@@ -65,8 +72,8 @@
           <p class="muted">Every preset is assembled in layers: prompt analysis, style selection, shader planning, and a polished ZIP bundle.</p>
         </div>
 
-        <section class="panel panel-pad gen-grid">
-          <div class="stack">
+        <section class="panel panel-pad generator-card">
+          <div class="generator-tools">
             <div class="auth-card">
               <div class="auth-state">
                 <div>
@@ -79,17 +86,12 @@
                 </div>
               </div>
             </div>
-            <div class="hero-metrics">
-              <div class="metric"><strong id="creditMetric">50</strong><span>Starting credits</span></div>
-              <div class="metric"><strong id="burstMetric">6</strong><span>Credits / second</span></div>
-              <div class="metric"><strong id="suiteMetric">3</strong><span>Files in package</span></div>
-            </div>
-            <a class="btn btn-secondary" href="WindowGeneration.html" style="width:100%;">Switch to Window Agent</a>
+            <a class="btn btn-secondary" href="WindowGeneration.html">Open Window Agent</a>
           </div>
 
           <div class="stack">
             <div class="panel-head">
-              <h3>Prompt studio</h3>
+              <h3>Create your preset</h3>
               <div class="meta-badge">AI-assisted</div>
             </div>
             <div class="stack">
@@ -101,53 +103,56 @@
                 <label for="promptInput">Prompt</label>
                 <textarea id="promptInput" placeholder="Example: Create a deeply cinematic night preset with soft contrast, warmer highlights, and subtle depth in the shadows."></textarea>
               </div>
-              <div class="row2">
-                <div class="field">
-                  <label for="severitySelect">Severity</label>
-                  <select id="severitySelect">
-                    <option value="light">Light</option>
-                    <option value="medium">Medium</option>
-                    <option value="heavy">Heavy</option>
-                    <option value="critical">Critical</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label for="presetNameInput">Preset name</label>
-                  <input id="presetNameInput" type="text" value="Velvet Horizon" />
-                </div>
+              <div class="field">
+                <label for="presetNameInput">Preset name</label>
+                <input id="presetNameInput" type="text" value="Velvet Horizon" />
               </div>
-              <div class="row2">
-                <div class="field">
-                  <label for="styleTagInput">Style tag</label>
-                  <input id="styleTagInput" type="text" value="Cinematic Night" />
+              <details class="advanced-options">
+                <summary>Advanced options</summary>
+                <div class="advanced-fields">
+                  <div class="row2">
+                    <div class="field">
+                      <label for="severitySelect">Effect intensity</label>
+                      <select id="severitySelect">
+                        <option value="light">Light</option>
+                        <option value="medium">Medium</option>
+                        <option value="heavy">Heavy</option>
+                        <option value="critical">Critical</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="styleTagInput">Style tag</label>
+                      <input id="styleTagInput" type="text" value="Cinematic Night" />
+                    </div>
+                  </div>
+                  <div class="row2">
+                    <div class="field">
+                      <label for="qualitySelect">Quality</label>
+                      <select id="qualitySelect">
+                        <option value="balanced">Balanced</option>
+                        <option value="ultra">Ultra</option>
+                        <option value="streamlined">Streamlined</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="hardwareSelect">Hardware target</label>
+                      <select id="hardwareSelect">
+                        <option value="mid">Mid-range PC</option>
+                        <option value="high">High-end PC</option>
+                        <option value="ultra">Ultra setup</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="paletteSelect">Color palette</label>
+                    <select id="paletteSelect">
+                      <option value="cinematic">Cinematic</option>
+                      <option value="cool">Cool contrast</option>
+                      <option value="warm">Warm glow</option>
+                    </select>
+                  </div>
                 </div>
-                <div class="field">
-                  <label for="qualitySelect">Quality</label>
-                  <select id="qualitySelect">
-                    <option value="balanced">Balanced</option>
-                    <option value="ultra">Ultra</option>
-                    <option value="streamlined">Streamlined</option>
-                  </select>
-                </div>
-              </div>
-              <div class="row2">
-                <div class="field">
-                  <label for="hardwareSelect">Hardware target</label>
-                  <select id="hardwareSelect">
-                    <option value="mid">Mid-range PC</option>
-                    <option value="high">High-end PC</option>
-                    <option value="ultra">Ultra setup</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label for="paletteSelect">Color palette</label>
-                  <select id="paletteSelect">
-                    <option value="cinematic">Cinematic</option>
-                    <option value="cool">Cool contrast</option>
-                    <option value="warm">Warm glow</option>
-                  </select>
-                </div>
-              </div>
+              </details>
               <div class="row2">
                 <button class="btn btn-primary" id="generateBtn" type="button">Generate package</button>
                 <button class="btn btn-secondary" id="downloadBtn" type="button" disabled>Download ZIP</button>
@@ -262,7 +267,6 @@
       const progressFill = document.getElementById('progressFill');
       const logPanel = document.getElementById('logPanel');
       const creditValue = document.getElementById('creditValue');
-      const creditMetric = document.getElementById('creditMetric');
       const authStatus = document.getElementById('authStatus');
       const authInfo = document.getElementById('authInfo');
       const loginShell = document.getElementById('loginShell');
@@ -292,7 +296,6 @@
 
       function updateCredits() {
         creditValue.textContent = state.credits;
-        creditMetric.textContent = state.credits;
       }
 
       function log(message, kind = 'system') {
