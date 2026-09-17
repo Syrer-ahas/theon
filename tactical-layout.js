@@ -9,6 +9,7 @@
 (function () {
   const TRANSITION_STYLE_ID = 'tactical-page-transition-style';
   const PAGE_LOAD_DELAY = 300;
+  let navigationPending = false;
 
   function ensurePageLoader() {
     let loader = document.getElementById('tacticalPageLoader');
@@ -29,6 +30,8 @@
   }
 
   function navigateWithLoader(href) {
+    if (navigationPending) return;
+    navigationPending = true;
     const loader = ensurePageLoader();
     loader.classList.add('show');
     loader.setAttribute('aria-hidden', 'false');
@@ -51,7 +54,7 @@
           backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
           transition: opacity .16s ease, visibility .16s ease;
         }
-        .tw-page-loader.show { opacity: 1; visibility: visible; }
+        .tw-page-loader.show { opacity: 1; visibility: visible; pointer-events: auto; }
         .tw-loader-card {
           display: inline-flex; align-items: center; gap: 12px;
           padding: 14px 18px; border-radius: 16px;
@@ -85,6 +88,7 @@
     }, true);
 
     window.addEventListener('pageshow', () => {
+      navigationPending = false;
       document.body.classList.remove('tactical-page-exit');
       const loader = document.getElementById('tacticalPageLoader');
       if (loader) {
