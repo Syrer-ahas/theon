@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'url';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 3000);
-const host = '127.0.0.1';
+const host = process.env.HOST || 'localhost';
 const maxBodyBytes = 1024 * 1024;
 
 const mimeTypes = {
