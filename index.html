@@ -151,6 +151,70 @@
       .btn-secondary:hover { background: rgba(168, 85, 247, 0.18); color: #ffffff; border-color: rgba(192, 132, 252, 0.45); }
       .btn-secondary svg { width: 16px; height: 16px; fill: currentColor; opacity: 0.85; }
       .caret { width: 12px !important; height: 12px !important; margin-left: 2px; opacity: 0.5 !important; }
+      .model-select { position: relative; }
+      .model-select-trigger { min-width: 154px; justify-content: space-between; white-space: nowrap; }
+      .model-select-trigger[aria-expanded="true"] { color: #fff; background: rgba(168, 85, 247, 0.2); border-color: rgba(216, 180, 254, 0.5); }
+      .model-select-trigger[aria-expanded="true"] .caret { transform: rotate(180deg); }
+      .model-trigger-label { overflow: hidden; text-overflow: ellipsis; }
+      .model-menu {
+        position: absolute;
+        right: 0;
+        bottom: calc(100% + 12px);
+        z-index: 200;
+        width: min(430px, calc(100vw - 32px));
+        padding: 12px;
+        border: 1px solid rgba(192, 132, 252, 0.32);
+        border-radius: 20px;
+        background: linear-gradient(155deg, rgba(48, 26, 75, 0.98), rgba(22, 11, 39, 0.98));
+        box-shadow: 0 24px 65px rgba(6, 2, 14, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+      }
+      .model-menu[hidden] { display: none; }
+      .model-menu-header { padding: 4px 5px 11px; }
+      .model-menu-title { display: block; color: #fff; font-size: 0.9rem; font-weight: 700; }
+      .model-menu-help { display: block; margin-top: 3px; color: #a995c9; font-size: 0.73rem; }
+      .model-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; padding: 4px; margin-bottom: 10px; border-radius: 12px; background: rgba(12, 5, 24, 0.45); }
+      .model-tab {
+        min-width: 0;
+        border: 0;
+        border-radius: 9px;
+        padding: 8px 5px;
+        color: #a995c9;
+        background: transparent;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.67rem;
+        font-weight: 700;
+        line-height: 1.2;
+        cursor: pointer;
+      }
+      .model-tab:hover { color: #eee5ff; background: rgba(168, 85, 247, 0.1); }
+      .model-tab[aria-selected="true"] { color: #fff; background: linear-gradient(135deg, rgba(192, 132, 252, 0.28), rgba(124, 58, 237, 0.22)); box-shadow: inset 0 0 0 1px rgba(216, 180, 254, 0.2); }
+      .model-panel { display: grid; gap: 6px; }
+      .model-panel[hidden] { display: none; }
+      .model-option {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 32px minmax(0, 1fr) 18px;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid transparent;
+        border-radius: 12px;
+        color: #eadfff;
+        background: transparent;
+        font-family: 'Inter', sans-serif;
+        text-align: left;
+        cursor: pointer;
+      }
+      .model-option:hover, .model-option:focus-visible { outline: none; background: rgba(168, 85, 247, 0.1); border-color: rgba(192, 132, 252, 0.2); }
+      .model-option.selected { background: rgba(168, 85, 247, 0.14); border-color: rgba(192, 132, 252, 0.32); }
+      .model-icon { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; color: #f3e8ff; background: linear-gradient(145deg, rgba(192, 132, 252, 0.28), rgba(124, 58, 237, 0.2)); font-size: 0.72rem; font-weight: 800; }
+      .model-copy { min-width: 0; }
+      .model-name { display: block; color: #f7f2ff; font-size: 0.82rem; font-weight: 700; }
+      .model-description { display: block; margin-top: 2px; color: #9f8dbd; font-size: 0.69rem; line-height: 1.35; }
+      .model-check { color: #d8b4fe; font-size: 0.9rem; opacity: 0; }
+      .model-option.selected .model-check { opacity: 1; }
       .btn-generate {
         background: linear-gradient(135deg, #c084fc, #7c3aed);
         color: #ffffff;
@@ -182,6 +246,7 @@
           padding: 18px;
         }
         .input-footer { flex-wrap: wrap; }
+        .model-menu { position: fixed; right: 16px; bottom: 20px; left: 16px; width: auto; max-height: calc(100svh - 40px); overflow-y: auto; }
       }
       @media (max-width: 520px) {
         h1.title-top { font-size: 34px; }
@@ -195,6 +260,7 @@
           grid-template-columns: minmax(0, 1fr) auto;
           width: 100%;
         }
+        .model-select-trigger { width: 100%; }
         .btn-generate {
           grid-column: 1 / -1;
           width: 100%;
@@ -236,11 +302,38 @@
           <div class="input-container">
             <input type="text" class="input-field" id="mechanicInput" placeholder="Add double-jump with particles..." autocomplete="off">
             <div class="input-footer">
-              <button class="btn-secondary" type="button">
-                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
-                GPT-5.6 Luna
-                <svg class="caret" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
-              </button>
+              <div class="model-select" id="modelSelect">
+                <button class="btn-secondary model-select-trigger" id="modelSelectTrigger" type="button" aria-expanded="false" aria-haspopup="dialog" aria-controls="modelMenu">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
+                  <span class="model-trigger-label" id="modelTriggerLabel">Select AI Model</span>
+                  <svg class="caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <div class="model-menu" id="modelMenu" role="dialog" aria-label="Select AI model" hidden>
+                  <div class="model-menu-header"><span class="model-menu-title">Select AI Model</span><span class="model-menu-help">Choose the balance that fits your task.</span></div>
+                  <div class="model-tabs" role="tablist" aria-label="Model categories">
+                    <button class="model-tab" type="button" role="tab" id="tabAuto" aria-controls="panelAuto" aria-selected="true" data-model-tab="auto">AUTO</button>
+                    <button class="model-tab" type="button" role="tab" id="tabLow" aria-controls="panelLow" aria-selected="false" data-model-tab="low">Low Cost</button>
+                    <button class="model-tab" type="button" role="tab" id="tabEfficient" aria-controls="panelEfficient" aria-selected="false" data-model-tab="efficient">Best Efficiency</button>
+                    <button class="model-tab" type="button" role="tab" id="tabOverall" aria-controls="panelOverall" aria-selected="false" data-model-tab="overall">Best Overall</button>
+                  </div>
+                  <div class="model-panel" id="panelAuto" role="tabpanel" aria-labelledby="tabAuto" data-model-panel="auto">
+                    <button class="model-option" type="button" data-model="Auto"><span class="model-icon">A</span><span class="model-copy"><span class="model-name">Auto</span><span class="model-description">Automatically choose the best model for your request.</span></span><span class="model-check">✓</span></button>
+                  </div>
+                  <div class="model-panel" id="panelLow" role="tabpanel" aria-labelledby="tabLow" data-model-panel="low" hidden>
+                    <button class="model-option" type="button" data-model="Deepseek v4 Flash"><span class="model-icon">D4</span><span class="model-copy"><span class="model-name">Deepseek v4 Flash</span><span class="model-description">Fast generation for lightweight requests.</span></span><span class="model-check">✓</span></button>
+                    <button class="model-option" type="button" data-model="GPT 5.6 Luna"><span class="model-icon">G5</span><span class="model-copy"><span class="model-name">GPT 5.6 Luna</span><span class="model-description">Affordable everyday generation.</span></span><span class="model-check">✓</span></button>
+                  </div>
+                  <div class="model-panel" id="panelEfficient" role="tabpanel" aria-labelledby="tabEfficient" data-model-panel="efficient" hidden>
+                    <button class="model-option" type="button" data-model="Lumen 3.2"><span class="model-icon">L3</span><span class="model-copy"><span class="model-name">Lumen 3.2</span><span class="model-description">Balanced speed and capable reasoning.</span></span><span class="model-check">✓</span></button>
+                    <button class="model-option" type="button" data-model="Gemini 3.8 Flash"><span class="model-icon">G3</span><span class="model-copy"><span class="model-name">Gemini 3.8 Flash</span><span class="model-description">Quick responses for complex workflows.</span></span><span class="model-check">✓</span></button>
+                  </div>
+                  <div class="model-panel" id="panelOverall" role="tabpanel" aria-labelledby="tabOverall" data-model-panel="overall" hidden>
+                    <button class="model-option" type="button" data-model="Lumen 3.8"><span class="model-icon">L3</span><span class="model-copy"><span class="model-name">Lumen 3.8</span><span class="model-description">Advanced generation with strong consistency.</span></span><span class="model-check">✓</span></button>
+                    <button class="model-option" type="button" data-model="Fortis Gen 7.3"><span class="model-icon">F7</span><span class="model-copy"><span class="model-name">Fortis Gen 7.3</span><span class="model-description">High-quality output for demanding builds.</span></span><span class="model-check">✓</span></button>
+                    <button class="model-option" type="button" data-model="Kimi K3"><span class="model-icon">K3</span><span class="model-copy"><span class="model-name">Kimi K3</span><span class="model-description">Versatile performance across larger tasks.</span></span><span class="model-check">✓</span></button>
+                  </div>
+                </div>
+              </div>
               <button class="btn-secondary" type="button" title="Tokens">
                 <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 4.24 2 7v10c0 2.76 4.48 5 10 5s10-2.24 10-5V7c0-2.76-4.48-5-10-5zm0 18c-4.42 0-8-1.79-8-4v-2.34c1.88 1.45 4.7 2.34 8 2.34s6.12-.89 8-2.34V16c0 2.21-3.58 4-8 4zm0-6c-4.42 0-8-1.79-8-4v-2.34c1.88 1.45 4.7 2.34 8 2.34s6.12-.89 8-2.34V12c0 2.21-3.58 4-8 4z"/></svg>
                 1.04
@@ -267,6 +360,78 @@
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         const inputField = document.getElementById('mechanicInput');
+        const modelSelect = document.getElementById('modelSelect');
+        const modelTrigger = document.getElementById('modelSelectTrigger');
+        const modelLabel = document.getElementById('modelTriggerLabel');
+        const modelMenu = document.getElementById('modelMenu');
+        const modelTabs = Array.from(document.querySelectorAll('[data-model-tab]'));
+        const modelPanels = Array.from(document.querySelectorAll('[data-model-panel]'));
+        const modelOptions = Array.from(document.querySelectorAll('[data-model]'));
+
+        const closeModelMenu = (returnFocus = false) => {
+          modelMenu.hidden = true;
+          modelTrigger.setAttribute('aria-expanded', 'false');
+          if (returnFocus) modelTrigger.focus();
+        };
+
+        const openModelMenu = () => {
+          modelMenu.hidden = false;
+          modelTrigger.setAttribute('aria-expanded', 'true');
+          const activeTab = modelTabs.find((tab) => tab.getAttribute('aria-selected') === 'true');
+          if (activeTab) activeTab.focus();
+        };
+
+        const activateModelTab = (category) => {
+          modelTabs.forEach((tab) => {
+            const active = tab.dataset.modelTab === category;
+            tab.setAttribute('aria-selected', String(active));
+            tab.tabIndex = active ? 0 : -1;
+          });
+          modelPanels.forEach((panel) => { panel.hidden = panel.dataset.modelPanel !== category; });
+        };
+
+        const selectModel = (model) => {
+          modelLabel.textContent = model;
+          modelOptions.forEach((option) => option.classList.toggle('selected', option.dataset.model === model));
+          try { localStorage.setItem('tactical-web-selected-model', model); } catch (_) {}
+          closeModelMenu(true);
+        };
+
+        modelTrigger.addEventListener('click', () => {
+          if (modelMenu.hidden) openModelMenu();
+          else closeModelMenu();
+        });
+        modelTabs.forEach((tab, index) => {
+          tab.tabIndex = index === 0 ? 0 : -1;
+          tab.addEventListener('click', () => activateModelTab(tab.dataset.modelTab));
+          tab.addEventListener('keydown', (event) => {
+            if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+            event.preventDefault();
+            const direction = event.key === 'ArrowRight' ? 1 : -1;
+            const next = modelTabs[(index + direction + modelTabs.length) % modelTabs.length];
+            activateModelTab(next.dataset.modelTab);
+            next.focus();
+          });
+        });
+        modelOptions.forEach((option) => option.addEventListener('click', () => selectModel(option.dataset.model)));
+        document.addEventListener('click', (event) => {
+          if (!modelSelect.contains(event.target)) closeModelMenu();
+        });
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && !modelMenu.hidden) closeModelMenu(true);
+        });
+
+        try {
+          const savedModel = localStorage.getItem('tactical-web-selected-model');
+          const savedOption = modelOptions.find((option) => option.dataset.model === savedModel);
+          if (savedOption) {
+            modelLabel.textContent = savedModel;
+            modelOptions.forEach((option) => option.classList.toggle('selected', option.dataset.model === savedModel));
+            const savedPanel = savedOption.closest('[data-model-panel]');
+            if (savedPanel) activateModelTab(savedPanel.dataset.modelPanel);
+          }
+        } catch (_) {}
+
         document.querySelectorAll('.chip').forEach((chip) => {
           chip.addEventListener('click', () => {
             inputField.value = chip.textContent.trim();
