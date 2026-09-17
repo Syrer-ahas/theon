@@ -34,14 +34,13 @@
     return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   }
 
-  function continueFromFileOrigin(resolve, reject) {
+  function continueFromFileOrigin(reject) {
     const localOrigin = getLocalOrigin();
     fetch(localOrigin + '/health', { cache: 'no-store', mode: 'cors' })
       .then((response) => {
         if (!response.ok) throw new Error('Local server unavailable.');
         const fileName = decodeURIComponent(window.location.pathname.split('/').pop() || 'index.html');
         window.location.replace(localOrigin + '/' + encodeURIComponent(fileName) + window.location.search + window.location.hash);
-        resolve(null);
       })
       .catch(() => {
         reject(new Error('Google sign-in cannot run from file://. Start the site with "npm run dev", then open ' + localOrigin + '.'));
@@ -168,7 +167,7 @@
   function signInWithGoogle() {
     return new Promise((resolve, reject) => {
       if (window.location.protocol === 'file:') {
-        continueFromFileOrigin(resolve, reject);
+        continueFromFileOrigin(reject);
         return;
       }
       if (!isSecureAuthOrigin()) {
