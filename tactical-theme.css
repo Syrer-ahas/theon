@@ -247,6 +247,7 @@ body.tw-home .tw-page {
 }
 .tw-topbar-home {
   width: min(1240px, calc(100% - 48px));
+  max-width: 100%;
   margin: 0 auto;
   padding: 22px 0;
   justify-content: space-between;
@@ -654,7 +655,14 @@ textarea { resize: vertical; }
     align-items: stretch;
     flex-direction: column;
   }
-  .cookie-actions { justify-content: flex-end; }
+  .cookie-banner > div:first-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .cookie-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 @media (max-width: 520px) {
   .upgrade-btn span { display: none; }

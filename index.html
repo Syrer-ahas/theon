@@ -62,6 +62,7 @@
       }
       .chips-carousel-wrapper {
         width: 100%;
+        min-width: 0;
         max-width: 800px;
         overflow: hidden;
         position: relative;
@@ -172,11 +173,19 @@
         h1.title-top { font-size: 34px; }
         h2.title-bottom {
           max-width: 100%;
-          font-size: clamp(30px, 9vw, 36px);
+          font-size: clamp(28px, 8vw, 32px);
           letter-spacing: 0;
         }
-        .input-footer { justify-content: flex-start; }
-        .btn-generate { margin-left: auto; }
+        .input-footer {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          width: 100%;
+        }
+        .btn-generate {
+          grid-column: 1 / -1;
+          width: 100%;
+          margin: 0;
+        }
       }
     </style>
     <link rel="stylesheet" href="newsletter-popup.css" />
