@@ -31,7 +31,7 @@
         <div class="aff-hero">
           <span class="eyebrow">Affiliate rewards</span>
           <h1>Become an <span class="gradient-text">Affiliate</span>, earn by inviting.</h1>
-          <p class="muted">Generate a referral code, copy the share link, and send it to friends. When the invite is verified with Gmail for both sides, the reward flow can unlock 500 credits.</p>
+          <p class="muted">Generate a referral code, copy the share link, and send it to friends. Referral tracking is separate from the daily credit system.</p>
         </div>
 
         <div class="aff-grid">
@@ -55,7 +55,7 @@
             <div style="margin-top:12px;">
               <div class="step"><div class="step-num">1</div><div><strong>Generate a code</strong><div class="muted" style="font-size:0.9rem;">Confirm your Gmail and your friend's Gmail to qualify.</div></div></div>
               <div class="step"><div class="step-num">2</div><div><strong>Share the link</strong><div class="muted" style="font-size:0.9rem;">Send the affiliate link to your friend.</div></div></div>
-              <div class="step"><div class="step-num">3</div><div><strong>Earn credits</strong><div class="muted" style="font-size:0.9rem;">Once both Gmail accounts are verified, the reward can unlock 500 credits.</div></div></div>
+              <div class="step"><div class="step-num">3</div><div><strong>Track referrals</strong><div class="muted" style="font-size:0.9rem;">Verified referrals appear in your account. Credit rewards are not currently active.</div></div></div>
             </div>
           </section>
         </div>
@@ -128,10 +128,9 @@
         const code = 'AFF-' + Math.random().toString(36).slice(2, 8).toUpperCase();
         referralCode.textContent = code;
         affiliateLinkEl.textContent = getShareLink(code);
-        statusText.textContent = 'Referral code ready. Copy the share link and send it to your friend. Once both Gmail accounts are verified, the reward can unlock 500 credits.';
+        statusText.textContent = 'Referral code ready. Copy the share link and send it to your friend.';
 
         localStorage.setItem('tactical-affiliate-code', code);
-        localStorage.setItem('tactical-affiliate-credits', '500');
         copyLinkBtn.disabled = false;
       }
 

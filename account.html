@@ -122,7 +122,7 @@
           <div class="actions">
             <span class="pill-stat">Affiliate code: <span id="affiliateCodeDisplay">—</span></span>
             <span class="pill-stat">Referrals: <span id="referralCount">0</span></span>
-            <span class="pill-stat">Credits earned: <span id="affiliateCredits">0</span></span>
+            <span class="pill-stat">Credit rewards: <span id="affiliateCredits">Not active</span></span>
           </div>
         </section>
 
@@ -204,7 +204,6 @@
         if (storedAffiliateCode) {
           document.getElementById('affiliateCodeDisplay').textContent = storedAffiliateCode;
           document.getElementById('referralCount').textContent = localStorage.getItem('tactical-affiliate-referrals') || '0';
-          document.getElementById('affiliateCredits').textContent = localStorage.getItem('tactical-affiliate-credits') || '0';
         }
 
         if (localStorage.getItem('tactical-web-newsletter-subscribed')) {
