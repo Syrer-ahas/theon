@@ -24,6 +24,30 @@
     return window.TACTICAL_AUTH_CONFIG?.googleClientId || '';
   }
 
+  function getLocalOrigin() {
+    return (window.TACTICAL_AUTH_CONFIG?.localOrigin || 'http://localhost:3000').replace(/\/$/, '');
+  }
+
+  function isSecureAuthOrigin() {
+    if (window.location.protocol === 'https:') return true;
+    if (window.location.protocol !== 'http:') return false;
+    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  }
+
+  function continueFromFileOrigin(resolve, reject) {
+    const localOrigin = getLocalOrigin();
+    fetch(localOrigin + '/health', { cache: 'no-store', mode: 'cors' })
+      .then((response) => {
+        if (!response.ok) throw new Error('Local server unavailable.');
+        const fileName = decodeURIComponent(window.location.pathname.split('/').pop() || 'index.html');
+        window.location.replace(localOrigin + '/' + encodeURIComponent(fileName) + window.location.search + window.location.hash);
+        resolve(null);
+      })
+      .catch(() => {
+        reject(new Error('Google sign-in cannot run from file://. Start the site with "npm run dev", then open ' + localOrigin + '.'));
+      });
+  }
+
   function isConfigured() {
     const id = getClientId();
     return Boolean(id && !id.startsWith('YOUR_GOOGLE') && id.includes('.apps.googleusercontent.com'));
@@ -143,6 +167,14 @@
    */
   function signInWithGoogle() {
     return new Promise((resolve, reject) => {
+      if (window.location.protocol === 'file:') {
+        continueFromFileOrigin(resolve, reject);
+        return;
+      }
+      if (!isSecureAuthOrigin()) {
+        reject(new Error('Google sign-in requires HTTPS or localhost. Open the secure website address and try again.'));
+        return;
+      }
       if (!isConfigured()) {
         reject(new Error('Google sign-in is not configured yet. Add your Google OAuth Web client ID to auth-config.js.'));
         return;
@@ -150,6 +182,7 @@
 
       pendingResolve = resolve;
       pendingReject = reject;
+      initAttempts = 0;
 
       const begin = () => {
         try {
