@@ -67,58 +67,77 @@
     <div class="tw-container">
       <section class="pro-hero">
         <span class="eyebrow">Tactical memberships</span>
-        <h1>Choose your <span class="gradient-text">tactical advantage.</span></h1>
-        <p class="muted">Unlock faster, more capable preset generation and a workflow tuned for your setup.</p>
-        <div class="region">Regional pricing is active · <span id="regionPrice">Detecting your currency...</span></div>
+        <h1>Choose the plan that <span class="gradient-text">fits your workflow.</span></h1>
+        <p class="muted lead">Start with the tools you need today, then move up when your generation volume grows.</p>
+        <div class="region"><span class="region-dot" aria-hidden="true"></span><span id="regionPrice">Detecting your currency...</span></div>
       </section>
 
       <section class="plans" id="plansSection">
         <article class="plan">
+          <p class="plan-audience">For individual creators</p>
           <h2>Tactical PRO</h2>
-          <div class="price" data-price="6.99">$6.99 <small>/ month</small></div>
-          <ul><li>Better Generation</li><li>Faster Generation</li><li>Unlock 4K Optimization Tool</li><li>More Customization</li><li>50 presets a month</li></ul>
-          <button class="btn btn-primary" data-plan="Tactical PRO" type="button">Choose PRO</button>
+          <p class="plan-description">The essentials for building and refining presets regularly.</p>
+          <div class="price-row"><div class="price" data-price="6.99">$6.99 <small>/ month</small></div></div>
+          <span class="quota">50 generations per month</span>
+          <div class="feature-label">Included with PRO</div>
+          <ul><li>Enhanced generation quality</li><li>Faster generation queue</li><li>4K optimization tools</li><li>Advanced customization controls</li></ul>
+          <button class="btn btn-quiet" data-plan="Tactical PRO" type="button">Choose PRO</button>
+          <p class="plan-action-note">Review your choice before checkout.</p>
         </article>
         <article class="plan featured">
-          <span class="badge-pop">MOST POPULAR</span>
+          <span class="badge-pop">RECOMMENDED</span>
+          <p class="plan-audience">For frequent creators</p>
           <h2>Tactical Premium</h2>
-          <div class="price" data-price="9.99">$9.99 <small>/ month</small></div>
-          <ul><li>Everything in Pro Package</li><li>Priority Support</li><li>Monthly handcrafted presets available</li><li>80 presets a month</li></ul>
+          <p class="plan-description">More capacity, curated presets, and help when you need it.</p>
+          <div class="price-row"><div class="price" data-price="9.99">$9.99 <small>/ month</small></div></div>
+          <span class="quota">80 generations per month</span>
+          <div class="feature-label">Everything in PRO, plus</div>
+          <ul><li>Priority support</li><li>Monthly handcrafted preset collection</li><li>Increased monthly generation capacity</li></ul>
           <button class="btn btn-primary" data-plan="Tactical Premium" type="button">Choose Premium</button>
+          <p class="plan-action-note">Review your choice before checkout.</p>
         </article>
         <article class="plan">
+          <p class="plan-audience">For studios and power users</p>
           <h2>Tactical Enterprise</h2>
-          <div class="price" data-price="49.99">$49.99 <small>/ month</small></div>
-          <ul><li>Access to our strongest AI model</li><li>Faster Generation</li><li>1-click preset execution</li><li>Early access to TLE (Tactical Lumen Engine)</li><li>Highest priority support, 24/7</li><li>Weekly presets made by professionals</li><li>100 presets a month</li></ul>
-          <button class="btn btn-primary" data-plan="Tactical Enterprise" type="button">Choose Enterprise</button>
+          <p class="plan-description">Maximum performance and support for demanding workflows.</p>
+          <div class="price-row"><div class="price" data-price="49.99">$49.99 <small>/ month</small></div></div>
+          <span class="quota">100 generations per month</span>
+          <div class="feature-label">Everything in Premium, plus</div>
+          <ul><li>Access to the strongest AI model</li><li>Fastest generation queue</li><li>One-click preset execution</li><li>Early Tactical Lumen Engine access</li><li>24/7 priority support</li><li>Weekly professional presets</li></ul>
+          <button class="btn btn-quiet" data-plan="Tactical Enterprise" type="button">Choose Enterprise</button>
+          <p class="plan-action-note">Review your choice before checkout.</p>
         </article>
       </section>
 
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:24px;">
-        <button class="btn btn-secondary" id="donateToggleBtn" type="button">Support Tactical Web</button>
-      </div>
+      <p class="muted note" id="plansNote">Prices are estimated in your browser's regional currency. Your selected plan is saved before you continue to account setup.</p>
 
-      <section class="donate-section" id="donateSection">
-        <h2>Support Tactical Web</h2>
-        <p>I appreciate each gift — every tip helps keep the generators running and the presets flowing.</p>
-        <div class="tip-grid" id="tipGrid"></div>
-        <button class="back-link" id="backToPlans" type="button">Back to subscription plans</button>
+      <section class="support-card">
+        <div>
+          <h2>Want to support development?</h2>
+          <p>One-time tips help cover infrastructure and keep Tactical Web improving.</p>
+        </div>
+        <button class="btn btn-secondary" id="donateToggleBtn" type="button" aria-expanded="false" aria-controls="donateSection">View support options</button>
       </section>
 
-      <p class="muted note" id="plansNote">Prices are shown in your browser's regional currency using live exchange-rate formatting. Selecting a plan currently saves your choice locally; connect your payment provider here when checkout is ready.</p>
+      <section class="donate-section" id="donateSection">
+        <h2>Support continued development</h2>
+        <p>Choose a one-time tip amount. Payment support can be connected when checkout is ready.</p>
+        <div class="tip-grid" id="tipGrid"></div>
+        <button class="back-link" id="backToPlans" type="button">Close support options</button>
+      </section>
 
       <div class="guarantees">
-        <span><svg class="tick-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8ee8c1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Cancel at any Time</span>
-        <span class="link" id="refundPolicyTrigger">2 Day-Refund Policy</span>
-        <span><svg class="tick-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8ee8c1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Fair Prices</span>
+        <span><svg class="tick-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8ee8c1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Cancel anytime</span>
+        <span class="link" id="refundPolicyTrigger" role="button" tabindex="0">View 2-day refund policy</span>
+        <span><svg class="tick-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8ee8c1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Straightforward pricing</span>
       </div>
     </div>
   </div>
 
-  <div class="tw-modal hidden" id="refundModal">
+  <div class="tw-modal hidden" id="refundModal" role="dialog" aria-modal="true" aria-labelledby="refundTitle">
     <div class="tw-modal-card" style="max-width:480px;text-align:center;">
-      <h2 style="margin:0 0 14px;">2 Day Refund Policy</h2>
-      <p class="muted" style="line-height:1.8;margin:0 0 22px;text-align:left;">You may cancel and get a chargeback at any time in a 2 day period. If you don't like it, you get your money back. Please note you will not get access to monthly presets until after 3 days, at which point you get access to monthly presets. Thanks!</p>
+      <h2 id="refundTitle" style="margin:0 0 14px;">2-day refund policy</h2>
+      <p class="muted refund-copy">You can request a refund within two days of purchase. Monthly preset releases become available after three days, so they are not included during the refund window. Contact support from your account if you need help.</p>
       <button class="btn btn-primary" type="button" id="refundCloseBtn">Close</button>
     </div>
   </div>
@@ -140,45 +159,80 @@
       const price = Number(node.dataset.price) * (rates[currency] || rates.EUR);
       node.innerHTML = format.format(price) + ' <small>/ month</small>';
     });
-    document.getElementById('regionPrice').textContent = 'Showing ' + currency + ' for ' + region + '.';
+    document.getElementById('regionPrice').textContent = currency + ' pricing for ' + region;
     document.querySelectorAll('[data-plan]').forEach((button) => button.addEventListener('click', () => {
       localStorage.setItem('tactical-web-selected-plan', button.dataset.plan);
-      button.textContent = 'Plan selected';
-      setTimeout(() => { window.location.href = 'account.html'; }, 500);
+      button.disabled = true;
+      button.textContent = 'Saving selection...';
+      setTimeout(() => {
+        if (window.TacticalPageLoader && typeof window.TacticalPageLoader.navigate === 'function') {
+          window.TacticalPageLoader.navigate('account.html');
+        } else {
+          window.location.href = 'account.html';
+        }
+      }, 350);
     }));
-    document.getElementById('refundPolicyTrigger').addEventListener('click', () => { document.getElementById('refundModal').classList.remove('hidden'); });
-    document.getElementById('refundCloseBtn').addEventListener('click', () => { document.getElementById('refundModal').classList.add('hidden'); });
-    document.getElementById('refundModal').addEventListener('click', (e) => { if (e.target.id === 'refundModal') e.target.classList.add('hidden'); });
+    const refundTrigger = document.getElementById('refundPolicyTrigger');
+    const refundModal = document.getElementById('refundModal');
+    const refundCloseBtn = document.getElementById('refundCloseBtn');
+    let refundReturnFocus = null;
+    function openRefundPolicy() {
+      refundReturnFocus = document.activeElement;
+      refundModal.classList.remove('hidden');
+      refundCloseBtn.focus();
+    }
+    function closeRefundPolicy() {
+      refundModal.classList.add('hidden');
+      if (refundReturnFocus) refundReturnFocus.focus();
+    }
+    refundTrigger.addEventListener('click', openRefundPolicy);
+    refundTrigger.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openRefundPolicy();
+      }
+    });
+    refundCloseBtn.addEventListener('click', closeRefundPolicy);
+    refundModal.addEventListener('click', (event) => { if (event.target === refundModal) closeRefundPolicy(); });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !refundModal.classList.contains('hidden')) closeRefundPolicy();
+    });
 
     // Donate / Tips functionality
     const tipAmounts = [1, 2, 4, 6, 8, 10, 15, 20, 50, 100];
     const tipGrid = document.getElementById('tipGrid');
     const donateSection = document.getElementById('donateSection');
-    const plansSection = document.getElementById('plansSection');
-    const plansNote = document.getElementById('plansNote');
     const donateToggleBtn = document.getElementById('donateToggleBtn');
 
     tipAmounts.forEach((amount) => {
       const btn = document.createElement('button');
       btn.className = 'tip-btn';
+      btn.type = 'button';
+      btn.setAttribute('aria-label', 'Select a $' + amount + ' tip');
       btn.textContent = '$' + amount;
       btn.addEventListener('click', function () {
-        this.textContent = 'Thanks!';
-        this.style.opacity = '0.7';
-        setTimeout(() => { this.textContent = '$' + amount; this.style.opacity = '1'; }, 2000);
+        tipGrid.querySelectorAll('.tip-btn').forEach((tipButton) => {
+          tipButton.removeAttribute('aria-pressed');
+          tipButton.textContent = tipButton.dataset.label;
+        });
+        this.setAttribute('aria-pressed', 'true');
+        this.textContent = '$' + amount + ' selected';
       });
+      btn.dataset.label = '$' + amount;
       tipGrid.appendChild(btn);
     });
 
     function showDonate() {
-      plansSection.style.display = 'none';
-      plansNote.style.display = 'none';
       donateSection.classList.add('visible');
+      donateToggleBtn.setAttribute('aria-expanded', 'true');
+      donateToggleBtn.textContent = 'Support options open';
+      donateSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
     function showPlans() {
-      plansSection.style.display = 'grid';
-      plansNote.style.display = 'block';
       donateSection.classList.remove('visible');
+      donateToggleBtn.setAttribute('aria-expanded', 'false');
+      donateToggleBtn.textContent = 'View support options';
+      donateToggleBtn.focus();
     }
     donateToggleBtn.addEventListener('click', showDonate);
     document.getElementById('backToPlans').addEventListener('click', showPlans);
