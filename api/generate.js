@@ -6,46 +6,7 @@
 // issuer, audience, expiry, and email_verified). Rejects all anonymous access.
 
 import { verifyGoogleJWT, extractSessionToken } from './_auth.js';
-
-const DEFAULT_CREDITS = 50;
-const MIN_CREDITS = 6;
-const CREDIT_RATE = 6; // credits per second
-const DAILY_BONUS = 50;
-const DAILY_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-// In-memory store for credits. For production, replace with Vercel KV / Redis / DB.
-const creditStore = new Map(); // email -> { credits, lastDailyClaim }
-
-function getStore(email) {
-  if (!creditStore.has(email)) {
-    creditStore.set(email, { credits: DEFAULT_CREDITS, lastDailyClaim: 0 });
-  }
-  return creditStore.get(email);
-}
-
-function setStore(email, data) {
-  creditStore.set(email, data);
-}
-
-function getCredits(email) {
-  const store = getStore(email);
-  const now = Date.now();
-
-  // Auto-grant daily 50 credits if 24h has passed since last claim
-  if (store.lastDailyClaim === 0 || (now - store.lastDailyClaim) >= DAILY_COOLDOWN_MS) {
-    store.credits = (store.credits || 0) + DAILY_BONUS;
-    store.lastDailyClaim = now;
-    setStore(email, store);
-  }
-
-  return store.credits;
-}
-
-function setCredits(email, credits) {
-  const store = getStore(email);
-  store.credits = credits;
-  setStore(email, store);
-}
+import { GENERATION_COST, consumeGenerationCredit, refundGenerationCredit } from './_credits.js';
 
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
@@ -53,7 +14,7 @@ export default async function handler(request, response) {
     return response.status(405).json({ error: 'Method not allowed.' });
   }
 
-  const { game, style, severity, quality, hardware, palette, prompt, presetName, session, cost } = request.body || {};
+  const { game, style, severity, quality, hardware, palette, prompt, presetName } = request.body || {};
 
   if (!game || !prompt) {
     return response.status(400).json({ error: 'Game and prompt are required.' });
@@ -78,33 +39,26 @@ export default async function handler(request, response) {
     return response.status(401).json({ error: 'Invalid or expired session. Please sign in again.' });
   }
 
-  const email = user.email;
-  const calculatedCost = Math.max(MIN_CREDITS, (cost || MIN_CREDITS));
-  const currentCredits = getCredits(email);
-
-  if (currentCredits < MIN_CREDITS) {
-    return response.status(403).json({
-      error: `Insufficient credits. Minimum ${MIN_CREDITS} required, you have ${currentCredits}.`,
-      creditsRemaining: currentCredits
-    });
-  }
-
-  if (currentCredits < calculatedCost) {
-    return response.status(403).json({
-      error: `Not enough credits. Need ${calculatedCost}, have ${currentCredits}.`,
-      creditsRemaining: currentCredits,
-      cost: calculatedCost
-    });
-  }
-
-  // Deduct credits BEFORE calling the AI (prevents abuse on failed AI calls too)
-  const newBalance = currentCredits - calculatedCost;
-  setCredits(email, newBalance);
-  // --- End credit validation ---
-
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return response.status(500).json({ error: 'Groq API key not configured.' });
+  }
+
+  let creditReserved = false;
+  let creditsRemaining = 0;
+  try {
+    const reservation = await consumeGenerationCredit(user.sub);
+    creditsRemaining = reservation.credits;
+    if (!reservation.ok) {
+      return response.status(403).json({
+        error: `Generation requires ${GENERATION_COST} credit.`,
+        creditsRemaining
+      });
+    }
+    creditReserved = true;
+  } catch (error) {
+    console.error('Credit reservation error:', error);
+    return response.status(503).json({ error: 'Credit service unavailable.', creditsRemaining: 0 });
   }
 
   const systemPrompt = `Act as a ReShade v4.0+ Expert. Generate two separate files (Preset.ini and Shader.fx) for a preset named '${presetName || 'Tactical Preset'}' for the game "${game}".
@@ -169,6 +123,10 @@ Output ONLY the JSON object with preset_ini and shader_fx strings. No explanatio
     const data = await groqResponse.json();
     if (!groqResponse.ok) {
       console.error('Groq API error:', data);
+      if (creditReserved) {
+        creditsRemaining = await refundGenerationCredit(user.sub);
+        creditReserved = false;
+      }
       return response.status(502).json({ error: 'Preset generation failed.' });
     }
 
@@ -201,11 +159,18 @@ Output ONLY the JSON object with preset_ini and shader_fx strings. No explanatio
       shader_fx: presetData.shader_fx,
       readme: readmeText,
       presetName: presetName || 'Tactical Preset',
-      binaries: ['dxgi.dll', 'opengl32.dll', 'IMPORTANT.txt']
+      binaries: ['dxgi.dll', 'opengl32.dll', 'IMPORTANT.txt'],
+      creditCost: GENERATION_COST,
+      creditsRemaining
     });
 
   } catch (error) {
     console.error('Generate endpoint error:', error);
+    if (creditReserved) {
+      try { creditsRemaining = await refundGenerationCredit(user.sub); } catch (refundError) {
+        console.error('Credit refund error:', refundError);
+      }
+    }
     return response.status(500).json({ error: 'Something went wrong during generation.' });
   }
 }
