@@ -1,1 +1,212 @@
-.tactical-newsletter-overlay{position:fixed;inset:0;z-index:20000;display:grid;place-items:center;padding:20px;background:rgba(4,7,16,.76);backdrop-filter:blur(9px);animation:tacticalFade .22s ease-out}.tactical-newsletter{position:relative;width:min(510px,100%);padding:34px;border:1px solid rgba(190,182,255,.38);border-radius:26px;color:#f6f7ff;background:radial-gradient(circle at 100% 0,rgba(82,213,255,.13),transparent 34%),linear-gradient(140deg,rgba(31,41,79,.98),rgba(12,17,32,.98));box-shadow:0 28px 90px rgba(0,0,0,.55);font-family:Inter,system-ui,sans-serif}.tactical-newsletter-kicker{display:inline-flex;padding:7px 10px;border:1px solid rgba(255,255,255,.15);border-radius:999px;color:#d9d4ff;background:rgba(255,255,255,.07);font-size:.73rem;font-weight:800;letter-spacing:.08em}.tactical-newsletter h2{margin:15px 0 10px;font:800 clamp(1.65rem,5vw,2.25rem)/1.08 Manrope,Inter,sans-serif}.tactical-newsletter p{margin:0;color:#aeb9d5;line-height:1.65}.tactical-newsletter-form{margin-top:22px}.tactical-newsletter-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}.tactical-newsletter-row{display:flex;gap:9px}.tactical-newsletter input{min-width:0;flex:1;padding:13px 14px;border:1px solid rgba(255,255,255,.16);border-radius:14px;color:#fff;background:rgba(4,8,19,.65);font:500 .95rem Inter,system-ui,sans-serif;outline:0}.tactical-newsletter input:focus{border-color:#8d7dff;box-shadow:0 0 0 3px rgba(141,125,255,.2)}.tactical-newsletter button{border:0;border-radius:14px;padding:12px 16px;color:#2e1a07;background:linear-gradient(180deg,#fff7e6,#ffe7b2);font:800 .87rem Manrope,Inter,sans-serif;cursor:pointer}.tactical-newsletter button:disabled{cursor:wait;opacity:.7}.tactical-newsletter-close{position:absolute;right:14px;top:12px;width:34px;height:34px;padding:0!important;border-radius:50%!important;color:#dbe2fb!important;background:rgba(255,255,255,.07)!important;font:400 1.5rem/1 Inter!important}.tactical-newsletter-status{min-height:22px;margin-top:10px!important;font-size:.86rem}.tactical-newsletter small{display:block;margin-top:15px;color:#7987a6;font-size:.75rem;line-height:1.5}@keyframes tacticalFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@media(max-width:470px){.tactical-newsletter{padding:28px 20px}.tactical-newsletter-row{flex-direction:column}.tactical-newsletter-row button{width:100%}}
+/* Tactical Dispatch — newsletter popup, unified with the Tactical Web theme. */
+.tactical-newsletter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: radial-gradient(circle at 50% 35%, rgba(88, 28, 135, 0.5), rgba(6, 2, 14, 0.85) 70%);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+  animation: tacticalFade 0.22s ease-out;
+}
+
+.tactical-newsletter {
+  position: relative;
+  width: min(510px, 100%);
+  padding: 36px 34px 30px;
+  border: 1px solid rgba(192, 132, 252, 0.45);
+  border-radius: 28px;
+  color: #f5edff;
+  background: linear-gradient(160deg, rgba(58, 26, 107, 0.97), rgba(28, 11, 56, 0.98));
+  box-shadow:
+    0 30px 80px -20px rgba(0, 0, 0, 0.8),
+    0 0 60px rgba(124, 58, 237, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow: hidden;
+}
+
+.tactical-newsletter::after {
+  content: "";
+  position: absolute;
+  top: -120%;
+  left: -60%;
+  width: 60%;
+  height: 340%;
+  transform: rotate(22deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+  animation: tacticalShine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes tacticalShine {
+  0% { left: -70%; }
+  55%, 100% { left: 130%; }
+}
+
+.tactical-newsletter-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  border-radius: 999px;
+  color: #e9d5ff;
+  background: rgba(168, 85, 247, 0.14);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tactical-newsletter-kicker svg {
+  width: 14px;
+  height: 14px;
+  fill: #c084fc;
+}
+
+.tactical-newsletter h2 {
+  margin: 16px 0 10px;
+  font-family: 'Montserrat', 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.65rem, 4.5vw, 2.15rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  background: linear-gradient(180deg, #f5e8ff, #c084fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tactical-newsletter p {
+  margin: 0;
+  color: #cbb9ee;
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+
+.tactical-newsletter-form {
+  margin-top: 22px;
+}
+
+.tactical-newsletter-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.tactical-newsletter-row {
+  display: flex;
+  gap: 10px;
+}
+
+.tactical-newsletter input {
+  min-width: 0;
+  flex: 1;
+  padding: 14px 16px;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 16px;
+  color: #fff;
+  background: rgba(12, 6, 26, 0.75);
+  font: 500 0.95rem 'Inter', system-ui, sans-serif;
+  outline: 0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tactical-newsletter input::placeholder {
+  color: #8873b3;
+}
+
+.tactical-newsletter input:focus {
+  border-color: #c084fc;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.22);
+}
+
+.tactical-newsletter button[type="submit"] {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 14px 22px;
+  color: #fff;
+  background: linear-gradient(135deg, #c084fc, #7c3aed);
+  font: 700 0.9rem 'Inter', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(124, 58, 237, 0.45);
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.tactical-newsletter button[type="submit"]:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+}
+
+.tactical-newsletter button[type="submit"]:disabled {
+  cursor: default;
+  opacity: 0.75;
+  transform: none;
+}
+
+.tactical-newsletter-close {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  width: 36px;
+  height: 36px;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  color: #dbe2fb !important;
+  background: rgba(168, 85, 247, 0.14) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+  font: 400 1.4rem/1 'Inter', sans-serif !important;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+  box-shadow: none !important;
+}
+
+.tactical-newsletter-close:hover {
+  background: rgba(168, 85, 247, 0.26) !important;
+  transform: rotate(90deg);
+}
+
+.tactical-newsletter-status {
+  min-height: 22px;
+  margin-top: 12px !important;
+  font-size: 0.86rem;
+}
+
+.tactical-newsletter-status.success {
+  color: #8ee8c1;
+}
+
+.tactical-newsletter-status.error {
+  color: #fca5a5;
+}
+
+.tactical-newsletter small {
+  display: block;
+  margin-top: 16px;
+  color: #8a79b0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+@keyframes tacticalFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 470px) {
+  .tactical-newsletter { padding: 30px 22px; }
+  .tactical-newsletter-row { flex-direction: column; }
+  .tactical-newsletter-row button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tactical-newsletter::after { animation: none; }
+  .tactical-newsletter-overlay { animation: none; }
+}

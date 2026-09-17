@@ -69,7 +69,18 @@
     };
 
     localStorage.setItem(storageKey, JSON.stringify(session));
+    notifyChange(session);
     return session;
+  }
+
+  /**
+   * Broadcast an auth state change so every component on every page can
+   * react without a reload (sidebar user card, topbar account menu, gates...).
+   */
+  function notifyChange(session) {
+    try {
+      window.dispatchEvent(new CustomEvent('tactical-auth-changed', { detail: { session: session || null } }));
+    } catch (_) {}
   }
 
   /**
@@ -84,7 +95,16 @@
   function clearSession() {
     localStorage.removeItem(storageKey);
     if (window.google?.accounts?.id) window.google.accounts.id.disableAutoSelect();
+    notifyChange(null);
   }
 
-  window.TacticalAuth = { getSession, saveSession, getCredential, clearSession };
+  /**
+   * Broadcast a change even from a listener that detected a stale/removed
+   * session (used when getSession() drops an expired session).
+   */
+  function notifyRemoved() {
+    notifyChange(null);
+  }
+
+  window.TacticalAuth = { getSession, saveSession, getCredential, clearSession, notifyRemoved, notifyChange };
 })();

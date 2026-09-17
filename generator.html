@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tactical Web Generator</title>
     <meta name="description" content="A dedicated, polished ReShade preset generator experience for Tactical Web." />
+    <link rel="icon" type="image/png" href="images/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="tactical-theme.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="ai-config.js"></script>
     <script src="auth-config.js"></script>
@@ -15,199 +17,173 @@
     <script src="auth-google.js"></script>
     <script src="https://accounts.google.com/gsi/client" async></script>
     <style>
-      :root {
-        --bg: #060814;
-        --surface: rgba(12, 17, 31, 0.82);
-        --surface-strong: rgba(16, 23, 40, 0.94);
-        --border: rgba(255,255,255,0.16);
-        --text: #f6f7ff;
-        --muted: #92a0bf;
-        --accent: #8b7cff;
-        --accent-2: #50d4ff;
-        --accent-3: #f28cff;
-        --success: #4fe6a2;
-      }
-
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        min-height: 100vh;
-        font-family: 'Inter', system-ui, sans-serif;
-        color: var(--text);
-        background:
-          radial-gradient(circle at top left, rgba(141, 125, 255, 0.22), transparent 24%),
-          radial-gradient(circle at 80% 0%, rgba(82, 213, 255, 0.20), transparent 20%),
-          linear-gradient(135deg, #0d1429 0%, #121c3a 42%, #0b1227 100%);
-        overflow-x: hidden;
-        user-select: text;
-      }
-
-      body::before {
-        content: '';
-        position: fixed;
-        inset: 0;
-        background: linear-gradient(180deg, rgba(255,255,255,0.13), transparent 24%, transparent 78%, rgba(255,255,255,0.05));
-        pointer-events: none;
-        mask-image: linear-gradient(180deg, rgba(0,0,0,0.95), transparent 100%);
-      }
-
-      .cookie-banner {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: min(900px, calc(100% - 24px));
-        z-index: 20;
-        background: rgba(10, 15, 28, 0.86);
-        color: var(--text);
-        border: 1px solid rgba(255,255,255,0.16);
-        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-        backdrop-filter: blur(18px);
-        border-radius: 18px;
-        padding: 16px 18px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 14px;
-      }
-      .cookie-banner.hidden { display: none; }
-      .cookie-actions button { margin-left: 8px; }
-
-            .container { width: min(1280px, calc(100% - 40px)); margin: 0 auto; padding: 28px 0 56px; }
-      .topbar { display:flex; justify-content:space-between; align-items:center; padding: 6px 0 26px; }
-      .nav-actions { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-      .brand { display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:0.02em; color:var(--text); text-decoration:none; }
-      .brand-logo { width:48px; height:48px; border-radius:0; object-fit:cover; border:0; box-shadow:none; }
-
-      .panel {
-        background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-        border: 1px solid var(--border);
-        border-radius: 24px;
-        backdrop-filter: blur(18px);
-        box-shadow: 0 18px 50px rgba(0,0,0,0.2);
-        position: relative;
-        overflow: hidden;
-      }
-      .panel::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        padding: 1px;
-        background: linear-gradient(110deg, rgba(255,255,255,0.35), rgba(255,255,255,0.05), rgba(255,255,255,0.2));
-        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        pointer-events: none;
-      }
-
-            .hero { padding: 32px 36px; display:grid; grid-template-columns: 1.05fr 0.95fr; gap:28px; margin-bottom: 22px; align-items:start; }
-      .hero h1 { font-family:'Manrope',sans-serif; font-size:clamp(2rem,3.3vw,2.9rem); margin:8px 0 14px; line-height:1.06; letter-spacing:-0.01em; }
-      .hero p { color: var(--muted); line-height: 1.7; margin:0 0 16px; }
-      .pill { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background: rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); font-size:0.92rem; color:#dfe7ff; }
-      .eyebrow { display:inline-flex; align-items:center; gap:8px; padding:7px 10px; border-radius:999px; background: rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); font-size:0.75rem; letter-spacing:0.16em; text-transform:uppercase; color:#c6d4ff; margin-bottom: 8px; }
-      .panel-header { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom: 10px; }
-      .panel-header h3 { font-size: 1rem; margin:0; }
-      .meta-badge { padding:7px 10px; border-radius:999px; background: rgba(80,212,255,0.12); border:1px solid rgba(80,212,255,0.24); color:#9fe2ff; font-size:0.78rem; font-weight:700; }
-
-      .btn {
-        border: 0;
-        border-radius: 22px;
-        padding: 12px 18px;
-        font-family: 'Manrope', sans-serif;
-        font-weight: 800;
-        cursor: pointer;
-        color: white;
-        transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .btn:hover { transform: translateY(-2px); filter: brightness(1.04); }
-      .btn-primary {
-        background: linear-gradient(180deg, #fff7e6 0%, #ffe7b2 60%);
-        color: #2e1a07;
-        padding: 10px 24px;
-        border-radius: 22px;
-        border: 1px solid rgba(0,0,0,0.16);
-        box-shadow: 0 10px 30px rgba(6,8,12,0.78), 0 0 18px rgba(90,60,20,0.20), inset 0 1px 0 rgba(255,255,255,0.7);
-        font-weight: 900;
-        letter-spacing: 0.01em;
-        outline: 0;
-      }
-      .btn-secondary { background: linear-gradient(180deg, rgba(255,240,245,0.98), rgba(250,210,235,0.9)); color:#3a1f2b; box-shadow: 0 8px 22px rgba(6,8,12,0.7), 0 0 18px rgba(140,80,110,0.12); border:1px solid rgba(0,0,0,0.12); }
-      .btn-ghost { background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color: var(--text); box-shadow:0 6px 18px rgba(6,8,12,0.55); }
-      .btn-yellow { background: linear-gradient(180deg, #fff8c8 0%, #ffd96b 70%); color: #4a2a04; border:1px solid rgba(84,54,12,0.16); box-shadow: 0 8px 22px rgba(255,188,40,0.18); }
-      .hero-metrics { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-top: 18px; }
-      .metric { padding:14px; border-radius:16px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }
-      .metric strong { display:block; font-size:1.1rem; }
-      .metric span { color: var(--muted); font-size:0.9rem; }
-
-            .content { display:grid; grid-template-columns:0.9fr 1.1fr; gap:22px; align-items:start; }
-      .side-panel { padding:24px; border-radius: 22px; background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); border:1px solid rgba(255,255,255,0.1); }
-      .stack { display:grid; gap:14px; }
-      .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-      .field { display:grid; gap:6px; }
-      label { font-size:0.92rem; font-weight:700; }
-      input, textarea, select {
-        width: 100%;
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 14px;
-        padding: 12px 13px;
-        background: rgba(7, 11, 22, 0.8);
-        color: var(--text);
-        font: inherit;
-        position: relative;
-        z-index: 2;
-        caret-color: #fff;
-        -webkit-user-select: text;
-        user-select: text;
-      }
-      textarea { min-height: 116px; resize: vertical; }
-      input:focus, textarea:focus, select:focus { outline: 2px solid rgba(82,213,255,0.24); outline-offset: 1px; }
-
-      .auth-card { padding:18px; border-radius:18px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); margin-bottom:12px; }
-      .auth-state { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-      .auth-actions { display:flex; gap:8px; flex-wrap:wrap; }
-
-      .login-shell { position:fixed; inset:0; background:rgba(2,6,16,0.7); backdrop-filter:blur(8px); display:grid; place-items:center; z-index:30; }
-      .login-shell.hidden { display:none; }
-      .login-card { width:min(460px, calc(100% - 24px)); padding:24px; border-radius:24px; background: var(--surface-strong); border:1px solid var(--border); box-shadow:0 24px 70px rgba(0,0,0,0.32); }
-      .login-card h3 { margin:0 0 8px; font-family:'Manrope',sans-serif; }
-      .login-card p { margin:0 0 16px; color: var(--muted); }
-      .login-btn { width:100%; margin-top:8px; text-align:left; display:flex; justify-content:space-between; align-items:center; }
-
-            .console-panel { padding:24px; display:grid; gap:14px; }
-      .console-card { padding:16px 18px; border-radius:16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#edf2ff; line-height:1.6; }
-      .console-panel .console-card.system { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
-      .console-card.success { border-color:rgba(79,230,162,0.3); background:rgba(79,230,162,0.08); }
-      .console-card.system { border-color: rgba(255,255,255,0.1); }
-      .progress { height:10px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,0.08); }
-      .progress > span { display:block; height:100%; width:0%; background: linear-gradient(90deg,var(--accent),var(--accent-2)); transition: width 0.28s ease; }
-      .status-line { color: var(--muted); font-size:0.94rem; }
-      .credits-pill { display:inline-flex; align-items:center; gap:8px; border-radius:999px; padding:8px 12px; background:rgba(79,230,162,0.1); color:#dffceb; border:1px solid rgba(79,230,162,0.18); }
-      .small { font-size:0.88rem; color: var(--muted); }
-      .option-row { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; }
-
-            @media (max-width: 980px) {
-        .container { width: calc(100% - 28px); }
-        .hero { padding: 26px; gap:22px; }
-        .hero, .content { grid-template-columns:1fr; }
-        .hero-metrics, .option-row { grid-template-columns:1fr; }
-        .row { grid-template-columns:1fr; }
+      .gen-head { margin-bottom: 22px; }
+      .gen-head h1 { font-size: clamp(2rem, 4vw, 2.9rem); line-height: 1.08; margin: 14px 0 12px; }
+      .gen-head p { max-width: 720px; }
+      .gen-grid { display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 22px; align-items: start; }
+      .gen-grid h3 { font-size: 1.05rem; margin: 0; }
+      .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px; }
+      .meta-badge { padding: 7px 12px; border-radius: 999px; background: rgba(80, 212, 255, 0.12); border: 1px solid rgba(80, 212, 255, 0.24); color: #9fe2ff; font-size: 0.78rem; font-weight: 700; }
+      .stack { display: grid; gap: 14px; }
+      .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .auth-card { padding: 16px 18px; border-radius: 18px; background: var(--surface); border: 1px solid rgba(168, 85, 247, 0.18); }
+      .auth-state { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+      .auth-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+      .hero-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      .metric { padding: 14px; border-radius: 16px; background: var(--surface); border: 1px solid rgba(168, 85, 247, 0.16); }
+      .metric strong { display: block; font-size: 1.2rem; color: #e9d5ff; }
+      .metric span { color: var(--muted); font-size: 0.85rem; }
+      .console-card { padding: 16px 18px; border-radius: 16px; background: var(--surface); border: 1px solid rgba(168, 85, 247, 0.14); color: #edf2ff; line-height: 1.6; }
+      .console-card.success { border-color: rgba(79, 230, 162, 0.35); background: rgba(79, 230, 162, 0.08); }
+      .progress { height: 10px; border-radius: 999px; overflow: hidden; background: rgba(168, 85, 247, 0.12); }
+      .progress > span { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #c084fc, #7c3aed); transition: width 0.28s ease; }
+      .status-line { color: var(--muted); font-size: 0.92rem; }
+      .credits-pill { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 8px 12px; background: rgba(79, 230, 162, 0.1); color: #dffceb; border: 1px solid rgba(79, 230, 162, 0.18); font-weight: 700; font-size: 0.85rem; }
+      .small { font-size: 0.86rem; color: var(--muted); }
+      #logPanel { max-height: 320px; overflow-y: auto; }
+      .login-shell { position: fixed; inset: 0; background: rgba(6, 2, 14, 0.72); backdrop-filter: blur(8px); display: grid; place-items: center; z-index: 3000; }
+      .login-shell.hidden { display: none; }
+      .login-card { width: min(460px, calc(100% - 24px)); padding: 26px; border-radius: 24px; background: linear-gradient(160deg, rgba(58, 26, 107, 0.97), rgba(28, 11, 56, 0.98)); border: 1px solid rgba(192, 132, 252, 0.4); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5); }
+      .login-card h3 { margin: 0 0 8px; }
+      .login-card p { margin: 0 0 16px; color: var(--muted); }
+      .login-btn { width: 100%; margin-top: 8px; text-align: center; }
+      @media (max-width: 980px) {
+        .gen-grid { grid-template-columns: 1fr; }
+        .row2 { grid-template-columns: 1fr; }
+        .hero-metrics { grid-template-columns: 1fr; }
       }
     </style>
     <link rel="stylesheet" href="newsletter-popup.css" />
   </head>
-  <body>
-    <div class="cookie-banner" id="cookieBanner">
-      <div>We use cookies to keep your session and preferences intact. <a href="privacy.html" style="color:#8fdfff;">Learn more</a></div>
-      <div class="cookie-actions">
-        <button class="btn btn-ghost" id="cookieDeclineBtn" type="button">Decline</button>
-        <button class="btn btn-primary" id="cookieAcceptBtn" type="button">Accept</button>
+  <body data-page="generator">
+    <div class="tw-page">
+      <div class="tw-topbar"></div>
+      <div class="tw-container">
+        <div class="gen-head">
+          <span class="eyebrow">Prompt studio</span>
+          <h1>Build <span class="gradient-text">cinematic ReShade presets</span> on a premium workflow.</h1>
+          <p class="muted">Every preset is assembled in layers: prompt analysis, style selection, shader planning, and a polished ZIP bundle.</p>
+        </div>
+
+        <section class="panel panel-pad gen-grid">
+          <div class="stack">
+            <div class="auth-card">
+              <div class="auth-state">
+                <div>
+                  <div id="authStatus" style="font-weight:700;">Anonymous session</div>
+                  <div class="small" id="authInfo">Sign in to unlock generation.</div>
+                </div>
+                <div class="auth-actions">
+                  <button class="btn btn-primary" id="openLoginBtn" type="button">Sign in</button>
+                  <button class="btn btn-ghost" id="logoutBtn" type="button">Reset</button>
+                </div>
+              </div>
+            </div>
+            <div class="hero-metrics">
+              <div class="metric"><strong id="creditMetric">50</strong><span>Starting credits</span></div>
+              <div class="metric"><strong id="burstMetric">6</strong><span>Credits / second</span></div>
+              <div class="metric"><strong id="suiteMetric">3</strong><span>Files in package</span></div>
+            </div>
+            <a class="btn btn-secondary" href="WindowGeneration.html" style="width:100%;">Switch to Window Agent</a>
+          </div>
+
+          <div class="stack">
+            <div class="panel-head">
+              <h3>Prompt studio</h3>
+              <div class="meta-badge">AI-assisted</div>
+            </div>
+            <div class="stack">
+              <div class="field">
+                <label for="gameSelect">Game profile</label>
+                <select id="gameSelect"></select>
+              </div>
+              <div class="field">
+                <label for="promptInput">Prompt</label>
+                <textarea id="promptInput" placeholder="Example: Create a deeply cinematic night preset with soft contrast, warmer highlights, and subtle depth in the shadows."></textarea>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label for="severitySelect">Severity</label>
+                  <select id="severitySelect">
+                    <option value="light">Light</option>
+                    <option value="medium">Medium</option>
+                    <option value="heavy">Heavy</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="presetNameInput">Preset name</label>
+                  <input id="presetNameInput" type="text" value="Velvet Horizon" />
+                </div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label for="styleTagInput">Style tag</label>
+                  <input id="styleTagInput" type="text" value="Cinematic Night" />
+                </div>
+                <div class="field">
+                  <label for="qualitySelect">Quality</label>
+                  <select id="qualitySelect">
+                    <option value="balanced">Balanced</option>
+                    <option value="ultra">Ultra</option>
+                    <option value="streamlined">Streamlined</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label for="hardwareSelect">Hardware target</label>
+                  <select id="hardwareSelect">
+                    <option value="mid">Mid-range PC</option>
+                    <option value="high">High-end PC</option>
+                    <option value="ultra">Ultra setup</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="paletteSelect">Color palette</label>
+                  <select id="paletteSelect">
+                    <option value="cinematic">Cinematic</option>
+                    <option value="cool">Cool contrast</option>
+                    <option value="warm">Warm glow</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row2">
+                <button class="btn btn-primary" id="generateBtn" type="button">Generate package</button>
+                <button class="btn btn-secondary" id="downloadBtn" type="button" disabled>Download ZIP</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="gen-grid" style="margin-top:22px;">
+          <div class="panel panel-pad stack">
+            <div class="panel-head">
+              <h3>Generation stream</h3>
+              <div class="meta-badge">Premium mode</div>
+            </div>
+            <div class="credits-pill">Credits remaining: <span id="creditValue">50</span></div>
+            <div class="console-card">The generator has been tuned for a deliberate, premium pace. It will walk through each layer of your preset instead of rushing the result.</div>
+            <div class="console-card" id="statusCard">Waiting for authentication and prompt input.</div>
+            <div class="progress"><span id="progressFill"></span></div>
+            <div class="status-line" id="statusLine">Ready for a polished build.</div>
+            <div class="console-card">
+              <strong>Mission chain</strong><br />
+              1. Parse prompt intent<br />
+              2. Build shader stack<br />
+              3. Apply lighting balance<br />
+              4. Package export files
+            </div>
+          </div>
+
+          <div class="panel panel-pad stack">
+            <div class="panel-head">
+              <h3>Session memory</h3>
+              <div class="meta-badge">Live</div>
+            </div>
+            <div class="console-card" id="logPanel">Your session will appear here as the generator works through the build.</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -220,156 +196,12 @@
       </div>
     </div>
 
-    <div class="container">
-      <div class="topbar nav">
-        <a class="brand" href="index.html">
-          <img class="brand-logo" src="images/logo.png" alt="Tactical Web logo" />
-          <span>Tactical Web Generator</span>
-        </a>
-        <div class="nav-actions" data-site-nav>
-          <div class="dropdown" style="position:relative; display:flex; align-items:center; gap:8px;">
-            <a class="btn btn-primary" href="generator.html">Start building</a>
-            <button class="btn btn-ghost" data-nav-toggle aria-expanded="false" aria-haspopup="true" type="button" style="padding:8px 10px;">▾</button>
-            <div data-nav-menu hidden style="position:absolute; right:0; top:calc(100% + 10px); background:rgba(16,23,40,.96); border:1px solid var(--border); border-radius:20px; padding:10px; min-width:200px; box-shadow:0 14px 44px rgba(0,0,0,.45); z-index:12000;">
-              <a class="btn btn-secondary" href="blog.html" style="display:block; width:100%; text-align:left; margin:6px 0;">Blog</a>
-              <a class="btn btn-yellow" href="pro.html" style="display:block; width:100%; text-align:left; margin:6px 0;">Get Pro</a>
-              <a class="btn btn-ghost" href="index.html" style="display:block; width:100%; text-align:left; margin:6px 0;">Landing</a>
-            </div>
-          </div>
-        </div>
+    <div class="cookie-banner hidden" id="cookieBanner">
+      <div>We use cookies to keep your session and preferences intact. <a href="privacy.html" style="color:#c9a8ff;">Learn more</a></div>
+      <div class="cookie-actions">
+        <button class="btn btn-ghost" id="cookieDeclineBtn" type="button">Decline</button>
+        <button class="btn btn-primary" id="cookieAcceptBtn" type="button">Accept</button>
       </div>
-
-      <section class="panel hero">
-        <div>
-          <div class="pill">✦ Precision generation • Glassy workflow • Premium export</div>
-          <h1>Build cinematic, production-ready ReShade presets with a calm, premium workflow.</h1>
-          <p>Every preset is assembled in layers: prompt analysis, style selection, shader planning, and a polished ZIP bundle, all with a slower and more deliberate generation rhythm.</p>
-          <div class="auth-card">
-            <div class="auth-state">
-              <div>
-                <div id="authStatus">Anonymous session</div>
-                <div class="small" id="authInfo">Sign in to unlock generation.</div>
-              </div>
-              <div class="auth-actions">
-                <button class="btn btn-primary" id="openLoginBtn">Sign in</button>
-                <button class="btn btn-ghost" id="logoutBtn">Reset</button>
-              </div>
-            </div>
-          </div>
-          <div class="hero-metrics">
-            <div class="metric"><strong id="creditMetric">50</strong><span>Starting credits</span></div>
-            <div class="metric"><strong id="burstMetric">6</strong><span>Credits / second</span></div>
-            <div class="metric"><strong id="suiteMetric">3</strong><span>Files in package</span></div>
-          </div>
-          <a class="btn" href="WindowGeneration.html" style="background:linear-gradient(180deg,#c8e6ff,#8fd3ff);color:#1a3855;border:1px solid rgba(130,190,255,.3);box-shadow:0 8px 22px rgba(6,8,12,.55),0 0 18px rgba(100,180,255,.12);margin-top:16px;width:100%;padding:13px 20px;font-size:.95rem">Switch to Window Agent</a>
-        </div>
-
-        <div class="side-panel">
-          <div class="panel-header">
-            <div>
-              <div class="eyebrow">Composer</div>
-              <h3>Prompt studio</h3>
-            </div>
-            <div class="meta-badge">AI-assisted</div>
-          </div>
-          <div class="stack">
-            <div class="field">
-              <label for="gameSelect">Game profile</label>
-              <select id="gameSelect"></select>
-            </div>
-            <div class="field">
-              <label for="promptInput">Prompt</label>
-              <textarea id="promptInput" placeholder="Example: Create a deeply cinematic night preset with soft contrast, warmer highlights, and subtle depth in the shadows."></textarea>
-            </div>
-            <div class="row">
-              <div class="field">
-                <label for="severitySelect">Severity</label>
-                <select id="severitySelect">
-                  <option value="light">Light</option>
-                  <option value="medium">Medium</option>
-                  <option value="heavy">Heavy</option>
-                  <option value="critical">Critical</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="presetNameInput">Preset name</label>
-                <input id="presetNameInput" type="text" value="Velvet Horizon" />
-              </div>
-            </div>
-            <div class="option-row">
-              <div class="field">
-                <label for="styleTagInput">Style tag</label>
-                <input id="styleTagInput" type="text" value="Cinematic Night" />
-              </div>
-              <div class="field">
-                <label for="qualitySelect">Quality</label>
-                <select id="qualitySelect">
-                  <option value="balanced">Balanced</option>
-                  <option value="ultra">Ultra</option>
-                  <option value="streamlined">Streamlined</option>
-                </select>
-              </div>
-            </div>
-            <div class="option-row">
-              <div class="field">
-                <label for="hardwareSelect">Hardware target</label>
-                <select id="hardwareSelect">
-                  <option value="mid">Mid-range PC</option>
-                  <option value="high">High-end PC</option>
-                  <option value="ultra">Ultra setup</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="paletteSelect">Color palette</label>
-                <select id="paletteSelect">
-                  <option value="cinematic">Cinematic</option>
-                  <option value="cool">Cool contrast</option>
-                  <option value="warm">Warm glow</option>
-                </select>
-              </div>
-            </div>
-            <div class="row">
-              <button class="btn btn-primary" id="generateBtn">Generate package</button>
-              <button class="btn btn-secondary" id="downloadBtn" disabled>Download ZIP</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="content">
-        <div class="panel console-panel">
-          <div class="panel-header">
-            <div>
-              <div class="eyebrow">Workspace</div>
-              <h3>Generation stream</h3>
-            </div>
-            <div class="meta-badge">Premium mode</div>
-          </div>
-          <div class="credits-pill">⚡ Credits remaining: <span id="creditValue">50</span></div>
-          <div class="console-card system">The generator has been tuned for a deliberate, premium pace. It will walk through each layer of your preset instead of rushing the result.</div>
-          <div class="console-card" id="statusCard">Waiting for authentication and prompt input.</div>
-          <div class="progress"><span id="progressFill"></span></div>
-          <div class="status-line" id="statusLine">Ready for a polished build.</div>
-          <div class="console-card system" id="stepList">
-            <strong>Mission chain</strong><br />
-            1. Parse prompt intent<br />
-            2. Build shader stack<br />
-            3. Apply lighting balance<br />
-            4. Package export files
-          </div>
-        </div>
-
-        <div class="panel console-panel">
-          <div class="panel-header">
-            <div>
-              <div class="eyebrow">Notes</div>
-              <h3>Session memory</h3>
-            </div>
-            <div class="meta-badge">Live</div>
-          </div>
-          <div class="console-card system" id="logPanel">Your session will appear here as the generator works through the build.</div>
-        </div>
-      </section>
     </div>
 
     <script>
@@ -378,13 +210,12 @@
       ];
 
       const savedGoogleSession = window.TacticalAuth.getSession();
-      // Restore credits from localStorage so they persist across refreshes
       const savedCredits = (function() {
         try {
           const v = localStorage.getItem('tactical-web-credits');
           const n = Number(v);
           return (n >= 0) ? n : 50;
-        } catch(e) { return 50; }
+        } catch (e) { return 50; }
       })();
       const state = {
         credits: savedCredits,
@@ -392,24 +223,20 @@
         generatedFiles: null,
         cookiesAccepted: false
       };
-      // Persist credits to localStorage whenever they change
       function persistCredits() {
-        try { localStorage.setItem('tactical-web-credits', String(state.credits)); } catch(e) {}
+        try { localStorage.setItem('tactical-web-credits', String(state.credits)); } catch (e) {}
+        window.dispatchEvent(new CustomEvent('tw-credits-changed'));
       }
 
-      // Get the stored Google credential JWT for server-side credit validation
       function getSessionToken() {
         return window.TacticalSignIn.getSessionToken();
       }
 
-      // Fetch current credits from the server on load
       async function syncCreditsFromServer() {
         const token = getSessionToken();
         if (!token) return;
         try {
-          const resp = await fetch('/api/credits', {
-            headers: { 'Authorization': 'Bearer ' + token }
-          });
+          const resp = await fetch('/api/credits', { headers: { 'Authorization': 'Bearer ' + token } });
           if (resp.ok) {
             const data = await resp.json();
             state.credits = data.credits;
@@ -440,9 +267,10 @@
       const authInfo = document.getElementById('authInfo');
       const loginShell = document.getElementById('loginShell');
       const loginGoogleBtn = document.getElementById('loginGoogleBtn');
+
       if (savedGoogleSession) {
         authStatus.textContent = 'Signed in with Google';
-        authInfo.textContent = `Welcome back, ${savedGoogleSession.name}`;
+        authInfo.textContent = 'Welcome back, ' + savedGoogleSession.name;
         document.getElementById('openLoginBtn').style.display = 'none';
         document.getElementById('openLoginBtn').disabled = true;
         document.getElementById('logoutBtn').textContent = 'Log out';
@@ -450,11 +278,6 @@
         document.getElementById('openLoginBtn').style.display = 'inline-flex';
         document.getElementById('openLoginBtn').disabled = false;
         document.getElementById('logoutBtn').style.display = 'none';
-      }
-      function restoreCookies() {
-        // Cookie consent is handled by the CookieInfo widget. Keep a lightweight check for the consent cookie.
-        const has = document.cookie.split(';').some(c => c.trim().startsWith('tactical-web-consent='));
-        state.cookiesAccepted = !!has;
       }
 
       function renderGames() {
@@ -474,7 +297,7 @@
 
       function log(message, kind = 'system') {
         const card = document.createElement('div');
-        card.className = `console-card ${kind}`;
+        card.className = 'console-card ' + kind;
         card.textContent = message;
         logPanel.appendChild(card);
         logPanel.scrollTop = logPanel.scrollHeight;
@@ -483,30 +306,8 @@
       function openLogin() { loginShell.classList.remove('hidden'); }
       function closeLogin() { loginShell.classList.add('hidden'); }
 
-      function decodeGoogleCredential(credential) {
-        try {
-          const payload = credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-          return JSON.parse(decodeURIComponent(atob(payload).split('').map((char) => `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`).join('')));
-        } catch (error) {
-          return null;
-        }
-      }
-
-      let googleTokenClient = null;
-
       function escapeFilename(value) {
         return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      }
-
-      function sanitizePresetText(rawText) {
-        let text = String(rawText || '').trim();
-        const fenced = text.match(/```(?:ini)?\s*([\s\S]*?)```/i);
-        if (fenced) {
-          text = fenced[1].trim();
-        } else {
-          text = text.replace(/^```(?:ini)?/i, '').replace(/```$/i, '').trim();
-        }
-        return text;
       }
 
       function buildPresetContent(prompt, presetName, game, styleTag, severity, quality, hardware, palette) {
@@ -515,8 +316,8 @@
         const techniqueSettings = [];
 
         const addTechnique = (shaderName, settingsLines) => {
-          techniques.push(`${shaderName}=1`);
-          techniqueSettings.push(`${shaderName}=`, ...settingsLines.map((line) => `  ${line}`));
+          techniques.push(shaderName + '=1');
+          techniqueSettings.push(shaderName + '=', ...settingsLines.map((line) => '  ' + line));
         };
 
         if (/(vibrant|neon|pop)/.test(lowerPrompt)) {
@@ -524,36 +325,29 @@
           addTechnique('Vibrance.fx', ['Vibrance=0.450000', 'VibranceRGBBalance=1.000000,1.000000,1.000000']);
           addTechnique('MagicBloom.fx', ['Intensity=0.900000', 'Threshold=0.250000']);
         }
-
         if (/(dark|gritty|military)/.test(lowerPrompt)) {
           addTechnique('Curves.fx', ['Mode=2', 'Formula=4', 'Contrast=1.250000']);
           addTechnique('Levels.fx', ['BlackPoint=0.120000', 'WhitePoint=0.900000', 'Gamma=1.000000']);
           addTechnique('FilmicPass.fx', ['Strength=0.850000', 'Contrast=1.050000', 'Saturation=0.800000', 'Bleach=0.300000']);
         }
-
         if (/(sharp|clear|crisp)/.test(lowerPrompt)) {
           addTechnique('LumaSharpen.fx', ['pattern=1', 'sharp_strength=0.650000', 'sharp_clamp=0.035000']);
           addTechnique('SMAA.fx', ['EdgeDetectionType=1', 'EdgeDetectionThreshold=0.100000', 'MaxSearchSteps=16']);
         }
-
         if (/(cinematic|movie|dramatic)/.test(lowerPrompt)) {
           addTechnique('Vignette.fx', ['Type=1', 'Center=0.500000,0.500000', 'Radius=0.650000', 'Slope=2.000000']);
           addTechnique('ChromaticAberration.fx', ['Shift=1.000000', 'Strength=0.050000']);
         }
-
         if (/(soft|dreamy|foggy)/.test(lowerPrompt)) {
           addTechnique('MagicBloom.fx', ['Intensity=1.100000', 'Threshold=0.150000']);
           addTechnique('Colorfulness.fx', ['Colorfulness=0.900000', 'Contrast=0.850000', 'Gamma=1.000000']);
         }
-
         if (/(warm|sunset|gold)/.test(lowerPrompt)) {
           addTechnique('Sepia.fx', ['Tint=0.980000,0.700000,0.350000', 'Strength=0.180000']);
         }
-
         if (/(cold|blue|frost)/.test(lowerPrompt)) {
           addTechnique('LiftGammaGain.fx', ['Lift=0.000000,0.030000,0.080000', 'Gamma=0.000000,0.000000,0.000000', 'Gain=0.000000,0.000000,0.040000']);
         }
-
         if (techniques.length === 0) {
           addTechnique('Colorfulness.fx', ['Colorfulness=1.100000', 'Contrast=1.000000', 'Gamma=1.000000']);
           addTechnique('FilmicPass.fx', ['Strength=0.750000', 'Contrast=1.000000', 'Saturation=0.900000', 'Bleach=0.150000']);
@@ -561,23 +355,10 @@
         }
 
         return [
-          '[PRESET]',
-          `Name=${presetName}`,
-          `Game=${game}`,
-          `StyleTag=${styleTag}`,
-          `Severity=${severity}`,
-          `Quality=${quality}`,
-          `Hardware=${hardware}`,
-          `Palette=${palette}`,
-          'Author=Tactical Web',
-          'Description=Generated from text prompt',
-          'Screenshot=',
-          '',
-          '[Techniques]',
-          ...techniques,
-          '',
-          '[TechniqueSettings]',
-          ...techniqueSettings
+          '[PRESET]', 'Name=' + presetName, 'Game=' + game, 'StyleTag=' + styleTag,
+          'Severity=' + severity, 'Quality=' + quality, 'Hardware=' + hardware, 'Palette=' + palette,
+          'Author=Tactical Web', 'Description=Generated from text prompt', 'Screenshot=', '',
+          '[Techniques]', ...techniques, '', '[TechniqueSettings]', ...techniqueSettings
         ].join('\n');
       }
 
@@ -587,60 +368,38 @@
           const response = await fetch('/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              game: game,
-              style: styleTag,
-              severity: severity,
-              quality: quality,
-              hardware: hardware,
-              palette: palette,
-              prompt: prompt,
-              presetName: presetName,
-              session: session,
-              cost: cost
-            })
+            body: JSON.stringify({ game, style: styleTag, severity, quality, hardware, palette, prompt, presetName, session, cost })
           });
           const data = await response.json();
           if (!response.ok) {
-            // Server rejected due to credits or auth
-            if (response.status === 401 || response.status === 403) {
-              throw new Error(data.error || 'Generation rejected by server.');
-            }
             throw new Error(data.error || 'Generation failed.');
           }
-          // Server-side credit deduction succeeded, sync credit balance
-          // (Note: the server already deducted credits; we trust the server-side balance)
           return data.preset_ini;
         } catch (error) {
-          // If server generation fails, fall back to local builder (credits were already deducted server-side)
           console.warn('Groq preset generation failed, falling back to local preset builder.', error);
           return buildPresetContent(prompt, presetName, game, styleTag, severity, quality, hardware, palette);
         }
       }
 
       function buildReadme(presetName, game, styleTag, severity, prompt, quality, hardware, palette) {
-        return `Tactical Web ReShade Package
-===========================
-Preset: ${presetName}
-Game Profile: ${game}
-Style Tag: ${styleTag}
-Severity: ${severity}
-Quality: ${quality}
-Hardware Target: ${hardware}
-Palette: ${palette}
-
-Prompt:
-${prompt}
-
-Installation:
-1. Copy preset.ini into your ReShade preset folder.
-2. Open ReShade and load preset.ini.
-3. Ensure the related shaders are installed and enabled in-game.
-`;
+        return 'Tactical Web ReShade Package\n' +
+          '===========================\n' +
+          'Preset: ' + presetName + '\n' +
+          'Game Profile: ' + game + '\n' +
+          'Style Tag: ' + styleTag + '\n' +
+          'Severity: ' + severity + '\n' +
+          'Quality: ' + quality + '\n' +
+          'Hardware Target: ' + hardware + '\n' +
+          'Palette: ' + palette + '\n\n' +
+          'Prompt:\n' + prompt + '\n\n' +
+          'Installation:\n' +
+          '1. Copy preset.ini into your ReShade preset folder.\n' +
+          '2. Open ReShade and load preset.ini.\n' +
+          '3. Ensure the related shaders are installed and enabled in-game.\n';
       }
 
       function buildManifest(presetName, game, styleTag, severity, prompt, quality, hardware, palette) {
-        return JSON.stringify({ presetName, game, styleTag, severity, quality, hardware, palette, prompt, generatedBy:'Tactical Web AI', packageVersion:'1.0.0', files:['preset.ini','README.readme','manifest.json','shader-profile.txt'] }, null, 2);
+        return JSON.stringify({ presetName, game, styleTag, severity, quality, hardware, palette, prompt, generatedBy: 'Tactical Web AI', packageVersion: '1.0.0', files: ['preset.ini', 'README.readme', 'manifest.json', 'shader-profile.txt'] }, null, 2);
       }
 
       async function generatePackage() {
@@ -657,8 +416,6 @@ Installation:
           statusCard.textContent = 'Enter a prompt so the generator can build a package.';
           return;
         }
-
-        // Minimum credit check: need at least 6 credits (1 second minimum)
         if (state.credits < 6) {
           statusCard.textContent = 'You need at least 6 credits to start generation.';
           log('Insufficient credits. Minimum 6 credits required.', 'system');
@@ -666,35 +423,33 @@ Installation:
         }
 
         const startTime = performance.now();
-
         generateBtn.disabled = true;
         downloadBtn.disabled = true;
         statusCard.textContent = 'The package is now being assembled with a deliberate premium workflow.';
-        statusLine.textContent = 'Generating…';
+        statusLine.textContent = 'Generating...';
         progressFill.style.width = '4%';
 
         const steps = ['Parsing prompt intent', 'Selecting shader stack', 'Balancing lighting depth', 'Writing preset files', 'Packaging ZIP bundle', 'Finalizing export'];
         let current = 0;
         const interval = setInterval(() => {
           if (current < steps.length) {
-            progressFill.style.width = `${(current / steps.length) * 100}%`;
+            progressFill.style.width = ((current / steps.length) * 100) + '%';
             statusLine.textContent = steps[current];
             current += 1;
           }
         }, 1100);
 
-        log(`Mission launched for ${game} with a ${severity} complexity profile.`, 'system');
-        log(`AI planning optimized for ${hardware} hardware and a ${palette} palette.`, 'system');
+        log('Mission launched for ' + game + ' with a ' + severity + ' complexity profile.', 'system');
+        log('AI planning optimized for ' + hardware + ' hardware and a ' + palette + ' palette.', 'system');
 
         setTimeout(async () => {
           clearInterval(interval);
-
           const elapsedMs = performance.now() - startTime;
           const elapsedSec = Math.ceil(elapsedMs / 1000);
           const cost = Math.max(6, elapsedSec * 6);
 
           if (state.credits < cost) {
-            statusCard.textContent = `Generation took ${elapsedSec}s costing ${cost} credits, but you only have ${state.credits}.`;
+            statusCard.textContent = 'Generation took ' + elapsedSec + 's costing ' + cost + ' credits, but you only have ' + state.credits + '.';
             log('Not enough credits to complete this generation.', 'system');
             generateBtn.disabled = false;
             return;
@@ -704,11 +459,15 @@ Installation:
           updateCredits();
           persistCredits();
 
+          try {
+            const used = Number(localStorage.getItem('tactical-web-credits-used') || '0') + cost;
+            localStorage.setItem('tactical-web-credits-used', String(used));
+          } catch (e) {}
+
           const presetContent = await generatePresetFromModel(prompt, presetName, game, styleTag, severity, quality, hardware, palette, cost);
           const readmeContent = buildReadme(presetName, game, styleTag, severity, prompt, quality, hardware, palette);
           const manifestContent = buildManifest(presetName, game, styleTag, severity, prompt, quality, hardware, palette);
 
-          // Helper to fetch binary DLLs from the binaries folder
           async function fetchBinary(name) {
             var r = await fetch('binaries/' + name);
             return r.ok ? await r.blob() : null;
@@ -718,9 +477,8 @@ Installation:
           zip.file('preset.ini', presetContent);
           zip.file('README.readme', readmeContent);
           zip.file('manifest.json', manifestContent);
-          zip.file('shader-profile.txt', `Shader profile for ${styleTag} using ${quality} quality settings and a ${palette} palette for ${game}.`);
+          zip.file('shader-profile.txt', 'Shader profile for ' + styleTag + ' using ' + quality + ' quality settings and a ' + palette + ' palette for ' + game + '.');
 
-          // Include required binaries (dxgi.dll, opengl32.dll)
           var dllFiles = ['dxgi.dll', 'opengl32.dll'];
           for (var d = 0; d < dllFiles.length; d++) {
             try {
@@ -732,10 +490,19 @@ Installation:
           const blob = await zip.generateAsync({ type: 'blob' });
           state.generatedFiles = { blob, presetName };
 
+          try {
+            const pc = Number(localStorage.getItem('tactical-web-preset-count') || '0') + 1;
+            localStorage.setItem('tactical-web-preset-count', String(pc));
+            const logArr = JSON.parse(localStorage.getItem('tactical-web-activity-log') || '[]');
+            logArr.push({ action: 'Generated preset for ' + game, date: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) });
+            if (logArr.length > 50) logArr.splice(0, logArr.length - 50);
+            localStorage.setItem('tactical-web-activity-log', JSON.stringify(logArr));
+          } catch (e) {}
+
           progressFill.style.width = '100%';
           statusLine.textContent = 'Package complete.';
-          statusCard.textContent = `Package ready. ${state.credits} credits remain (${elapsedSec}s × 6 credits/s = ${cost} used).`;
-          log(`Export bundle generated in ${elapsedSec}s using ${cost} credits (6 credits/s).`, 'success');
+          statusCard.textContent = 'Package ready. ' + state.credits + ' credits remain (' + elapsedSec + 's x 6 credits/s = ' + cost + ' used).';
+          log('Export bundle generated in ' + elapsedSec + 's using ' + cost + ' credits (6 credits/s).', 'success');
           downloadBtn.disabled = false;
           generateBtn.disabled = false;
         }, 7000);
@@ -743,7 +510,7 @@ Installation:
 
       async function downloadPackage() {
         if (!state.generatedFiles) return;
-        const fileName = `${escapeFilename(state.generatedFiles.presetName || 'tactical-web')}-preset-package.zip`;
+        const fileName = escapeFilename(state.generatedFiles.presetName || 'tactical-web') + '-preset-package.zip';
         const link = document.createElement('a');
         const objectUrl = URL.createObjectURL(state.generatedFiles.blob);
         link.href = objectUrl;
@@ -762,28 +529,19 @@ Installation:
         log(message, 'system');
       }
 
-      function initialiseGoogleSignIn() {
-        // Use the shared strict sign-in client (auth-google.js)
-        return window.TacticalSignIn.ensureGoogleInit();
-      }
-
-      function loadGoogleSignIn() {
-        // Not needed for the shared flow; kept for compatibility.
-      }
-
       document.getElementById('openLoginBtn').addEventListener('click', openLogin);
       document.getElementById('loginGoogleBtn').addEventListener('click', async () => {
         loginGoogleBtn.disabled = true;
-        loginGoogleBtn.textContent = 'Signing in…';
+        loginGoogleBtn.textContent = 'Signing in...';
         try {
           const session = await window.TacticalSignIn.signInWithGoogle();
           if (!session) throw new Error('Sign-in returned no valid session.');
           state.authenticated = true;
           authStatus.textContent = 'Signed in with Google';
-          authInfo.textContent = `Welcome, ${session.name || session.email}`;
+          authInfo.textContent = 'Welcome, ' + (session.name || session.email);
           statusCard.textContent = 'Google sign-in verified. You are ready to generate.';
           updateCredits();
-          log(`Google authentication complete for ${session.email}.`, 'success');
+          log('Google authentication complete for ' + session.email + '.', 'success');
           closeLogin();
           syncCreditsFromServer();
         } catch (error) {
@@ -793,9 +551,8 @@ Installation:
           loginGoogleBtn.textContent = 'Continue with Google';
         }
       });
-      document.getElementById('logoutBtn').addEventListener('click', async () => {
+      document.getElementById('logoutBtn').addEventListener('click', function () {
         state.authenticated = false;
-        state.googleCredential = null;
         window.TacticalAuth.clearSession();
         authStatus.textContent = 'Anonymous session';
         authInfo.textContent = 'Sign in to unlock generation.';
@@ -807,7 +564,14 @@ Installation:
       document.getElementById('downloadBtn').addEventListener('click', downloadPackage);
       loginShell.addEventListener('click', (event) => { if (event.target === loginShell) closeLogin(); });
 
-      // Small UX improvements: focus prompt on load and allow Ctrl/Cmd+Enter to generate
+      // Pick up a draft prompt handed off from the homepage "Describe a game mechanic" input.
+      try {
+        const draft = localStorage.getItem('tactical-web-draft-prompt');
+        if (draft && !promptInput.value.trim()) {
+          promptInput.value = draft;
+          localStorage.removeItem('tactical-web-draft-prompt');
+        }
+      } catch (e) {}
 
       setTimeout(() => { if (promptInput) promptInput.focus(); }, 220);
       if (promptInput) {
@@ -821,11 +585,10 @@ Installation:
 
       renderGames();
       updateCredits();
-      restoreCookies();
       syncCreditsFromServer();
       log('Welcome to Tactical Web. Sign in to begin the premium generation experience.', 'system');
     </script>
-    <script src="site-nav.js"></script>
+    <script src="tactical-layout.js"></script>
     <script src="auth-ui.js"></script>
     <script src="cookie.js"></script>
     <script src="countdown.js"></script>
@@ -834,4 +597,3 @@ Installation:
     <script src="newsletter-popup.js"></script>
   </body>
 </html>
-

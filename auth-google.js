@@ -1,14 +1,24 @@
 // Shared strict Google sign-in client for Tactical Web.
-// Uses Google Identity Services (GIS) to obtain an ID token (JWT credential),
-// verifies the token structurally on the client, stores it in the strict
-// session store, and exposes helpers used by every page (including the
-// windowed agent) to gate access behind a verified sign-in.
+// Uses Google Identity Services (GIS) "ID token" flow (google.accounts.id),
+// which reliably returns an id_token (signed JWT). The token is verified
+// structurally on the client, stored in the strict session store, and every
+// page reacts to the resulting `tactical-auth-changed` event.
+//
+// Flow priority:
+//   1. google.accounts.id.prompt()  (One Tap / auto select — if available)
+//   2. A hidden GIS "Sign in with Google" button rendered off-screen and
+//      clicked programmatically (works in every browser, no pop-up blockers).
+//
+// The older OAuth2 token flow (initTokenClient) is NOT used because it does
+// not reliably return an id_token, which the strict session store requires.
 
 (() => {
-  let googleTokenClient = null;
   let initialised = false;
   let initAttempts = 0;
-  const MAX_ATTEMPTS = 40;
+  const MAX_ATTEMPTS = 40; // 40 * 250ms = 10s
+  let pendingResolve = null;
+  let pendingReject = null;
+  let hiddenButtonHost = null;
 
   function getClientId() {
     return window.TACTICAL_AUTH_CONFIG?.googleClientId || '';
@@ -48,63 +58,83 @@
     if (!exp || Number.isNaN(exp)) return 'Missing token expiry.';
     if (exp <= Date.now() + 30 * 1000) return 'Token is expired or expiring too soon.';
     if (profile.iss !== 'https://accounts.google.com' && profile.iss !== 'accounts.google.com') return 'Token was not issued by Google.';
+    if (profile.aud && getClientId() && profile.aud !== getClientId()) return 'Token audience does not match this app.';
     return null;
   }
 
+  function ensureHiddenButtonHost() {
+    if (hiddenButtonHost && document.body.contains(hiddenButtonHost)) return hiddenButtonHost;
+    hiddenButtonHost = document.createElement('div');
+    hiddenButtonHost.id = 'tactical-gis-button-host';
+    hiddenButtonHost.setAttribute('aria-hidden', 'true');
+    hiddenButtonHost.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;';
+    document.body.appendChild(hiddenButtonHost);
+    return hiddenButtonHost;
+  }
+
   /**
-   * Ensure the Google Identity Services token client is initialised.
-   * Returns true once ready, false if not yet available.
+   * Ensure Google Identity Services is initialised. Returns true once ready.
    */
   function ensureGoogleInit() {
-    const clientId = getClientId();
     if (!isConfigured()) return false;
-    if (!window.google?.accounts?.oauth2) return false;
-    if (initialised && googleTokenClient) return true;
+    if (!window.google?.accounts?.id) return false;
+    if (initialised) return true;
 
-    googleTokenClient = window.google.accounts.oauth2.initTokenClient({
-      client_id: clientId,
-      scope: 'openid email profile',
-      callback: (tokenResponse) => {
-        // Fallback: if no one attached a handler, forward to stored callback
-        if (ensureGoogleInit._pendingCallback) {
-          const cb = ensureGoogleInit._pendingCallback;
-          ensureGoogleInit._pendingCallback = null;
-          handleTokenResponse(tokenResponse, cb);
-        }
+    window.google.accounts.id.initialize({
+      client_id: getClientId(),
+      auto_select: false,
+      cancel_on_tap_outside: true,
+      use_fedcm_for_prompt: true,
+      callback: (response) => {
+        if (!response || !response.credential) return;
+        handleCredential(response.credential);
       }
     });
+
+    // Render a fallback button, off-screen, so we can trigger sign-in
+    // programmatically even when One Tap prompt() is unavailable.
+    const host = ensureHiddenButtonHost();
+    try {
+      window.google.accounts.id.renderButton(host, {
+        type: 'standard',
+        theme: 'filled_black',
+        size: 'large',
+        text: 'signin_with',
+        shape: 'pill'
+      });
+    } catch (_) { /* renderButton may not be ready yet */ }
+
     initialised = true;
     return true;
   }
 
-  function handleTokenResponse(tokenResponse, callback) {
-    if (tokenResponse.error || !tokenResponse.access_token) {
-      callback(null, 'Google sign-in was cancelled or could not be completed. Please try again.');
-      return;
-    }
-
-    // GIS TokenResponse includes an ID token (JWT) when openid scope is requested.
-    const credential = tokenResponse.id_token || '';
-    const profile = credential ? decodeGoogleCredential(credential) : null;
-
+  /** Handle a returned credential: validate, save, resolve the pending promise. */
+  function handleCredential(credential) {
+    const profile = decodeGoogleCredential(credential);
     const shapeError = validateCredentialShape(credential, profile);
     if (shapeError) {
-      callback(null, shapeError);
+      finish(null, shapeError);
       return;
     }
-
-    // Ensure we keep a full numeric expiry in the profile for the session store.
-    if (typeof profile.exp !== 'number' || Number.isNaN(profile.exp)) {
-      profile.exp = Math.floor(Date.now() / 1000) + Number(tokenResponse.expires_in || 3600);
-    }
-
     const session = window.TacticalAuth.saveSession(profile, credential);
     if (!session) {
-      callback(null, 'Your Google session could not be stored securely. Please try again.');
+      finish(null, 'Your Google session could not be stored securely. Please try again.');
       return;
     }
+    finish(session, null);
+  }
 
-    callback(session, null);
+  function finish(session, error) {
+    const resolve = pendingResolve;
+    const reject = pendingReject;
+    pendingResolve = null;
+    pendingReject = null;
+    if (error) {
+      if (reject) reject(new Error(error));
+      else console.warn('Tactical sign-in:', error);
+      return;
+    }
+    if (resolve) resolve(session);
   }
 
   /**
@@ -118,55 +148,76 @@
         return;
       }
 
-      if (!ensureGoogleInit()) {
-        let attempts = 0;
-        const wait = window.setInterval(() => {
-          attempts += 1;
-          if (ensureGoogleInit()) {
-            window.clearInterval(wait);
-            requestToken(resolve, reject);
-          } else if (attempts >= MAX_ATTEMPTS) {
-            window.clearInterval(wait);
-            reject(new Error('Google sign-in could not load. Check your connection, browser privacy extensions, and Google Cloud authorized JavaScript origins.'));
-          }
-        }, 250);
+      pendingResolve = resolve;
+      pendingReject = reject;
+
+      const begin = () => {
+        try {
+          // Primary attempt: One Tap prompt.
+          window.google.accounts.id.prompt((notification) => {
+            const notDisplayed = notification?.isNotDisplayed?.();
+            const skipped = notification?.isSkippedMoment?.();
+            const dismissed = notification?.isDismissedMoment?.();
+            if (notDisplayed || skipped) {
+              // One Tap unavailable — fall back to the rendered button.
+              triggerRenderedButton();
+            } else if (dismissed) {
+              finish(null, 'Sign-in was dismissed. Please try again.');
+            }
+            // Otherwise the callback() will fire with the credential.
+          });
+        } catch (_) {
+          triggerRenderedButton();
+        }
+      };
+
+      if (ensureGoogleInit()) {
+        begin();
         return;
       }
 
-      requestToken(resolve, reject);
+      // Poll until GIS is available (script is loaded async).
+      const wait = window.setInterval(() => {
+        initAttempts += 1;
+        if (ensureGoogleInit()) {
+          window.clearInterval(wait);
+          begin();
+        } else if (initAttempts >= MAX_ATTEMPTS) {
+          window.clearInterval(wait);
+          finish(null, 'Google sign-in could not load. Check your connection, browser privacy extensions, and Google Cloud authorized JavaScript origins.');
+        }
+      }, 250);
     });
   }
 
-  function requestToken(resolve, reject) {
-    if (!googleTokenClient) {
-      reject(new Error('Google sign-in is still loading. Please try again in a moment.'));
-      return;
+  /** Programmatically click the off-screen GIS button as a fallback. */
+  function triggerRenderedButton() {
+    const host = ensureHiddenButtonHost();
+    const btn = host.querySelector('div[role="button"], button, iframe');
+    if (btn && typeof btn.click === 'function') {
+      try { btn.click(); return; } catch (_) {}
     }
-
-    ensureGoogleInit._pendingCallback = (session, error) => {
-      if (error) reject(new Error(error));
-      else resolve(session);
-    };
-
-    googleTokenClient.requestAccessToken({ prompt: 'select_account' });
+    const iframe = host.querySelector('iframe');
+    if (iframe && iframe.contentDocument) {
+      const inner = iframe.contentDocument.querySelector('div[role="button"], button');
+      if (inner) { inner.click(); return; }
+    }
+    finish(null, 'Please use the "Sign in with Google" button to continue.');
   }
 
-  /**
-   * Returns the current strict session token (JWT) or null.
-   */
   function getSessionToken() {
     return window.TacticalAuth?.getCredential?.() || null;
   }
 
-  /**
-   * Returns the current session object or null (strictly validated).
-   */
   function getSession() {
     return window.TacticalAuth?.getSession?.() || null;
   }
 
   function signOut() {
     window.TacticalAuth?.clearSession?.();
+    if (window.google?.accounts?.id) {
+      try { window.google.accounts.id.disableAutoSelect(); } catch (_) {}
+    }
   }
 
   window.TacticalSignIn = { signInWithGoogle, getSessionToken, getSession, signOut, isConfigured, ensureGoogleInit };
