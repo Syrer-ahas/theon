@@ -1,6 +1,6 @@
 // ==========================================================================
 // Tactical Web — Shared Layout
-// Injects the sidebar + topbar on every page, keeps the signed-in user card
+// Injects the app sidebar + topbar, keeps the signed-in user card
 // in sync, handles the mobile nav, and gates Account links behind sign-in
 // with an animated "NOT SIGNED IN!" popup.
 //
@@ -14,18 +14,15 @@
       const style = document.createElement('style');
       style.id = TRANSITION_STYLE_ID;
       style.textContent = `
-        @keyframes tactical-page-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes tactical-page-exit { from { opacity: 1; } to { opacity: 0; } }
-        body.tactical-page-enter > * { animation: tactical-page-enter .28s ease-out both; }
         body.tactical-page-exit > * { animation: tactical-page-exit .18s ease-in both; }
         @media (prefers-reduced-motion: reduce) {
-          body.tactical-page-enter > *, body.tactical-page-exit > * { animation: none; }
+          body.tactical-page-exit > * { animation: none; }
         }
       `;
       document.head.appendChild(style);
     }
 
-    document.body.classList.add('tactical-page-enter');
     document.addEventListener('click', (event) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const link = event.target.closest && event.target.closest('a[href]');
@@ -62,6 +59,9 @@
   }
 
   function injectSidebar() {
+    // The landing page is intentionally full-width. App pages keep the
+    // persistent sidebar, while the homepage uses a lightweight top nav.
+    if (activePage === 'home') return;
     if (document.querySelector('.tw-sidebar')) return;
     const aside = document.createElement('aside');
     aside.className = 'tw-sidebar';
@@ -111,6 +111,27 @@
     if (document.querySelector('[data-site-nav]')) return;
     const topbar = document.querySelector('.tw-topbar');
     if (!topbar) return;
+
+    if (activePage === 'home') {
+      topbar.classList.add('tw-topbar-home');
+      topbar.innerHTML = `
+        <a class="home-brand" href="index.html" aria-label="Tactical Web home">
+          <img src="images/logo.png" alt="" />
+          <span>Tactical Web</span>
+        </a>
+        <nav class="home-nav-links" aria-label="Primary navigation">
+          <a href="generator.html">Generator</a>
+          <a href="blog.html">Blog</a>
+          <a href="pro.html">Get Pro</a>
+          <a href="affiliate.html">Affiliate</a>
+        </nav>
+        <div class="home-nav-actions" data-site-nav>
+          <a class="home-account-link" href="account.html">Account</a>
+          <a class="btn btn-primary" href="generator.html">Start building</a>
+        </div>`;
+      return;
+    }
+
     const nav = document.createElement('div');
     nav.className = 'nav-actions';
     nav.dataset.siteNav = '';
@@ -296,6 +317,7 @@
   // ---- Boot --------------------------------------------------------------
   function boot() {
     document.body.classList.add('tw-body');
+    if (activePage === 'home') document.body.classList.add('tw-home');
     if (!document.querySelector('.tw-page')) {
       const page = document.createElement('div');
       page.className = 'tw-page';

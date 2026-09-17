@@ -239,6 +239,58 @@ body.nav-open .scrim { opacity: 1; pointer-events: auto; }
   gap: 12px;
   padding: 22px 28px;
 }
+
+/* The public homepage uses a light top navigation instead of the app rail. */
+body.tw-home .tw-page {
+  margin-left: 0;
+  min-width: 0;
+}
+.tw-topbar-home {
+  width: min(1240px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 22px 0;
+  justify-content: space-between;
+  gap: 28px;
+}
+.home-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.home-brand img {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 6px 18px rgba(168, 85, 247, 0.35);
+}
+.home-nav-links,
+.home-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.home-nav-links a,
+.home-account-link {
+  color: #d8caef;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.18s ease, background 0.18s ease;
+}
+.home-nav-links a:hover,
+.home-account-link:hover {
+  color: #fff;
+  background: rgba(192, 132, 252, 0.1);
+}
 .tw-container {
   width: min(1160px, calc(100% - 56px));
   margin: 0 auto;
@@ -585,12 +637,26 @@ textarea { resize: vertical; }
   .menu-toggle { display: flex; }
   .tw-page { margin-left: 0; }
   .tw-topbar { padding-left: 76px; }
+  .tw-topbar-home { padding-left: 0; }
+  .home-nav-links { display: none; }
 }
 @media (max-width: 720px) {
   .tw-container { width: calc(100% - 28px); }
   .panel-pad { padding: 24px 20px; }
   .tw-topbar { padding: 16px 16px 0 70px; }
+  .tw-topbar-home {
+    width: calc(100% - 28px);
+    padding: 14px 0 0;
+  }
+  .home-nav-links,
+  .home-account-link { display: none; }
+  .cookie-banner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .cookie-actions { justify-content: flex-end; }
 }
 @media (max-width: 520px) {
   .upgrade-btn span { display: none; }
+  .home-brand span { display: none; }
 }
