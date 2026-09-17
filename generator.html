@@ -362,6 +362,7 @@
           body: JSON.stringify({ game, style: styleTag, severity, quality, hardware, palette, prompt, presetName })
         });
         const data = await response.json().catch(() => ({}));
+        if (Number.isInteger(Number(data.creditsRemaining))) window.TacticalCredits.acceptServerBalance(data);
         if (!response.ok) throw new Error(data.error || 'Generation failed.');
         window.TacticalCredits.acceptServerBalance(data);
         return data;
