@@ -78,7 +78,7 @@
           </div>
           <div class="stats-row" id="usageStats">
             <div class="stat-card"><strong id="statPresets">0</strong><span>Presets generated</span></div>
-            <div class="stat-card"><strong id="statCreditsUsed">0</strong><span>Credits used</span></div>
+            <div class="stat-card"><strong id="statCreditsUsed">0</strong><span>Credits available</span></div>
             <div class="stat-card"><strong id="statSessionDays">0</strong><span>Active days</span></div>
           </div>
         </section>
@@ -150,6 +150,7 @@
     <script src="auth-config.js"></script>
     <script src="auth-session.js"></script>
     <script src="auth-google.js"></script>
+    <script src="credit-system.js"></script>
     <script src="https://accounts.google.com/gsi/client" async></script>
     <script src="tactical-layout.js"></script>
     <script src="auth-ui.js"></script>
@@ -179,11 +180,10 @@
         document.getElementById('memberSince').textContent = 'Member since ' + firstSeen.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
         const presetCount = Number(localStorage.getItem('tactical-web-preset-count') || '0');
-        const creditsUsed = Number(localStorage.getItem('tactical-web-credits-used') || '0');
         const firstDay = new Date(localStorage.getItem('tactical-web-first-seen'));
         const activeDays = Math.max(1, Math.floor((now - firstDay) / (1000 * 60 * 60 * 24)));
         document.getElementById('statPresets').textContent = presetCount;
-        document.getElementById('statCreditsUsed').textContent = creditsUsed;
+        document.getElementById('statCreditsUsed').textContent = window.TacticalCredits.getSnapshot().credits;
         document.getElementById('statSessionDays').textContent = activeDays;
 
         const activityLog = document.getElementById('activityLog');
@@ -221,6 +221,12 @@
         document.getElementById('memberSince').textContent = '';
         document.getElementById('billingHistoryBtn').disabled = true;
       }
+
+      window.addEventListener('tw-credits-changed', (event) => {
+        document.getElementById('statCreditsUsed').textContent = event.detail && event.detail.authenticated
+          ? Number(event.detail.credits || 0)
+          : 0;
+      });
 
       const preferences = JSON.parse(localStorage.getItem('tactical-web-preferences') || '{}');
       document.querySelectorAll('[data-preference]').forEach((input) => {
