@@ -302,7 +302,7 @@
             <h3>🤝 Affiliate</h3>
             <div class="h-metrics" id="am">
               <div class="h-item"><span class="h-lbl">Referrals</span><div class="h-track"><div class="h-fill" style="width:0%;background:linear-gradient(90deg,#8d7dff,#4fe7a3);"></div></div><span class="h-val" id="amRef">0</span></div>
-              <div class="h-item"><span class="h-lbl">Credits earned</span><div class="h-track"><div class="h-fill" style="width:0%;background:linear-gradient(90deg,#4fe7a3,#ffd96b);"></div></div><span class="h-val" id="amCred">0</span></div>
+              <div class="h-item"><span class="h-lbl">Credit rewards</span><div class="h-track"><div class="h-fill" style="width:0%;background:linear-gradient(90deg,#4fe7a3,#ffd96b);"></div></div><span class="h-val" id="amCred">Not active</span></div>
             </div>
           </div>
         </div>
@@ -477,7 +477,6 @@
           const visitCount = LSN('tactical-web-visit-count', 0);
           const isSubscribed = LS('tactical-web-newsletter-subscribed') === 'true';
           const referrals = LSN('tactical-web-affiliate-referrals', 0);
-          const affiliateCredits = LSN('tactical-web-affiliate-credits', 0);
 
           // Users: only the admin is a registered user we can verify
           $('sUsers').textContent = '1'; // Only the admin account can be confirmed
@@ -503,9 +502,9 @@
           document.querySelector('#nm .h-fill:last-child').style.width = Math.min((visitCount / 50) * 100, 100) + '%';
 
           $('amRef').textContent = referrals;
-          $('amCred').textContent = affiliateCredits;
+          $('amCred').textContent = 'Not active';
           document.querySelector('#am .h-fill:first-child').style.width = Math.min((referrals / 10) * 100, 100) + '%';
-          document.querySelector('#am .h-fill:last-child').style.width = Math.min((affiliateCredits / 200) * 100, 100) + '%';
+          document.querySelector('#am .h-fill:last-child').style.width = '0%';
 
           // ---- Activity Feed (REAL data) ----
           const activities = LSJ('tactical-web-activity-log', []);
