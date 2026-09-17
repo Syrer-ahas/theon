@@ -11,37 +11,53 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="tactical-theme.css" />
   <style>
-    .pro-hero { text-align: center; max-width: 760px; margin: 8px auto 40px; }
-    .pro-hero h1 { font-size: clamp(2.2rem, 6vw, 4rem); line-height: 1; margin: 16px 0 14px; }
-    .region { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; color: var(--muted); font-size: 0.85rem; }
-    .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: stretch; }
-    .plan { position: relative; padding: 30px; border: 1px solid var(--panel-border); border-radius: 28px; background: var(--panel-bg); backdrop-filter: blur(20px); display: flex; flex-direction: column; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25); }
-    .plan.featured { border-color: rgba(192, 132, 252, 0.7); transform: translateY(-10px); background: linear-gradient(145deg, rgba(192, 132, 252, 0.18), rgba(124, 58, 237, 0.08)); }
-    .plan:not(.featured):hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35); }
-    .badge-pop { position: absolute; right: 18px; top: 18px; border-radius: 999px; padding: 6px 12px; background: linear-gradient(135deg, #c084fc, #7c3aed); color: #fff; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.04em; box-shadow: 0 8px 22px rgba(124, 58, 237, 0.45); }
-    .plan h2 { font-size: 1.5rem; }
-    .price { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 2.4rem; margin: 18px 0 4px; }
-    .price small { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem; color: var(--muted); }
-    .plan ul { padding: 0; margin: 22px 0; list-style: none; display: grid; gap: 12px; flex: 1; }
-    .plan li { color: #e8ebff; font-size: 0.93rem; line-height: 1.45; padding-left: 24px; position: relative; }
-    .plan li::before { content: ""; position: absolute; left: 0; top: 5px; width: 12px; height: 7px; border-left: 2px solid #8ee8c1; border-bottom: 2px solid #8ee8c1; transform: rotate(-45deg); }
-    .plan .btn { width: 100%; }
-    .note { text-align: center; margin: 30px auto 0; max-width: 720px; font-size: 0.85rem; }
-    .donate-section { display: none; text-align: center; margin-top: 30px; }
-    .donate-section.visible { display: block; }
-    .donate-section h2 { font-size: 1.8rem; margin: 0 0 8px; }
-    .donate-section p { margin: 0 0 24px; color: var(--muted); }
-    .tip-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; max-width: 700px; margin: 0 auto 20px; }
-    .tip-btn { background: linear-gradient(180deg, #c084fc, #7c3aed); color: #fff; border: 1px solid rgba(192, 132, 252, 0.3); box-shadow: 0 8px 22px rgba(124, 58, 237, 0.4); padding: 16px 28px; font-size: 1rem; min-width: 110px; }
-    .tip-btn:hover { transform: translateY(-3px); filter: brightness(1.08); }
-    .back-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; color: var(--muted); font-size: 0.85rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; background: none; border: 0; }
-    .back-link:hover { color: var(--text); }
-    .guarantees { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 38px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.92rem; color: #e8ebff; }
-    .guarantees span { display: inline-flex; align-items: center; gap: 7px; }
-    .tick-svg { flex-shrink: 0; }
-    .guarantees .link { cursor: pointer; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; }
-    .hidden { display: none !important; }
-    @media (max-width: 850px) { .plans { grid-template-columns: 1fr; max-width: 520px; margin: auto; } .plan.featured { transform: none; } }
+    .pro-hero { text-align: center; max-width: 780px; margin: 10px auto 44px; }
+    .pro-hero h1 { max-width: 700px; margin: 17px auto 14px; font-size: clamp(2.25rem, 5.5vw, 4.25rem); line-height: 1.02; letter-spacing: -.045em; }
+    .pro-hero .lead { max-width: 610px; margin: 0 auto; font-size: 1rem; }
+    .region { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; padding: 8px 12px; border: 1px solid rgba(192,132,252,.2); border-radius: 999px; color: #cbb9ee; background: rgba(168,85,247,.08); font-size: 0.78rem; }
+    .region-dot { width: 7px; height: 7px; border-radius: 50%; background: #8ee8c1; box-shadow: 0 0 10px rgba(142,232,193,.65); }
+    .plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+    .plan { position: relative; min-width: 0; padding: 27px; border: 1px solid rgba(192,132,252,.22); border-radius: 25px; background: linear-gradient(155deg, rgba(48,29,74,.8), rgba(27,15,43,.76)); backdrop-filter: blur(20px); display: flex; flex-direction: column; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; box-shadow: 0 18px 50px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.05); overflow: hidden; }
+    .plan::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 85% 5%, rgba(192,132,252,.11), transparent 34%); }
+    .plan:hover { transform: translateY(-5px); border-color: rgba(192,132,252,.42); box-shadow: 0 25px 60px rgba(0,0,0,.34); }
+    .plan.featured { border-color: rgba(192,132,252,.62); background: linear-gradient(150deg, rgba(107,57,151,.46), rgba(38,18,65,.86)); box-shadow: 0 24px 65px rgba(68,25,115,.4), inset 0 1px 0 rgba(255,255,255,.08); }
+    .badge-pop { position: absolute; right: 16px; top: 16px; z-index: 2; border-radius: 999px; padding: 6px 10px; background: linear-gradient(135deg,#c084fc,#7c3aed); color:#fff; font-size:.64rem; font-weight:800; letter-spacing:.07em; box-shadow:0 8px 22px rgba(124,58,237,.38); }
+    .plan-audience { margin: 0 0 8px; color: #bba8db; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .plan h2 { position: relative; z-index: 1; font-size: 1.38rem; }
+    .plan-description { min-height: 42px; margin: 8px 0 0; color: #bfaedb; font-size: .82rem; line-height: 1.5; }
+    .price-row { display: flex; align-items: flex-end; gap: 8px; margin: 20px 0 5px; }
+    .price { font-family:'Montserrat',sans-serif; font-weight:800; font-size:2.35rem; line-height: 1; letter-spacing: -.04em; }
+    .price small { font-family:'Inter',sans-serif; font-weight:600; font-size:.78rem; color:var(--muted); letter-spacing: 0; }
+    .quota { display: inline-flex; width: fit-content; margin-top: 8px; padding: 6px 9px; border-radius: 9px; background: rgba(192,132,252,.1); color: #e7d7ff; font-size: .72rem; font-weight: 700; }
+    .feature-label { margin-top: 20px; padding-top: 17px; border-top: 1px solid rgba(192,132,252,.14); color: #f5edff; font-size: .76rem; font-weight: 700; }
+    .plan ul { padding:0; margin:13px 0 24px; list-style:none; display:grid; gap:10px; flex:1; }
+    .plan li { color:#ddd2ee; font-size:.82rem; line-height:1.45; padding-left:22px; position:relative; }
+    .plan li::before { content:""; position:absolute; left:1px; top:4px; width:11px; height:6px; border-left:2px solid #8ee8c1; border-bottom:2px solid #8ee8c1; transform:rotate(-45deg); }
+    .plan .btn { position: relative; z-index: 2; width:100%; min-height: 43px; }
+    .plan .btn-quiet { background: rgba(168,85,247,.1); border: 1px solid rgba(192,132,252,.25); color: #efe7ff; }
+    .plan-action-note { margin: 9px 0 0; color: #927da9; font-size: .68rem; text-align: center; }
+    .note { text-align:center; margin:24px auto 0; max-width:760px; font-size:.76rem; }
+    .support-card { display:flex; justify-content:space-between; align-items:center; gap:24px; margin-top:34px; padding:22px 24px; border:1px solid rgba(192,132,252,.2); border-radius:20px; background:rgba(37,20,58,.58); }
+    .support-card h2 { margin:0 0 5px; font-size:1rem; }
+    .support-card p { margin:0; max-width:650px; color:var(--muted); font-size:.8rem; line-height:1.55; }
+    .support-card .btn { flex:0 0 auto; }
+    .donate-section { display:none; text-align:center; margin-top:14px; padding:25px; border:1px solid rgba(192,132,252,.2); border-radius:20px; background:rgba(29,14,48,.62); }
+    .donate-section.visible { display:block; }
+    .donate-section h2 { font-size:1.35rem; margin:0 0 7px; }
+    .donate-section p { margin:0 0 20px; color:var(--muted); font-size:.84rem; }
+    .tip-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:670px; margin:0 auto 16px; }
+    .tip-btn { min-width:76px; padding:10px 15px; border:1px solid rgba(192,132,252,.3); border-radius:12px; background:rgba(168,85,247,.12); color:#f5edff; font:700 .84rem 'Inter',sans-serif; cursor:pointer; transition:background .18s ease, transform .18s ease; }
+    .tip-btn:hover { transform:translateY(-2px); background:rgba(168,85,247,.24); }
+    .back-link { display:inline-flex; margin-top:4px; color:var(--muted); font-size:.78rem; cursor:pointer; text-decoration:underline; text-underline-offset:3px; background:none; border:0; }
+    .back-link:hover { color:var(--text); }
+    .guarantees { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; margin-top:28px; overflow:hidden; border:1px solid rgba(192,132,252,.16); border-radius:16px; background:rgba(192,132,252,.14); font-family:'Inter',sans-serif; font-weight:600; font-size:.78rem; color:#e8ebff; }
+    .guarantees span { min-height:48px; display:flex; align-items:center; justify-content:center; gap:7px; padding:10px; background:rgba(27,14,43,.92); text-align:center; }
+    .tick-svg { flex-shrink:0; }
+    .guarantees .link { cursor:pointer; text-decoration:underline; text-decoration-style:dotted; text-underline-offset:4px; }
+    .hidden { display:none !important; }
+    .refund-copy { line-height:1.75; margin:0 0 22px; text-align:left; }
+    @media (max-width: 900px) { .plans { grid-template-columns:1fr; max-width:560px; margin:auto; } .plan-description { min-height:0; } }
+    @media (max-width: 620px) { .pro-hero { margin-bottom:32px; } .support-card { align-items:flex-start; flex-direction:column; } .support-card .btn { width:100%; } .guarantees { grid-template-columns:1fr; } .plan { padding:23px 21px; } }
   </style>
   <link rel="stylesheet" href="newsletter-popup.css" />
 </head>
