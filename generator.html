@@ -11,7 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="tactical-theme.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="ai-config.js"></script>
     <script src="auth-config.js"></script>
     <script src="auth-session.js"></script>
     <script src="auth-google.js"></script>
@@ -382,7 +381,7 @@
         log('Mission launched for ' + game + ' with a ' + severity + ' complexity profile.', 'system');
         log('AI planning optimized for ' + hardware + ' hardware and a ' + palette + ' palette.', 'system');
 
-        setTimeout(async () => {
+        (async () => {
           clearInterval(interval);
           const elapsedMs = performance.now() - startTime;
           const elapsedSec = Math.ceil(elapsedMs / 1000);
@@ -403,24 +402,11 @@
           const readmeContent = buildReadme(presetName, game, styleTag, severity, prompt, quality, hardware, palette);
           const manifestContent = buildManifest(presetName, game, styleTag, severity, prompt, quality, hardware, palette);
 
-          async function fetchBinary(name) {
-            var r = await fetch('binaries/' + name);
-            return r.ok ? await r.blob() : null;
-          }
-
           const zip = new JSZip();
           zip.file('preset.ini', presetContent);
           zip.file('README.readme', readmeContent);
           zip.file('manifest.json', manifestContent);
           zip.file('shader-profile.txt', 'Shader profile for ' + styleTag + ' using ' + quality + ' quality settings and a ' + palette + ' palette for ' + game + '.');
-
-          var dllFiles = ['dxgi.dll', 'opengl32.dll'];
-          for (var d = 0; d < dllFiles.length; d++) {
-            try {
-              var dllData = await fetchBinary(dllFiles[d]);
-              if (dllData) zip.file('binaries/' + dllFiles[d], dllData);
-            } catch (e) { console.warn('Could not include ' + dllFiles[d], e); }
-          }
 
           const blob = await zip.generateAsync({ type: 'blob' });
           state.generatedFiles = { blob, presetName };
@@ -440,7 +426,7 @@
           log('Export bundle generated in ' + elapsedSec + 's using 1 credit.', 'success');
           downloadBtn.disabled = false;
           generateBtn.disabled = false;
-        }, 7000);
+        })();
       }
 
       async function downloadPackage() {
@@ -528,7 +514,6 @@
     </script>
     <script src="auth-ui.js"></script>
     <script src="cookie.js"></script>
-    <script src="countdown.js"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script src="turnstile-config.js"></script>
     <script src="newsletter-popup.js"></script>

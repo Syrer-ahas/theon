@@ -253,12 +253,6 @@
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  async function fetchBinaryAsBlob(name) {
-    var resp = await fetch('binaries/' + name);
-    if (!resp.ok) throw new Error('Could not fetch ' + name);
-    return await resp.blob();
-  }
-
   async function callGenerate(params) {
     showTyping();
     try {
@@ -296,15 +290,6 @@
       zip.file('preset.ini', data.preset_ini);
       zip.file('shader.fx', data.shader_fx);
       zip.file('README.txt', data.readme);
-
-      if (data.binaries && data.binaries.length) {
-        for (var i = 0; i < data.binaries.length; i++) {
-          try {
-            var dllBlob = await fetchBinaryAsBlob(data.binaries[i]);
-            zip.file('binaries/' + data.binaries[i], dllBlob);
-          } catch (e) { console.warn('Could not include binary: ' + data.binaries[i], e); }
-        }
-      }
 
       var blob = await zip.generateAsync({ type: 'blob' });
       var url = URL.createObjectURL(blob);
