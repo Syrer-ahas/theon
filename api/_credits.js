@@ -15,6 +15,10 @@ function redisConfig() {
   return url && token ? { url: url.replace(/\/$/, ''), token } : null;
 }
 
+export function hasPersistentCreditStore() {
+  return Boolean(redisConfig());
+}
+
 function accountKey(subject) {
   if (!subject || typeof subject !== 'string') throw new Error('Verified user subject is required.');
   const digest = crypto.createHash('sha256').update(subject).digest('hex');

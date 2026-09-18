@@ -1,5 +1,5 @@
 import { verifyGoogleJWT, extractSessionToken } from './_auth.js';
-import { adjustUserCreditsByEmail, getUserAccountByEmail, setUserBanByEmail } from './_credits.js';
+import { adjustUserCreditsByEmail, getUserAccountByEmail, hasPersistentCreditStore, setUserBanByEmail } from './_credits.js';
 
 const DEFAULT_ADMIN_EMAIL = 'alkhidirea@gmail.com';
 
@@ -22,6 +22,9 @@ export default async function handler(request, response) {
   const adminEmail = normalizeEmail(process.env.ADMIN_EMAIL || DEFAULT_ADMIN_EMAIL);
   if (!admin || normalizeEmail(admin.email) !== adminEmail) {
     return response.status(403).json({ error: 'Administrator access required.' });
+  }
+  if (!hasPersistentCreditStore()) {
+    return response.status(503).json({ error: 'Persistent credit storage must be configured before managing users.' });
   }
 
   const email = normalizeEmail(request.body?.email);
