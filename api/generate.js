@@ -47,8 +47,11 @@ export default async function handler(request, response) {
   let creditReserved = false;
   let creditsRemaining = 0;
   try {
-    const reservation = await consumeGenerationCredit(user.sub);
+    const reservation = await consumeGenerationCredit(user.sub, user.email);
     creditsRemaining = reservation.credits;
+    if (reservation.banned) {
+      return response.status(403).json({ error: 'This account is suspended.', creditsRemaining });
+    }
     if (!reservation.ok) {
       return response.status(403).json({
         error: `Generation requires ${GENERATION_COST} credit.`,

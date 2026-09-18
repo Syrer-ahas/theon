@@ -25,7 +25,7 @@ export default async function handler(request, response) {
   }
 
   try {
-    const account = await getCreditAccount(user.sub);
+    const account = await getCreditAccount(user.sub, user.email);
     return response.status(200).json(account);
   } catch (error) {
     console.error('Credit account error:', error);
