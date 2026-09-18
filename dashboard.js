@@ -13,6 +13,19 @@
   const getJson = (key, fallback) => { try { return JSON.parse(get(key, '')) ?? fallback; } catch (_) { return fallback; } };
   const set = (key, value) => { try { localStorage.setItem(key, value); return true; } catch (_) { return false; } };
   let toastTimer;
+  let serverPlan = 'Free';
+
+  async function loadBillingPlan() {
+    try {
+      const response = await fetch('/api/billing', {
+        headers: { Authorization: `Bearer ${session.credential}` },
+        cache: 'no-store'
+      });
+      const billing = await response.json().catch(() => ({}));
+      if (response.ok) serverPlan = ({ pro: 'Tactical PRO', premium: 'Tactical Premium', enterprise: 'Tactical Enterprise' })[billing.plan] || 'Free';
+    } catch (_) {}
+    byId('profilePlan').textContent = serverPlan;
+  }
 
   function toast(message) {
     const element = byId('toast');
@@ -290,7 +303,7 @@
     byId('metricActivity').textContent = activities().length.toLocaleString();
     byId('profileName').textContent = session.name || 'Administrator';
     byId('profileEmail').textContent = session.email;
-    byId('profilePlan').textContent = get('tactical-web-selected-plan', 'Free');
+    byId('profilePlan').textContent = serverPlan;
     byId('profileSince').textContent = firstSeen ? new Date(firstSeen).toLocaleDateString() : 'Not recorded';
     renderActivity();
     renderChart();
@@ -478,7 +491,7 @@
       try { await importData(file); } catch (error) { toast(error.message || 'The backup could not be imported.'); }
       event.target.value = '';
     });
-    byId('refreshBtn').addEventListener('click', () => { refresh(); toast('Dashboard refreshed.'); });
+    byId('refreshBtn').addEventListener('click', () => { refresh(); loadBillingPlan(); toast('Dashboard refreshed.'); });
     byId('storageSearch').addEventListener('input', renderStorage);
     byId('clearPreferencesBtn').addEventListener('click', () => {
       localStorage.removeItem('tactical-web-preferences');
@@ -503,6 +516,7 @@
     byId('quickPrompt').value = savedDraft;
     byId('launchCount').textContent = `${savedDraft.length} / 600`;
     refresh();
+    loadBillingPlan();
   }
 
   function loadPreferences() {
