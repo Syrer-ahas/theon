@@ -166,6 +166,9 @@ body.tw-body::before {
 .empty-state { padding: 28px; border: 1px dashed var(--studio-line-strong); border-radius: 14px; color: var(--studio-muted); text-align: center; font-size: .8rem; }
 .toast { position: fixed; right: 24px; bottom: 24px; z-index: 60000; max-width: 340px; padding: 13px 16px; border: 1px solid var(--studio-line-strong); border-radius: 13px; background: #1a181f; color: #fff; box-shadow: var(--studio-shadow); font-size: .8rem; opacity: 0; transform: translateY(10px); pointer-events: none; transition: .2s; }
 .toast.show { opacity: 1; transform: none; }
+.dashboard-compact .dash-panel { padding: 16px; }
+.dashboard-compact .activity-item, .dashboard-compact .health-row, .dashboard-compact .storage-row { padding: 9px 11px; }
+.dashboard-compact .metric-card { padding: 15px; }
 
 @media (max-width: 1050px) {
   .home-hero, .home-grid, .dash-grid, .command-grid { grid-template-columns: 1fr; }
