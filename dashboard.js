@@ -38,7 +38,12 @@
 
   function renderActivity() {
     const list = byId('activityList');
-    const items = activities().slice().reverse();
+    const query = byId('activitySearch')?.value.trim().toLowerCase() || '';
+    const sourceItems = activities();
+    const items = sourceItems.map((item, index) => ({ item, index })).filter(({ item }) => {
+      const text = typeof item === 'string' ? item : `${item.action || ''} ${item.date || ''}`;
+      return !query || text.toLowerCase().includes(query);
+    }).reverse();
     list.replaceChildren();
     if (!items.length) {
       const empty = document.createElement('div');
@@ -47,7 +52,7 @@
       list.appendChild(empty);
       return;
     }
-    items.forEach((item, reverseIndex) => {
+    items.forEach(({ item, index }) => {
       const row = document.createElement('div');
       row.className = 'activity-item';
       const dot = document.createElement('span');
@@ -66,7 +71,7 @@
       remove.textContent = '×';
       remove.addEventListener('click', () => {
         const current = activities();
-        current.splice(current.length - 1 - reverseIndex, 1);
+        current.splice(index, 1);
         saveActivities(current);
         refresh();
         toast('Activity removed.');
@@ -150,12 +155,121 @@
     return storageEntries().reduce((total, [key, value]) => total + (key.length + value.length) * 2, 0);
   }
 
+  function downloadText(filename, content, type) {
+    const blob = new Blob([content], { type });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = filename;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
+  function exportActivity() {
+    const escapeCell = (value) => `"${String(value || '').replace(/"/g, '""')}"`;
+    const rows = activities().map((item) => [
+      typeof item === 'string' ? item : item.action,
+      typeof item === 'string' ? '' : item.date
+    ]);
+    const csv = [['Action', 'Date'], ...rows].map((row) => row.map(escapeCell).join(',')).join('\n');
+    downloadText(`tactical-activity-${new Date().toISOString().slice(0, 10)}.csv`, csv, 'text/csv');
+    toast('Activity exported as CSV.');
+  }
+
+  function workspaceData() {
+    const data = {};
+    storageEntries().forEach(([key, value]) => {
+      if (key !== 'tactical-web-google-session' && key !== 'tactical-web-snapshots') data[key] = value;
+    });
+    return data;
+  }
+
+  function snapshots() {
+    const value = getJson('tactical-web-snapshots', []);
+    return Array.isArray(value) ? value : [];
+  }
+
+  function saveSnapshots(items) {
+    set('tactical-web-snapshots', JSON.stringify(items.slice(-8)));
+  }
+
+  function renderSnapshots() {
+    const list = byId('snapshotList');
+    const items = snapshots().slice().reverse();
+    list.replaceChildren();
+    if (!items.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = 'No snapshots have been created.';
+      list.appendChild(empty);
+      return;
+    }
+    items.forEach((snapshot) => {
+      const row = document.createElement('div');
+      row.className = 'snapshot-row';
+      const copy = document.createElement('div');
+      const title = document.createElement('strong');
+      title.textContent = snapshot.name;
+      const meta = document.createElement('span');
+      meta.textContent = `${formatDate(snapshot.createdAt)} · ${Object.keys(snapshot.data || {}).length} keys`;
+      copy.append(title, meta);
+      const actions = document.createElement('div');
+      actions.className = 'snapshot-actions';
+      const restore = document.createElement('button');
+      restore.className = 'studio-button small';
+      restore.type = 'button';
+      restore.textContent = 'Restore';
+      restore.addEventListener('click', () => {
+        if (!confirm(`Restore ${snapshot.name}? Current authentication will be preserved.`)) return;
+        Object.entries(snapshot.data || {}).forEach(([key, value]) => {
+          if (key.startsWith('tactical-') && typeof value === 'string') set(key, value);
+        });
+        loadPreferences();
+        refresh();
+        toast('Snapshot restored.');
+      });
+      const remove = document.createElement('button');
+      remove.className = 'studio-button small danger';
+      remove.type = 'button';
+      remove.textContent = 'Delete';
+      remove.addEventListener('click', () => {
+        saveSnapshots(snapshots().filter((item) => item.id !== snapshot.id));
+        renderSnapshots();
+        toast('Snapshot deleted.');
+      });
+      actions.append(restore, remove);
+      row.append(copy, actions);
+      list.appendChild(row);
+    });
+  }
+
+  function createSnapshot() {
+    const now = new Date();
+    const items = snapshots();
+    items.push({ id: `${now.getTime()}`, name: `Snapshot ${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`, createdAt: now.toISOString(), data: workspaceData() });
+    saveSnapshots(items);
+    renderSnapshots();
+    toast('Workspace snapshot created.');
+  }
+
+  function renderGoal() {
+    const presetCount = getNumber('tactical-web-preset-count');
+    const goal = Math.max(1, getNumber('tactical-web-preset-goal') || 10);
+    const percent = Math.min(100, Math.round((presetCount / goal) * 100));
+    byId('goalInput').value = goal;
+    byId('goalProgress').textContent = `${presetCount.toLocaleString()} / ${goal.toLocaleString()}`;
+    byId('goalPercent').textContent = `${percent} percent`;
+    byId('goalFill').style.width = `${percent}%`;
+  }
+
   function runDiagnostics() {
     const checks = {
       healthAuth: Boolean(window.google?.accounts?.id),
       healthSession: Boolean(window.TacticalAuth?.getSession?.()),
       healthCredits: Boolean(window.TacticalCredits),
-      healthStorage: (() => { try { set('_tw_test', '1'); localStorage.removeItem('_tw_test'); return true; } catch (_) { return false; } })()
+      healthStorage: (() => { try { set('_tw_test', '1'); localStorage.removeItem('_tw_test'); return true; } catch (_) { return false; } })(),
+      healthNetwork: navigator.onLine,
+      healthSecure: window.isSecureContext
     };
     Object.entries(checks).forEach(([id, ok]) => {
       const element = byId(id);
@@ -181,21 +295,15 @@
     renderActivity();
     renderChart();
     renderStorage();
+    renderSnapshots();
+    renderGoal();
     runDiagnostics();
     byId('lastUpdated').textContent = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   }
 
   function exportData() {
-    const data = {};
-    storageEntries().forEach(([key, value]) => {
-      if (key !== 'tactical-web-google-session') data[key] = value;
-    });
-    const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), data }, null, 2)], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `tactical-web-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    link.click();
-    URL.revokeObjectURL(link.href);
+    const data = workspaceData();
+    downloadText(`tactical-web-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ exportedAt: new Date().toISOString(), data }, null, 2), 'application/json');
     toast('Workspace backup exported without authentication data.');
   }
 
