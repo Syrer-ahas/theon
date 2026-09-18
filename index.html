@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Design tailored ReShade presets with an AI-assisted visual workflow." />
+    <title>Tactical Web — ReShade Studio</title>
+    <link rel="icon" type="image/png" href="images/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="tactical-theme.css" />
+    <link rel="stylesheet" href="studio-ui.css" />
+    <link rel="stylesheet" href="newsletter-popup.css" />
+  </head>
+  <body data-page="home">
+    <div class="tw-page">
+      <header class="tw-topbar"></header>
+      <main class="studio-main">
+        <section class="home-hero" aria-labelledby="heroTitle">
+          <div>
+            <span class="studio-kicker">AI-assisted ReShade studio</span>
+            <h1 class="studio-title" id="heroTitle">Build a look.<br><em>Keep the control.</em></h1>
+            <p class="studio-lede">Describe the atmosphere, color response, and performance target. Tactical Web turns that direction into an editable preset package built for your game.</p>
+          </div>
+          <aside class="studio-panel home-status" aria-label="Workspace status">
+            <div class="status-head">
+              <div>
+                <span class="studio-label">Workspace pulse</span>
+                <div style="margin-top:7px;font-weight:750">Ready for a new build</div>
+              </div>
+              <span class="status-live">Online</span>
+            </div>
+            <div class="status-metrics">
+              <div class="status-metric"><strong id="pulseAccount">Guest</strong><span>Account state</span></div>
+              <div class="status-metric"><strong id="pulseCredits">0</strong><span>Credits ready</span></div>
+              <div class="status-metric"><strong id="pulsePresets">0</strong><span>Presets built</span></div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="studio-panel composer" aria-labelledby="composerTitle">
+          <div class="composer-head">
+            <div>
+              <span class="studio-label">New project</span>
+              <h2 id="composerTitle" style="margin-top:7px">Describe the final frame</h2>
+            </div>
+            <span class="char-count" id="charCount">0 / 600</span>
+          </div>
+          <textarea id="promptInput" maxlength="600" aria-label="Preset description" placeholder="A restrained cinematic grade for night driving: cool shadows, warm streetlights, clean highlights, subtle bloom, and sharp detail without crushed blacks."></textarea>
+          <p id="composerStatus" class="studio-muted" role="status" style="min-height:18px;margin:7px 0 0;font-size:.76rem"></p>
+          <div class="composer-tools">
+            <select class="studio-select" id="modelSelect" aria-label="AI model">
+              <option value="Auto">Auto select</option>
+              <option value="Deepseek v4 Flash">Deepseek v4 Flash</option>
+              <option value="GPT 5.6 Luna">GPT 5.6 Luna</option>
+              <option value="Lumen 3.2">Lumen 3.2</option>
+              <option value="Gemini 3.8 Flash">Gemini 3.8 Flash</option>
+              <option value="Lumen 3.8">Lumen 3.8</option>
+              <option value="Fortis Gen 7.3">Fortis Gen 7.3</option>
+              <option value="Kimi K3">Kimi K3</option>
+            </select>
+            <button class="studio-button" id="clearPromptBtn" type="button">Clear</button>
+            <button class="studio-button primary" id="generateBtn" type="button">Open generator</button>
+          </div>
+        </section>
+
+        <div class="suggestion-strip" aria-label="Prompt suggestions">
+          <button class="suggestion" type="button" data-suggestion="Natural daylight with neutral whites, soft contrast, restrained saturation, and crisp foliage detail.">Natural daylight</button>
+          <button class="suggestion" type="button" data-suggestion="A cinematic night grade with cool shadows, warm practical lights, subtle bloom, and protected highlights.">Cinematic night</button>
+          <button class="suggestion" type="button" data-suggestion="A performance-first competitive preset with clear visibility, low processing cost, and precise edge detail.">Competitive clarity</button>
+          <button class="suggestion" type="button" data-suggestion="A film-inspired image with gentle grain, lifted blacks, warm skin tones, and controlled halation.">Film response</button>
+          <button class="suggestion" type="button" data-suggestion="A realistic weathered look with muted greens, dense atmosphere, natural exposure, and subtle texture definition.">Grounded realism</button>
+        </div>
+
+        <section class="home-grid" aria-label="Product overview">
+          <div class="studio-panel section-panel">
+            <div class="section-head">
+              <div><span class="studio-label">Designed for iteration</span><h2 style="margin-top:7px">From direction to usable files</h2></div>
+              <span class="studio-muted" style="font-size:.75rem">Three focused stages</span>
+            </div>
+            <div class="feature-grid">
+              <article class="studio-card feature-card"><span class="feature-index">01 / DIRECT</span><h3>Describe the mood</h3><p>Set the game, visual intent, palette, hardware target, and strength in plain language.</p></article>
+              <article class="studio-card feature-card"><span class="feature-index">02 / REFINE</span><h3>Review the build</h3><p>Keep every result editable. Adjust the generated preset and shader values for your own display.</p></article>
+              <article class="studio-card feature-card"><span class="feature-index">03 / EXPORT</span><h3>Download clean files</h3><p>Receive a focused package containing the preset, shader, manifest, and installation notes.</p></article>
+            </div>
+          </div>
+          <aside class="studio-panel section-panel">
+            <div class="section-head"><div><span class="studio-label">Shortcuts</span><h2 style="margin-top:7px">Continue working</h2></div></div>
+            <nav class="quick-list" aria-label="Quick links">
+              <a class="quick-link" href="generator.html"><strong>Direct generator</strong><span>Full controls</span></a>
+              <a class="quick-link" href="WindowGeneration.html"><strong>Agent workspace</strong><span>Guided build</span></a>
+              <a class="quick-link" href="account.html"><strong>Account</strong><span>Preferences</span></a>
+              <a class="quick-link" href="blog.html"><strong>Field notes</strong><span>Guides and updates</span></a>
+            </nav>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <div class="cookie-banner hidden" id="cookieBanner">
+      <div>We use browser storage to keep your session and preferences available. <a href="privacy.html" style="color:#c9b7ff">Learn more</a></div>
+      <div class="cookie-actions">
+        <button class="btn btn-ghost" id="cookieDeclineBtn" type="button">Decline</button>
+        <button class="btn btn-primary" id="cookieAcceptBtn" type="button">Accept</button>
+      </div>
+    </div>
+
+    <script src="auth-config.js"></script>
+    <script src="auth-session.js"></script>
+    <script src="auth-google.js"></script>
+    <script src="credit-system.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <script src="tactical-layout.js"></script>
+    <script src="auth-ui.js"></script>
+    <script src="home.js"></script>
+    <script src="cookie.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="turnstile-config.js"></script>
+  </body>
+</html>
