@@ -1,12 +1,12 @@
 (() => {
   'use strict';
   const el = (id) => document.getElementById(id);
-  const state = { session: null, chats: [], activeId: null, busy: false, credits: 0, downloads: new Map() };
+  const state = { session: null, chats: [], activeId: null, busy: false, credits: 0, plan: 'free', downloads: new Map() };
 
   function planName() {
-    try { return localStorage.getItem('tactical-web-selected-plan') || 'Free'; } catch (_) { return 'Free'; }
+    return ({ pro: 'Tactical PRO', premium: 'Tactical Premium', enterprise: 'Tactical Enterprise' })[state.plan] || 'Free';
   }
-  function isPaid() { return planName() !== 'Free'; }
+  function isPaid() { return state.plan !== 'free'; }
   function chatLimit() { return isPaid() ? Infinity : 2; }
   function storageKey() { return `tactical-web-saved-chats:${state.session?.email?.toLowerCase() || 'guest'}`; }
   function uid() { return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`; }
@@ -16,14 +16,14 @@
     if (!state.session) { state.chats = []; state.activeId = null; return; }
     try {
       const value = JSON.parse(localStorage.getItem(storageKey()) || '[]');
-      state.chats = Array.isArray(value) ? value.slice(0, isPaid() ? 100 : 2) : [];
+      state.chats = Array.isArray(value) ? value.slice(0, 100) : [];
     } catch (_) { state.chats = []; }
     state.activeId = state.chats[0]?.id || null;
   }
 
   function saveChats() {
     if (!state.session) return;
-    try { localStorage.setItem(storageKey(), JSON.stringify(state.chats.slice(0, isPaid() ? 100 : 2))); } catch (_) {}
+    try { localStorage.setItem(storageKey(), JSON.stringify(state.chats.slice(0, 100))); } catch (_) {}
     el('saveState').textContent = 'Saved in this browser';
   }
 
@@ -79,6 +79,7 @@
     });
     el('chatPlan').textContent = isPaid() ? `${planName()} · ${state.chats.length} saved chats` : `Free plan · ${state.chats.length} of 2 chats used`;
     el('newChatBtn').disabled = !state.session || (!isPaid() && state.chats.length >= 2 && activeChat()?.messages.length > 0);
+    el('upgradeChatLink').hidden = isPaid();
   }
 
   function createMessageNode(message) {
@@ -225,12 +226,26 @@
       const signedIn = await window.TacticalSignIn.signInWithGoogle();
       if (!signedIn) return;
       state.session = signedIn;
+      await syncBilling();
       loadChats();
       await window.TacticalCredits.sync({ force: true });
       clearNotice();
       render();
       processHomepageDraft();
     } catch (error) { showNotice(error.message || 'Google sign-in could not be completed.'); }
+  }
+
+  async function syncBilling() {
+    state.plan = 'free';
+    if (!state.session?.credential) return;
+    try {
+      const response = await fetch('/api/billing', {
+        headers: { Authorization: `Bearer ${state.session.credential}` },
+        cache: 'no-store'
+      });
+      const billing = await response.json().catch(() => ({}));
+      if (response.ok && ['pro', 'premium', 'enterprise'].includes(billing.plan)) state.plan = billing.plan;
+    } catch (_) {}
   }
 
   function processHomepageDraft() {
@@ -250,8 +265,9 @@
     }
   }
 
-  function boot() {
+  async function boot() {
     state.session = window.TacticalSignIn.getSession();
+    await syncBilling();
     loadChats();
     el('newChatBtn').addEventListener('click', () => { clearNotice(); makeChat(); el('chatInput').focus(); });
     el('sendBtn').addEventListener('click', () => sendMessage());
@@ -267,15 +283,15 @@
     });
     document.querySelectorAll('[data-agent-suggestion]').forEach((button) => button.addEventListener('click', () => sendMessage(button.dataset.agentSuggestion)));
     window.addEventListener('tw-credits-changed', (event) => { state.credits = event.detail?.authenticated ? Number(event.detail.credits || 0) : 0; render(); });
-    document.addEventListener('tactical-auth-changed', (event) => {
+    document.addEventListener('tactical-auth-changed', async (event) => {
       state.session = event.detail?.session || null;
+      await syncBilling();
       loadChats();
       render();
     });
     const selectedModel = localStorage.getItem('tactical-web-selected-model');
     if (selectedModel && Array.from(el('agentModel').options).some((option) => option.value === selectedModel)) el('agentModel').value = selectedModel;
     render();
-    el('upgradeChatLink').hidden = isPaid();
     if (state.session) {
       window.TacticalCredits.sync({ force: true });
       processHomepageDraft();
