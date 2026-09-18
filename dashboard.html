@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Tactical Web administration and workspace dashboard." />
+    <title>Dashboard — Tactical Web</title>
+    <link rel="icon" type="image/png" href="images/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&family=Montserrat:wght@800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="tactical-theme.css" />
+    <link rel="stylesheet" href="studio-ui.css" />
+  </head>
+  <body data-page="dashboard">
+    <div class="tw-page">
+      <header class="tw-topbar"></header>
+      <main class="studio-main">
+        <header class="dash-header">
+          <div>
+            <span class="studio-kicker">Administration workspace</span>
+            <h1>Control center</h1>
+            <p class="studio-muted" id="lastUpdated" style="margin:10px 0 0">Loading workspace data</p>
+          </div>
+          <div class="dash-user">
+            <strong id="adminName">Administrator</strong>
+            <span id="adminEmail"></span>
+          </div>
+        </header>
+
+        <section class="metric-grid" aria-label="Workspace metrics">
+          <article class="studio-card metric-card"><span class="studio-label">Presets</span><strong id="metricPresets">0</strong><p>Generated on this browser</p></article>
+          <article class="studio-card metric-card"><span class="studio-label">Credits</span><strong id="metricCredits">0</strong><p>Available generation balance</p></article>
+          <article class="studio-card metric-card"><span class="studio-label">Visits</span><strong id="metricVisits">0</strong><p>Recorded site sessions</p></article>
+          <article class="studio-card metric-card"><span class="studio-label">Activity</span><strong id="metricActivity">0</strong><p>Workspace history entries</p></article>
+        </section>
+
+        <nav class="dash-tabs" aria-label="Dashboard sections">
+          <button class="dash-tab active" type="button" data-dashboard-tab="overview">Overview</button>
+          <button class="dash-tab" type="button" data-dashboard-tab="workspace">Workspace</button>
+          <button class="dash-tab" type="button" data-dashboard-tab="data">Data tools</button>
+          <button class="dash-tab" type="button" data-dashboard-tab="health">System health</button>
+        </nav>
+
+        <section class="dash-view" data-dashboard-view="overview">
+          <div class="dash-grid">
+            <div class="dash-stack">
+              <article class="studio-panel dash-panel">
+                <div class="panel-title"><div><span class="studio-label">Last seven days</span><h2 style="margin-top:6px">Workspace activity</h2></div><button class="studio-button small" id="refreshBtn" type="button">Refresh</button></div>
+                <div class="usage-chart" id="usageChart" aria-label="Seven day activity chart"></div>
+              </article>
+              <article class="studio-panel dash-panel">
+                <div class="panel-title"><div><span class="studio-label">Timeline</span><h2 style="margin-top:6px">Recent activity</h2></div><button class="studio-button small danger" id="clearActivityBtn" type="button">Clear history</button></div>
+                <form class="form-row" id="activityForm" style="margin-bottom:12px">
+                  <input class="studio-input" id="activityInput" maxlength="120" placeholder="Record a workspace note" aria-label="Activity note" />
+                  <button class="studio-button accent" type="submit">Add note</button>
+                </form>
+                <div class="activity-list" id="activityList"></div>
+              </article>
+            </div>
+            <aside class="dash-stack">
+              <article class="studio-panel dash-panel">
+                <div class="panel-title"><div><span class="studio-label">Administrator</span><h2 style="margin-top:6px">Profile summary</h2></div></div>
+                <div class="quick-list">
+                  <div class="quick-link"><strong>Name</strong><span id="profileName">—</span></div>
+                  <div class="quick-link"><strong>Email</strong><span id="profileEmail">—</span></div>
+                  <div class="quick-link"><strong>Plan</strong><span id="profilePlan">Free</span></div>
+                  <div class="quick-link"><strong>First seen</strong><span id="profileSince">—</span></div>
+                </div>
+              </article>
+              <article class="studio-panel dash-panel">
+                <div class="panel-title"><div><span class="studio-label">Navigation</span><h2 style="margin-top:6px">Quick actions</h2></div></div>
+                <nav class="quick-list" aria-label="Dashboard quick actions">
+                  <a class="quick-link" href="generator.html"><strong>Open generator</strong><span>Direct workflow</span></a>
+                  <a class="quick-link" href="WindowGeneration.html"><strong>Open agent</strong><span>Guided workflow</span></a>
+                  <a class="quick-link" href="account.html"><strong>Account settings</strong><span>Profile and privacy</span></a>
+                  <a class="quick-link" href="index.html"><strong>Return home</strong><span>Landing page</span></a>
+                </nav>
+              </article>
+            </aside>
+          </div>
+        </section>
+
+        <section class="dash-view" data-dashboard-view="workspace" hidden>
+          <div class="dash-grid">
+            <article class="studio-panel dash-panel">
+              <div class="panel-title"><div><span class="studio-label">Defaults</span><h2 style="margin-top:6px">Generation preferences</h2></div></div>
+              <div class="preference-grid">
+                <div class="field"><label for="defaultGame">Default game</label><input class="studio-input" id="defaultGame" placeholder="Cyberpunk 2077" /></div>
+                <div class="field"><label for="defaultQuality">Quality profile</label><select class="studio-select" id="defaultQuality"><option value="performance">Performance</option><option value="balanced">Balanced</option><option value="quality">Maximum quality</option></select></div>
+                <div class="field"><label for="defaultHardware">Hardware target</label><select class="studio-select" id="defaultHardware"><option value="low">Entry level</option><option value="mid">Mid range</option><option value="high">High end</option></select></div>
+                <div class="field"><label>Interface density</label><div class="toggle-row"><span style="font-size:.78rem">Compact controls</span><button class="toggle" id="compactMode" type="button" aria-pressed="false" aria-label="Toggle compact controls"></button></div></div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:18px">
+                <button class="studio-button" id="clearPreferencesBtn" type="button">Reset</button>
+                <button class="studio-button primary" id="savePreferencesBtn" type="button">Save preferences</button>
+              </div>
+            </article>
+            <aside class="studio-panel dash-panel">
+              <div class="panel-title"><div><span class="studio-label">Workflow</span><h2 style="margin-top:6px">Operational notes</h2></div></div>
+              <p class="studio-muted" style="font-size:.82rem;line-height:1.7;margin:0">These defaults are stored in the browser and are ready for generator integration. They do not change server settings or alter generated files until the generator reads them.</p>
+              <div class="quick-list" style="margin-top:18px">
+                <div class="quick-link"><strong>Authentication</strong><span>Google ID token</span></div>
+                <div class="quick-link"><strong>Generation</strong><span>Serverless API</span></div>
+                <div class="quick-link"><strong>Local state</strong><span>Browser only</span></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="dash-view" data-dashboard-view="data" hidden>
+          <div class="studio-panel dash-panel">
+            <div class="panel-title">
+              <div><span class="studio-label">Browser state</span><h2 style="margin-top:6px">Data tools</h2></div>
+              <span class="studio-muted" id="storageCount" style="font-size:.74rem">0 visible keys</span>
+            </div>
+            <div class="action-grid" style="margin-bottom:18px">
+              <article class="studio-card action-card"><h3>Export workspace</h3><p>Download preferences and activity as JSON. Authentication credentials are excluded.</p><button class="studio-button small" id="exportDataBtn" type="button">Export backup</button></article>
+              <article class="studio-card action-card"><h3>Import workspace</h3><p>Restore Tactical Web preferences and history from a previous dashboard backup.</p><button class="studio-button small" id="importDataBtn" type="button">Choose backup</button><input id="importFile" type="file" accept="application/json" hidden /></article>
+              <article class="studio-card action-card"><h3>Inspect state</h3><p>Search the browser data used by the current Tactical Web session and interface.</p><input class="studio-input" id="storageSearch" placeholder="Search stored data" aria-label="Search stored data" /></article>
+            </div>
+            <div class="storage-list" id="storageList"></div>
+          </div>
+        </section>
+
+        <section class="dash-view" data-dashboard-view="health" hidden>
+          <div class="dash-grid">
+            <article class="studio-panel dash-panel">
+              <div class="panel-title"><div><span class="studio-label">Live checks</span><h2 style="margin-top:6px">System health</h2></div></div>
+              <div class="health-grid">
+                <div class="health-row"><span>Google Identity</span><span class="health-state" id="healthAuth">Checking</span></div>
+                <div class="health-row"><span>Admin session</span><span class="health-state" id="healthSession">Checking</span></div>
+                <div class="health-row"><span>Credit service</span><span class="health-state" id="healthCredits">Checking</span></div>
+                <div class="health-row"><span>Browser storage</span><span class="health-state" id="healthStorage">Checking</span></div>
+                <div class="health-row"><span>Storage usage</span><span class="health-state" id="healthUsage">Calculating</span></div>
+              </div>
+            </article>
+            <aside class="studio-panel dash-panel">
+              <div class="panel-title"><div><span class="studio-label">Session control</span><h2 style="margin-top:6px">Administrator access</h2></div></div>
+              <p class="studio-muted" style="font-size:.82rem;line-height:1.7">This page remains restricted to the configured administrator Google account. Signing out removes the local session and returns to the homepage.</p>
+              <button class="studio-button danger" id="signOutBtn" type="button" style="margin-top:18px">Sign out</button>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="auth-config.js"></script>
+    <script src="auth-session.js"></script>
+    <script src="auth-google.js"></script>
+    <script src="credit-system.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <script src="tactical-layout.js"></script>
+    <script src="auth-ui.js"></script>
+    <script src="dashboard.js"></script>
+  </body>
+</html>
