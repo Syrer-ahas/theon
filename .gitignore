@@ -28,3 +28,7 @@ OPENROUTER_API_KEY
 .edge-headless*/
 homepage-after.png
 homepage-mobile*.png
+
+# Local dependency and editor caches
+node_modules/
+.continue/

@@ -1,10 +1,4 @@
 {
   "type": "module",
-  "scripts": {
-    "dev": "node dev-server.js"
-  },
-  "dependencies": {
-    "@vercel/analytics": "^2.0.1",
-    "resend": "^6.17.2"
-  }
+  "private": true
 }
