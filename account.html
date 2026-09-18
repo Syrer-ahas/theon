@@ -128,9 +128,9 @@
 
         <section class="panel section">
           <h2>Billing &amp; payment</h2>
-          <p class="muted">Manage your payment method and view invoices. Your payment provider will be connected when checkout goes live.</p>
-          <div class="connected-row"><div class="service"><div><strong>Payment method</strong><div class="muted" style="font-size:0.82rem;">None on file</div></div></div><span class="badge badge-gray">Not set up</span></div>
-          <div class="actions"><button class="btn btn-secondary" id="billingHistoryBtn" type="button">View billing history</button></div>
+          <p class="muted">Manage your Stripe subscription, payment method, and invoices.</p>
+          <div class="connected-row"><div class="service"><div><strong>Stripe billing</strong><div class="muted" id="billingDescription" style="font-size:0.82rem;">Checking billing status...</div></div></div><span class="badge badge-gray" id="billingBadge">Checking</span></div>
+          <div class="actions"><button class="btn btn-secondary" id="billingHistoryBtn" type="button" disabled>Manage billing</button></div>
         </section>
 
         <section class="panel section">
@@ -157,8 +157,47 @@
     <script>
       const session = window.TacticalAuth.getSession();
       const avatar = document.getElementById('avatar');
-      const selectedPlan = localStorage.getItem('tactical-web-selected-plan');
-      if (selectedPlan) document.getElementById('planLabel').textContent = selectedPlan + ' selected · Checkout will be available soon.';
+      let activePlan = 'Free';
+      const checkoutResult = new URLSearchParams(window.location.search).get('checkout');
+
+      function planName(plan) {
+        return ({ pro: 'Tactical PRO', premium: 'Tactical Premium', enterprise: 'Tactical Enterprise' })[plan] || 'Free';
+      }
+
+      async function loadBilling(attempt = 0) {
+        if (!session) return;
+        const label = document.getElementById('planLabel');
+        const badge = document.getElementById('billingBadge');
+        const description = document.getElementById('billingDescription');
+        const manageButton = document.getElementById('billingHistoryBtn');
+        try {
+          const response = await fetch('/api/billing', {
+            headers: { Authorization: `Bearer ${session.credential}` },
+            cache: 'no-store'
+          });
+          const billing = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(billing.error || 'Billing status is unavailable.');
+          activePlan = planName(billing.plan);
+          label.textContent = activePlan === 'Free'
+            ? 'Free plan · Explore Tactical Web at your own pace.'
+            : `${activePlan} · ${billing.status === 'trialing' ? 'Trial active' : 'Subscription active'}`;
+          const paid = activePlan !== 'Free' && Boolean(billing.customerId);
+          badge.textContent = paid ? 'Active' : 'Not set up';
+          badge.className = paid ? 'badge badge-green' : 'badge badge-gray';
+          description.textContent = paid ? 'Subscription and invoices are managed securely by Stripe.' : 'No active paid subscription.';
+          manageButton.disabled = !paid;
+          if (checkoutResult === 'success' && !paid && attempt < 4) {
+            label.textContent = 'Payment received · Activating your plan...';
+            setTimeout(() => loadBilling(attempt + 1), 1500);
+          } else if (checkoutResult === 'success' && paid) {
+            document.getElementById('settingsStatus').textContent = `${activePlan} is now active.`;
+            history.replaceState({}, '', 'account.html');
+          }
+        } catch (error) {
+          badge.textContent = 'Unavailable';
+          description.textContent = error.message;
+        }
+      }
 
       // If somehow reached without a session, send them home (the layout also gates this).
       if (!session && window.location.pathname.includes('account.html')) {
@@ -173,6 +212,7 @@
         document.getElementById('googleStatus').textContent = 'Connected as ' + session.email;
         document.getElementById('googleBadge').textContent = 'Connected';
         document.getElementById('googleBadge').className = 'badge badge-green';
+        loadBilling();
 
         const now = new Date();
         if (!localStorage.getItem('tactical-web-first-seen')) localStorage.setItem('tactical-web-first-seen', now.toISOString());
@@ -250,8 +290,23 @@
         window.location.href = 'index.html';
       });
 
-      document.getElementById('billingHistoryBtn').addEventListener('click', () => {
-        document.getElementById('settingsStatus').textContent = 'Billing history will appear here once checkout is available.';
+      document.getElementById('billingHistoryBtn').addEventListener('click', async () => {
+        const button = document.getElementById('billingHistoryBtn');
+        button.disabled = true;
+        document.getElementById('settingsStatus').textContent = 'Opening secure Stripe billing...';
+        try {
+          const response = await fetch('/api/create-portal-session', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${session.credential}`, 'Content-Type': 'application/json' },
+            body: '{}'
+          });
+          const payload = await response.json().catch(() => ({}));
+          if (!response.ok || !payload.url) throw new Error(payload.error || 'Billing could not be opened.');
+          window.location.assign(payload.url);
+        } catch (error) {
+          document.getElementById('settingsStatus').textContent = error.message;
+          button.disabled = false;
+        }
       });
 
       document.getElementById('exportDataBtn').addEventListener('click', () => {
@@ -261,7 +316,7 @@
           preferences: JSON.parse(localStorage.getItem('tactical-web-preferences') || '{}'),
           activityLog: JSON.parse(localStorage.getItem('tactical-web-activity-log') || '[]'),
           affiliateCode: localStorage.getItem('tactical-affiliate-code') || null,
-          plan: selectedPlan || 'Free'
+          plan: activePlan
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
