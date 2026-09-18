@@ -35,8 +35,7 @@ async function readBody(request) {
     if (size > maxBodyBytes) throw new Error('Request body is too large.');
     chunks.push(chunk);
   }
-  if (!chunks.length) return {};
-  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  return Buffer.concat(chunks);
 }
 
 async function handleApi(request, response, pathname) {
@@ -52,7 +51,8 @@ async function handleApi(request, response, pathname) {
   }
 
   try {
-    request.body = request.method === 'GET' || request.method === 'HEAD' ? {} : await readBody(request);
+    request.rawBody = request.method === 'GET' || request.method === 'HEAD' ? Buffer.alloc(0) : await readBody(request);
+    request.body = request.rawBody.length ? JSON.parse(request.rawBody.toString('utf8')) : {};
   } catch (_) {
     return sendJson(response, 400, { error: 'Invalid request body.' });
   }
