@@ -318,6 +318,63 @@
     toast('Workspace backup imported.');
   }
 
+  let managedAccount = null;
+
+  function renderManagedAccount(account) {
+    managedAccount = account || null;
+    byId('accountResult').hidden = !account;
+    byId('accountControls').hidden = !account;
+    if (!account) return;
+    byId('managedAccountEmail').textContent = account.email;
+    byId('managedCredits').textContent = Number(account.credits || 0).toLocaleString();
+    byId('managedBanState').textContent = account.banned ? 'Banned' : 'Active';
+    byId('managedBanState').style.color = account.banned ? 'var(--studio-red)' : 'var(--studio-green)';
+    byId('banUserBtn').disabled = Boolean(account.banned);
+    byId('unbanUserBtn').disabled = !account.banned;
+  }
+
+  async function manageUser(action) {
+    const email = byId('managedEmail').value.trim().toLowerCase();
+    const amount = Number(byId('creditAmount').value);
+    const token = window.TacticalSignIn?.getSessionToken?.();
+    if (!email || !token) { byId('userAdminStatus').textContent = 'A valid email and administrator session are required.'; return; }
+
+    const controls = [byId('lookupUserBtn'), byId('addCreditsBtn'), byId('removeCreditsBtn'), byId('banUserBtn'), byId('unbanUserBtn')];
+    controls.forEach((button) => { button.disabled = true; });
+    byId('userAdminStatus').textContent = action === 'lookup' ? 'Looking up user…' : 'Applying account change…';
+    try {
+      const response = await fetch('/api/admin-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        credentials: 'same-origin',
+        body: JSON.stringify({ email, action, amount })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (response.status === 401) window.TacticalSignIn?.signOut?.();
+      if (!response.ok) throw new Error(payload.error || 'The account action failed.');
+      renderManagedAccount(payload.account);
+      const actionLabel = { lookup: 'User loaded', add: 'Credits added', remove: 'Credits removed', ban: 'User banned', unban: 'User access restored' }[action];
+      byId('userAdminStatus').textContent = `${actionLabel}. Current balance: ${payload.account.credits}.`;
+      if (action !== 'lookup') {
+        const items = activities();
+        items.push({ action: `${actionLabel}: ${email}`, date: new Date().toISOString() });
+        saveActivities(items);
+        refresh();
+      }
+    } catch (error) {
+      renderManagedAccount(null);
+      byId('userAdminStatus').textContent = error.message || 'The account action failed.';
+    } finally {
+      byId('lookupUserBtn').disabled = false;
+      if (managedAccount) {
+        byId('addCreditsBtn').disabled = false;
+        byId('removeCreditsBtn').disabled = false;
+        byId('banUserBtn').disabled = Boolean(managedAccount.banned);
+        byId('unbanUserBtn').disabled = !managedAccount.banned;
+      }
+    }
+  }
+
   function boot() {
     document.querySelectorAll('[data-dashboard-tab]').forEach((tab) => {
       tab.addEventListener('click', () => {
@@ -391,6 +448,13 @@
       try { await navigator.clipboard.writeText(summary); toast('Workspace summary copied.'); }
       catch (_) { toast('Clipboard access is unavailable.'); }
     });
+    byId('userLookupForm').addEventListener('submit', (event) => { event.preventDefault(); manageUser('lookup'); });
+    byId('addCreditsBtn').addEventListener('click', () => manageUser('add'));
+    byId('removeCreditsBtn').addEventListener('click', () => manageUser('remove'));
+    byId('banUserBtn').addEventListener('click', () => {
+      if (confirm(`Ban ${byId('managedEmail').value.trim()} from generation and agent access?`)) manageUser('ban');
+    });
+    byId('unbanUserBtn').addEventListener('click', () => manageUser('unban'));
     byId('savePreferencesBtn').addEventListener('click', () => {
       const preferences = {
         defaultGame: byId('defaultGame').value.trim(),
