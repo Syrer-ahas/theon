@@ -24,7 +24,7 @@ export default async function handler(request, response) {
     return response.status(403).json({ error: 'Administrator access required.' });
   }
   if (!hasPersistentCreditStore()) {
-    return response.status(503).json({ error: 'Persistent credit storage must be configured before managing users.' });
+    return response.status(503).json({ error: 'Connect an Upstash or Vercel Redis database, then set KV_REST_API_URL and KV_REST_API_TOKEN in the deployment environment.' });
   }
 
   const email = normalizeEmail(request.body?.email);

@@ -53,7 +53,7 @@ export default async function handler(request, response) {
   }
   rateLimitStore.set(user.email, now);
 
-  const { message, history } = request.body || {};
+  const { message, history, model } = request.body || {};
   if (!message || typeof message !== 'string' || message.trim().length === 0) {
     return response.status(400).json({ error: 'Message is required.' });
   }
@@ -66,7 +66,8 @@ export default async function handler(request, response) {
     return response.status(500).json({ error: 'AI is not configured yet.' });
   }
 
-  const systemPrompt = `You are Tactical AI, the chat and intake assistant for Tactical Web. You have TWO modes:
+  const selectedProfile = String(model || 'Auto').slice(0, 60).replace(/[^a-z0-9 ._-]/gi, '') || 'Auto';
+  const systemPrompt = `You are Tactical AI, the chat and intake assistant for Tactical Web. The user selected the "${selectedProfile}" response profile. Adapt response depth and speed to that preference without claiming to be a different underlying provider. You have TWO modes:
 
 MODE 1 - CONVERSATION: Help users with ReShade advice, answer questions about shaders, optimization, visual styles. Be concise, knowledgeable, under 250 words.
 

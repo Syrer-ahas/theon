@@ -340,9 +340,9 @@
                   </div>
                 </div>
               </div>
-              <button class="btn-secondary" type="button" title="Tokens">
+              <button class="btn-secondary" id="homeCreditButton" type="button" title="Available credits">
                 <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 4.24 2 7v10c0 2.76 4.48 5 10 5s10-2.24 10-5V7c0-2.76-4.48-5-10-5zm0 18c-4.42 0-8-1.79-8-4v-2.34c1.88 1.45 4.7 2.34 8 2.34s6.12-.89 8-2.34V16c0 2.21-3.58 4-8 4zm0-6c-4.42 0-8-1.79-8-4v-2.34c1.88 1.45 4.7 2.34 8 2.34s6.12-.89 8-2.34V12c0 2.21-3.58 4-8 4z"/></svg>
-                1.04
+                <span id="homeCreditValue">0 credits</span>
               </button>
               <button class="btn-generate" type="button" id="generateBtn">Generate</button>
             </div>
@@ -362,6 +362,7 @@
     <script src="auth-config.js"></script>
     <script src="auth-session.js"></script>
     <script src="auth-google.js"></script>
+    <script src="credit-system.js"></script>
     <script src="https://accounts.google.com/gsi/client" async></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
@@ -373,6 +374,21 @@
         const modelTabs = Array.from(document.querySelectorAll('[data-model-tab]'));
         const modelPanels = Array.from(document.querySelectorAll('[data-model-panel]'));
         const modelOptions = Array.from(document.querySelectorAll('[data-model]'));
+        const generateButton = document.getElementById('generateBtn');
+        const creditButton = document.getElementById('homeCreditButton');
+        const creditValue = document.getElementById('homeCreditValue');
+
+        const refreshHomeAccess = () => {
+          const signedIn = Boolean(window.TacticalAuth.getSession());
+          const snapshot = window.TacticalCredits.getSnapshot();
+          inputField.disabled = !signedIn;
+          modelTrigger.disabled = !signedIn;
+          modelOptions.forEach((option) => { option.disabled = !signedIn; });
+          document.querySelectorAll('.chip').forEach((chip) => { chip.disabled = !signedIn; });
+          generateButton.textContent = signedIn ? 'Chat with AI' : 'Sign in to continue';
+          creditValue.textContent = signedIn ? Number(snapshot.credits || 0) + ' credits' : 'Sign in';
+          inputField.placeholder = signedIn ? 'Describe the preset you want...' : 'Sign in with Google to start...';
+        };
 
         const closeModelMenu = (returnFocus = false) => {
           modelMenu.hidden = true;
@@ -446,15 +462,20 @@
         });
 
         // Carry the described mechanic into the generator and start there.
-        document.getElementById('generateBtn').addEventListener('click', () => {
+        generateButton.addEventListener('click', async () => {
+          if (!window.TacticalAuth.getSession()) {
+            try { await window.TacticalSignIn.signInWithGoogle(); await window.TacticalCredits.sync({ force: true }); refreshHomeAccess(); }
+            catch (_) { refreshHomeAccess(); return; }
+          }
           const value = (inputField.value || '').trim();
           try {
             if (value) localStorage.setItem('tactical-web-draft-prompt', value);
+            localStorage.setItem('tactical-web-agent-autosend', value ? 'true' : 'false');
           } catch (_) {}
           if (window.TacticalPageLoader && window.TacticalPageLoader.navigate) {
-            window.TacticalPageLoader.navigate('generator.html');
+            window.TacticalPageLoader.navigate('WindowGeneration.html');
           } else {
-            window.location.href = 'generator.html';
+            window.location.href = 'WindowGeneration.html';
           }
         });
         if (inputField) {
@@ -465,6 +486,18 @@
             }
           });
         }
+        creditButton.addEventListener('click', async () => {
+          if (!window.TacticalAuth.getSession()) {
+            try { await window.TacticalSignIn.signInWithGoogle(); await window.TacticalCredits.sync({ force: true }); }
+            catch (_) {}
+          } else {
+            window.location.href = 'account.html';
+          }
+          refreshHomeAccess();
+        });
+        document.addEventListener('tactical-auth-changed', refreshHomeAccess);
+        window.addEventListener('tw-credits-changed', refreshHomeAccess);
+        refreshHomeAccess();
       });
     </script>
     <script src="tactical-layout.js"></script>
