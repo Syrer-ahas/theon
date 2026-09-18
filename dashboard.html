@@ -37,6 +37,7 @@
 
         <nav class="dash-tabs" aria-label="Dashboard sections">
           <button class="dash-tab active" type="button" data-dashboard-tab="overview">Overview</button>
+          <button class="dash-tab" type="button" data-dashboard-tab="commands">Command center</button>
           <button class="dash-tab" type="button" data-dashboard-tab="workspace">Workspace</button>
           <button class="dash-tab" type="button" data-dashboard-tab="data">Data tools</button>
           <button class="dash-tab" type="button" data-dashboard-tab="health">System health</button>
@@ -50,7 +51,7 @@
                 <div class="usage-chart" id="usageChart" aria-label="Seven day activity chart"></div>
               </article>
               <article class="studio-panel dash-panel">
-                <div class="panel-title"><div><span class="studio-label">Timeline</span><h2 style="margin-top:6px">Recent activity</h2></div><button class="studio-button small danger" id="clearActivityBtn" type="button">Clear history</button></div>
+                <div class="panel-title"><div><span class="studio-label">Timeline</span><h2 style="margin-top:6px">Recent activity</h2></div><div class="toolbar"><input class="studio-input" id="activitySearch" placeholder="Filter activity" aria-label="Filter activity" /><button class="studio-button small" id="exportActivityBtn" type="button">Export CSV</button><button class="studio-button small danger" id="clearActivityBtn" type="button">Clear history</button></div></div>
                 <form class="form-row" id="activityForm" style="margin-bottom:12px">
                   <input class="studio-input" id="activityInput" maxlength="120" placeholder="Record a workspace note" aria-label="Activity note" />
                   <button class="studio-button accent" type="submit">Add note</button>
@@ -76,6 +77,45 @@
                   <a class="quick-link" href="account.html"><strong>Account settings</strong><span>Profile and privacy</span></a>
                   <a class="quick-link" href="index.html"><strong>Return home</strong><span>Landing page</span></a>
                 </nav>
+              </article>
+            </aside>
+          </div>
+        </section>
+
+        <section class="dash-view" data-dashboard-view="commands" hidden>
+          <div class="command-grid">
+            <div class="dash-stack">
+              <article class="studio-panel dash-panel">
+                <div class="panel-title"><div><span class="studio-label">Quick launch</span><h2 style="margin-top:6px">Start a generation brief</h2></div><span class="studio-muted" id="launchCount" style="font-size:.72rem">0 / 600</span></div>
+                <form class="launch-form" id="quickLaunchForm">
+                  <textarea id="quickPrompt" maxlength="600" placeholder="Describe a preset direction and send it directly to the generator." aria-label="Generation brief"></textarea>
+                  <div class="launch-options">
+                    <input class="studio-input" id="quickGame" placeholder="Game or profile" aria-label="Game or profile" />
+                    <select class="studio-select" id="quickModel" aria-label="AI model"><option value="Auto">Auto select</option><option value="Deepseek v4 Flash">Deepseek v4 Flash</option><option value="GPT 5.6 Luna">GPT 5.6 Luna</option><option value="Lumen 3.2">Lumen 3.2</option><option value="Gemini 3.8 Flash">Gemini 3.8 Flash</option><option value="Lumen 3.8">Lumen 3.8</option><option value="Fortis Gen 7.3">Fortis Gen 7.3</option><option value="Kimi K3">Kimi K3</option></select>
+                  </div>
+                  <div style="display:flex;justify-content:flex-end;gap:9px"><button class="studio-button" id="saveDraftBtn" type="button">Save draft</button><button class="studio-button primary" type="submit">Open generator</button></div>
+                </form>
+              </article>
+              <article class="studio-panel dash-panel">
+                <div class="panel-title"><div><span class="studio-label">Restore points</span><h2 style="margin-top:6px">Workspace snapshots</h2></div><button class="studio-button small" id="createSnapshotBtn" type="button">Create snapshot</button></div>
+                <div class="snapshot-list" id="snapshotList"></div>
+              </article>
+            </div>
+            <aside class="dash-stack">
+              <article class="studio-panel dash-panel">
+                <div class="panel-title"><div><span class="studio-label">Target</span><h2 style="margin-top:6px">Preset goal</h2></div></div>
+                <div class="goal-display"><strong id="goalProgress">0 / 10</strong><span class="studio-muted" id="goalPercent">0 percent</span></div>
+                <div class="progress-track" aria-label="Preset goal progress"><div class="progress-fill" id="goalFill"></div></div>
+                <div class="form-row" style="margin-top:16px"><input class="studio-input" id="goalInput" type="number" min="1" max="10000" value="10" aria-label="Preset goal" /><button class="studio-button" id="saveGoalBtn" type="button">Set goal</button></div>
+              </article>
+              <article class="studio-panel dash-panel">
+                <div class="panel-title"><div><span class="studio-label">Maintenance</span><h2 style="margin-top:6px">Workspace utilities</h2></div></div>
+                <div class="utility-grid">
+                  <button class="studio-button utility-button" id="clearDraftBtn" type="button">Clear saved draft</button>
+                  <button class="studio-button utility-button" id="resetVisitsBtn" type="button">Reset visit counter</button>
+                  <button class="studio-button utility-button" id="resetNewsletterBtn" type="button">Reset newsletter state</button>
+                  <button class="studio-button utility-button" id="copySummaryBtn" type="button">Copy workspace summary</button>
+                </div>
               </article>
             </aside>
           </div>
@@ -132,6 +172,8 @@
                 <div class="health-row"><span>Admin session</span><span class="health-state" id="healthSession">Checking</span></div>
                 <div class="health-row"><span>Credit service</span><span class="health-state" id="healthCredits">Checking</span></div>
                 <div class="health-row"><span>Browser storage</span><span class="health-state" id="healthStorage">Checking</span></div>
+                <div class="health-row"><span>Network state</span><span class="health-state" id="healthNetwork">Checking</span></div>
+                <div class="health-row"><span>Secure context</span><span class="health-state" id="healthSecure">Checking</span></div>
                 <div class="health-row"><span>Storage usage</span><span class="health-state" id="healthUsage">Calculating</span></div>
               </div>
             </article>
