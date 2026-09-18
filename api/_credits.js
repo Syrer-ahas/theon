@@ -174,7 +174,7 @@ export async function consumeGenerationCredit(subject, email) {
   if (account.banned) return { ok: false, ...account };
   if (account.credits < GENERATION_COST) return { ok: false, ...account };
   account.credits -= GENERATION_COST;
-  localStore.set(subject, { credits: account.credits, lastDailyAt: account.lastDailyAt });
+  localStore.set(subject, account);
   return { ok: true, ...account };
 }
 
@@ -184,7 +184,7 @@ export async function refundGenerationCredit(subject) {
     const credits = await redisCommand(['HINCRBY', accountKey(subject), 'credits', String(GENERATION_COST)]);
     return Number(credits);
   }
-  const current = localStore.get(subject) || { credits: 0, lastDailyAt: 0 };
+  const current = localStore.get(subject) || { credits: 0, lastDailyAt: 0, banned: false };
   current.credits += GENERATION_COST;
   localStore.set(subject, current);
   return current.credits;
