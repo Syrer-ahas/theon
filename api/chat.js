@@ -5,6 +5,7 @@
 // Unauthenticated requests are rejected with 401.
 
 import { verifyGoogleJWT, extractSessionToken } from './_auth.js';
+import { getCreditAccount } from './_credits.js';
 
 const CHAT_COOLDOWN_MS = 1500; // minimum gap between messages per user
 
@@ -34,6 +35,14 @@ export default async function handler(request, response) {
 
   if (!user) {
     return response.status(401).json({ error: 'Invalid or expired session. Please sign in again.' });
+  }
+
+  try {
+    const account = await getCreditAccount(user.sub, user.email);
+    if (account.banned) return response.status(403).json({ error: 'This account is suspended.' });
+  } catch (error) {
+    console.error('Account status check failed:', error);
+    return response.status(503).json({ error: 'Account service unavailable.' });
   }
 
   // Rate limit: one message per ~1.5s per user to prevent flooding the agent.

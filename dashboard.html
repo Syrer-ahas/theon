@@ -38,6 +38,7 @@
         <nav class="dash-tabs" aria-label="Dashboard sections">
           <button class="dash-tab active" type="button" data-dashboard-tab="overview">Overview</button>
           <button class="dash-tab" type="button" data-dashboard-tab="commands">Command center</button>
+          <button class="dash-tab" type="button" data-dashboard-tab="users">User accounts</button>
           <button class="dash-tab" type="button" data-dashboard-tab="workspace">Workspace</button>
           <button class="dash-tab" type="button" data-dashboard-tab="data">Data tools</button>
           <button class="dash-tab" type="button" data-dashboard-tab="health">System health</button>
@@ -117,6 +118,44 @@
                   <button class="studio-button utility-button" id="copySummaryBtn" type="button">Copy workspace summary</button>
                 </div>
               </article>
+            </aside>
+          </div>
+        </section>
+
+        <section class="dash-view" data-dashboard-view="users" hidden>
+          <div class="dash-grid">
+            <article class="studio-panel dash-panel">
+              <div class="panel-title"><div><span class="studio-label">Account lookup</span><h2 style="margin-top:6px">Manage a Google user</h2></div></div>
+              <form class="user-admin-form" id="userLookupForm">
+                <input class="studio-input" id="managedEmail" type="email" autocomplete="off" placeholder="user@gmail.com" aria-label="User Gmail address" required />
+                <button class="studio-button primary" id="lookupUserBtn" type="submit">Find user</button>
+              </form>
+              <p class="account-status" id="userAdminStatus" role="status">Enter the email used for Google sign-in. The user must have signed in at least once.</p>
+              <div class="account-result" id="accountResult" hidden>
+                <div><span class="studio-label">Google account</span><strong id="managedAccountEmail">—</strong></div>
+                <div><span class="studio-label">Credit balance</span><strong id="managedCredits">0</strong></div>
+                <div><span class="studio-label">Access state</span><strong id="managedBanState">Active</strong></div>
+              </div>
+              <div id="accountControls" hidden>
+                <div class="credit-controls">
+                  <input class="studio-input" id="creditAmount" type="number" min="1" max="100000" value="1" aria-label="Credit amount" />
+                  <button class="studio-button accent" id="addCreditsBtn" type="button">Add credits</button>
+                  <button class="studio-button" id="removeCreditsBtn" type="button">Remove credits</button>
+                </div>
+                <div class="ban-controls">
+                  <button class="studio-button danger" id="banUserBtn" type="button">Ban user</button>
+                  <button class="studio-button" id="unbanUserBtn" type="button">Restore access</button>
+                </div>
+              </div>
+            </article>
+            <aside class="studio-panel dash-panel">
+              <div class="panel-title"><div><span class="studio-label">Security</span><h2 style="margin-top:6px">Server-enforced controls</h2></div></div>
+              <p class="studio-muted" style="font-size:.82rem;line-height:1.7;margin-top:0">Every account change is sent to a protected server endpoint. The Google ID token is verified again and the administrator email must match the server allowlist.</p>
+              <div class="quick-list" style="margin-top:18px">
+                <div class="quick-link"><strong>Credit updates</strong><span>Stored centrally</span></div>
+                <div class="quick-link"><strong>Ban enforcement</strong><span>Generator and agent</span></div>
+                <div class="quick-link"><strong>Admin protection</strong><span>Server verified</span></div>
+              </div>
             </aside>
           </div>
         </section>

@@ -163,6 +163,14 @@ body.tw-body::before {
 .snapshot-actions { display: flex; gap: 6px; }
 .utility-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 9px; }
 .utility-button { min-height: 64px; text-align: left; justify-content: flex-start; }
+.user-admin-form { display: grid; grid-template-columns: minmax(220px,1fr) auto; gap: 10px; }
+.account-result { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 18px; }
+.account-result > div { padding: 16px; border: 1px solid var(--studio-line); border-radius: 14px; background: rgba(255,255,255,.03); }
+.account-result strong, .account-result span { display: block; }
+.account-result strong { margin-top: 8px; font-size: 1.05rem; word-break: break-word; }
+.account-status { min-height: 20px; margin: 12px 0 0; color: var(--studio-muted); font-size: .78rem; }
+.credit-controls { display: grid; grid-template-columns: minmax(120px,.5fr) auto auto; gap: 9px; margin-top: 16px; }
+.ban-controls { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 14px; }
 .empty-state { padding: 28px; border: 1px dashed var(--studio-line-strong); border-radius: 14px; color: var(--studio-muted); text-align: center; font-size: .8rem; }
 .toast { position: fixed; right: 24px; bottom: 24px; z-index: 60000; max-width: 340px; padding: 13px 16px; border: 1px solid var(--studio-line-strong); border-radius: 13px; background: #1a181f; color: #fff; box-shadow: var(--studio-shadow); font-size: .8rem; opacity: 0; transform: translateY(10px); pointer-events: none; transition: .2s; }
 .toast.show { opacity: 1; transform: none; }
@@ -185,6 +193,7 @@ body.tw-body::before {
   .dash-header { align-items: start; flex-direction: column; }
   .dash-user { text-align: left; }
   .preference-grid, .health-grid, .launch-options { grid-template-columns: 1fr; }
+  .user-admin-form, .credit-controls { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
   .metric-grid, .status-metrics { grid-template-columns: 1fr 1fr; }
