@@ -343,6 +343,54 @@
       refresh();
       toast('Activity history cleared.');
     });
+    byId('activitySearch').addEventListener('input', renderActivity);
+    byId('exportActivityBtn').addEventListener('click', exportActivity);
+    byId('quickPrompt').addEventListener('input', (event) => {
+      byId('launchCount').textContent = `${event.currentTarget.value.length} / 600`;
+    });
+    byId('saveDraftBtn').addEventListener('click', () => {
+      const prompt = byId('quickPrompt').value.trim();
+      if (!prompt) { toast('Enter a generation brief first.'); return; }
+      set('tactical-web-draft-prompt', prompt);
+      set('tactical-web-selected-model', byId('quickModel').value);
+      if (byId('quickGame').value.trim()) set('tactical-web-draft-game', byId('quickGame').value.trim());
+      toast('Generation draft saved.');
+    });
+    byId('quickLaunchForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      byId('saveDraftBtn').click();
+      if (!byId('quickPrompt').value.trim()) return;
+      window.location.href = 'generator.html';
+    });
+    byId('createSnapshotBtn').addEventListener('click', createSnapshot);
+    byId('saveGoalBtn').addEventListener('click', () => {
+      const goal = Math.max(1, Math.min(10000, Number(byId('goalInput').value) || 10));
+      set('tactical-web-preset-goal', String(goal));
+      renderGoal();
+      toast('Preset goal updated.');
+    });
+    byId('clearDraftBtn').addEventListener('click', () => {
+      localStorage.removeItem('tactical-web-draft-prompt');
+      localStorage.removeItem('tactical-web-draft-game');
+      byId('quickPrompt').value = '';
+      byId('launchCount').textContent = '0 / 600';
+      toast('Saved generation draft cleared.');
+    });
+    byId('resetVisitsBtn').addEventListener('click', () => {
+      set('tactical-web-visit-count', '0');
+      refresh();
+      toast('Visit counter reset.');
+    });
+    byId('resetNewsletterBtn').addEventListener('click', () => {
+      localStorage.removeItem('tactical-web-newsletter-subscribed');
+      localStorage.removeItem('tactical-web-newsletter-dismissed-at');
+      toast('Newsletter state reset.');
+    });
+    byId('copySummaryBtn').addEventListener('click', async () => {
+      const summary = `Tactical Web workspace\nPresets: ${getNumber('tactical-web-preset-count')}\nCredits: ${window.TacticalCredits?.getSnapshot?.().credits || 0}\nVisits: ${getNumber('tactical-web-visit-count')}\nActivity entries: ${activities().length}\nStorage: ${Math.ceil(storageSize() / 1024)} KB`;
+      try { await navigator.clipboard.writeText(summary); toast('Workspace summary copied.'); }
+      catch (_) { toast('Clipboard access is unavailable.'); }
+    });
     byId('savePreferencesBtn').addEventListener('click', () => {
       const preferences = {
         defaultGame: byId('defaultGame').value.trim(),
@@ -356,6 +404,7 @@
     byId('compactMode').addEventListener('click', (event) => {
       const pressed = event.currentTarget.getAttribute('aria-pressed') === 'true';
       event.currentTarget.setAttribute('aria-pressed', String(!pressed));
+      document.body.classList.toggle('dashboard-compact', !pressed);
     });
     byId('exportDataBtn').addEventListener('click', exportData);
     byId('importDataBtn').addEventListener('click', () => byId('importFile').click());
@@ -377,7 +426,18 @@
       window.location.replace('index.html');
     });
     window.addEventListener('tw-credits-changed', refresh);
+    window.addEventListener('online', runDiagnostics);
+    window.addEventListener('offline', runDiagnostics);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '')) {
+        event.preventDefault();
+        byId('activitySearch').focus();
+      }
+    });
     loadPreferences();
+    const savedDraft = get('tactical-web-draft-prompt');
+    byId('quickPrompt').value = savedDraft;
+    byId('launchCount').textContent = `${savedDraft.length} / 600`;
     refresh();
   }
 
@@ -387,6 +447,10 @@
     byId('defaultQuality').value = preferences.quality || 'balanced';
     byId('defaultHardware').value = preferences.hardware || 'mid';
     byId('compactMode').setAttribute('aria-pressed', String(Boolean(preferences.compact)));
+    document.body.classList.toggle('dashboard-compact', Boolean(preferences.compact));
+    byId('quickGame').value = preferences.defaultGame || get('tactical-web-draft-game');
+    const selectedModel = get('tactical-web-selected-model', 'Auto');
+    if (Array.from(byId('quickModel').options).some((option) => option.value === selectedModel)) byId('quickModel').value = selectedModel;
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
