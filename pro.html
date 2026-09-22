@@ -41,6 +41,12 @@
     .guarantees .link { cursor:pointer; text-decoration:underline; text-decoration-style:dotted; text-underline-offset:4px; }
     .plan .btn:focus-visible, .guarantees .link:focus-visible { outline:2px solid #d8b4fe; outline-offset:3px; }
     .hidden { display:none !important; }
+    .redeem-copy { margin: 0 0 20px; line-height: 1.6; }
+    .redeem-form { display: grid; gap: 12px; text-align: left; }
+    .redeem-form label { color: #f5edff; font-size: .78rem; font-weight: 700; }
+    .redeem-form input { width: 100%; margin-top: 7px; }
+    .redeem-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; }
+    .redeem-actions .btn { min-width: 110px; }
     .refund-copy { line-height:1.75; margin:0 0 22px; text-align:left; }
     @media (max-width: 900px) { .plans { grid-template-columns:1fr; max-width:560px; margin:auto; } .plan-description { min-height:0; } }
     @media (max-width: 620px) { .pro-hero { margin:20px auto 32px; } .pro-hero h1 { font-size:clamp(2rem, 10vw, 2.65rem); overflow-wrap:anywhere; } .pro-hero .lead { font-size:.9rem; } .guarantees { grid-template-columns:1fr; } .plan { padding:23px 21px; } }
@@ -67,7 +73,7 @@
           <div class="feature-label">Included with PRO</div>
           <ul><li>Enhanced generation quality</li><li>Faster generation queue</li><li>4K optimization tools</li><li>Advanced customization controls</li></ul>
           <button class="btn btn-quiet" data-plan="pro" type="button">Choose PRO</button>
-          <p class="plan-action-note">Continue to secure Stripe checkout.</p>
+          <p class="plan-action-note">Redeem an access code for this plan.</p>
         </article>
         <article class="plan featured">
           <span class="badge-pop">RECOMMENDED</span>
@@ -78,7 +84,7 @@
           <div class="feature-label">Everything in PRO, plus</div>
           <ul><li>1x credit usage</li><li>Access to stronger AI models</li><li>Priority support</li><li>Monthly handcrafted preset collection</li></ul>
           <button class="btn btn-primary" data-plan="premium" type="button">Choose Premium</button>
-          <p class="plan-action-note">Continue to secure Stripe checkout.</p>
+          <p class="plan-action-note">Redeem an access code for this plan.</p>
         </article>
         <article class="plan">
           <p class="plan-audience">For studios and power users</p>
@@ -88,7 +94,7 @@
           <div class="feature-label">Everything in Premium, plus</div>
           <ul><li>Access to the strongest AI model</li><li>Fastest generation queue</li><li>One-click preset execution</li><li>Early Tactical Lumen Engine access</li><li>24/7 priority support</li><li>Weekly professional presets</li></ul>
           <button class="btn btn-quiet" data-plan="enterprise" type="button">Choose Enterprise</button>
-          <p class="plan-action-note">Continue to secure Stripe checkout.</p>
+          <p class="plan-action-note">Redeem an access code for this plan.</p>
         </article>
       </section>
 
@@ -99,6 +105,21 @@
         <span class="link" id="refundPolicyTrigger" role="button" tabindex="0">View 2-day refund policy</span>
         <span><svg class="tick-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8ee8c1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Straightforward pricing</span>
       </div>
+    </div>
+  </div>
+
+  <div class="tw-modal hidden" id="redeemModal" role="dialog" aria-modal="true" aria-labelledby="redeemTitle">
+    <div class="tw-modal-card" style="max-width:480px;text-align:center;">
+      <h2 id="redeemTitle" style="margin:0 0 10px;">Redeem a code</h2>
+      <p class="muted redeem-copy">Enter the access code you were given to activate this plan.</p>
+      <form class="redeem-form" id="redeemForm">
+        <label for="redeemCode">Access code<input id="redeemCode" name="code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" required maxlength="100" placeholder="Enter your code" /></label>
+        <p class="muted" id="redeemStatus" role="status" aria-live="polite"></p>
+        <div class="redeem-actions">
+          <button class="btn btn-quiet" type="button" id="redeemCancelBtn">Cancel</button>
+          <button class="btn btn-primary" type="submit" id="redeemSubmitBtn">Redeem code</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -129,34 +150,55 @@
     });
     document.getElementById('regionPrice').textContent = currency + ' pricing for ' + region;
     const plansNote = document.getElementById('plansNote');
-    if (new URLSearchParams(window.location.search).get('checkout') === 'cancelled') {
-      plansNote.textContent = 'Checkout was cancelled. You were not charged.';
-    }
-    document.querySelectorAll('[data-plan]').forEach((button) => button.addEventListener('click', async () => {
-      const credential = window.TacticalAuth.getCredential();
-      if (!credential) {
-        plansNote.textContent = 'Sign in with Google before choosing a paid plan.';
+    let selectedPlan = '';
+    const redeemModal = document.getElementById('redeemModal');
+    const redeemForm = document.getElementById('redeemForm');
+    const redeemCode = document.getElementById('redeemCode');
+    const redeemStatus = document.getElementById('redeemStatus');
+    const redeemSubmitBtn = document.getElementById('redeemSubmitBtn');
+    let redeemReturnFocus = null;
+    function openRedeem(plan, button) {
+      if (!window.TacticalAuth.getCredential()) {
+        plansNote.textContent = 'Sign in with Google before redeeming a code.';
         return;
       }
-      const originalText = button.textContent;
-      document.querySelectorAll('[data-plan]').forEach((item) => { item.disabled = true; });
-      button.textContent = 'Opening secure checkout...';
-      plansNote.textContent = 'Connecting to Stripe securely...';
+      selectedPlan = plan;
+      redeemReturnFocus = button;
+      redeemStatus.textContent = '';
+      redeemCode.value = '';
+      redeemModal.classList.remove('hidden');
+      redeemCode.focus();
+    }
+    function closeRedeem() {
+      redeemModal.classList.add('hidden');
+      if (redeemReturnFocus) redeemReturnFocus.focus();
+    }
+    document.querySelectorAll('[data-plan]').forEach((button) => button.addEventListener('click', () => openRedeem(button.dataset.plan, button)));
+    redeemForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const credential = window.TacticalAuth.getCredential();
+      const code = redeemCode.value.trim();
+      if (!credential || !code) return;
+      redeemSubmitBtn.disabled = true;
+      redeemStatus.textContent = 'Checking your code...';
       try {
-        const response = await fetch('/api/create-checkout-session', {
+        const response = await fetch('/api/redeem-code', {
           method: 'POST',
           headers: { Authorization: `Bearer ${credential}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan: button.dataset.plan })
+          body: JSON.stringify({ code, plan: selectedPlan })
         });
         const payload = await response.json().catch(() => ({}));
-        if (!response.ok || !payload.url) throw new Error(payload.error || 'Checkout could not be started.');
-        window.location.assign(payload.url);
+        if (!response.ok) throw new Error(payload.error || 'That code could not be redeemed.');
+        closeRedeem();
+        plansNote.textContent = `${payload.planName} is active. Your access code was accepted.`;
       } catch (error) {
-        plansNote.textContent = error.message;
-        button.textContent = originalText;
-        document.querySelectorAll('[data-plan]').forEach((item) => { item.disabled = false; });
+        redeemStatus.textContent = error.message;
+      } finally {
+        redeemSubmitBtn.disabled = false;
       }
-    }));
+    });
+    document.getElementById('redeemCancelBtn').addEventListener('click', closeRedeem);
+    redeemModal.addEventListener('click', (event) => { if (event.target === redeemModal) closeRedeem(); });
     const refundTrigger = document.getElementById('refundPolicyTrigger');
     const refundModal = document.getElementById('refundModal');
     const refundCloseBtn = document.getElementById('refundCloseBtn');
@@ -181,6 +223,7 @@
     refundModal.addEventListener('click', (event) => { if (event.target === refundModal) closeRefundPolicy(); });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && !refundModal.classList.contains('hidden')) closeRefundPolicy();
+      if (event.key === 'Escape' && !redeemModal.classList.contains('hidden')) closeRedeem();
     });
   </script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
