@@ -147,6 +147,22 @@
                   <button class="studio-button" id="unbanUserBtn" type="button">Restore access</button>
                 </div>
               </div>
+              <div class="redeem-admin" id="redeemAdmin">
+                <div class="panel-title"><div><span class="studio-label">Subscription access</span><h2 style="margin-top:6px">Generate redemption code</h2></div></div>
+                <div class="redeem-admin-form">
+                  <select class="studio-select" id="redeemPlan" aria-label="Subscription plan">
+                    <option value="pro">Tactical PRO</option>
+                    <option value="premium">Tactical Premium</option>
+                    <option value="enterprise">Tactical Enterprise</option>
+                  </select>
+                  <button class="studio-button accent" id="generateRedeemCodeBtn" type="button">Generate code</button>
+                </div>
+                <p class="account-status" id="redeemCodeStatus" role="status">Generate a code to give access to one subscription.</p>
+                <div class="generated-code" id="generatedRedeemCode" hidden>
+                  <code id="generatedRedeemCodeValue"></code>
+                  <button class="studio-button small" id="copyRedeemCodeBtn" type="button">Copy</button>
+                </div>
+              </div>
             </article>
             <aside class="studio-panel dash-panel">
               <div class="panel-title"><div><span class="studio-label">Security</span><h2 style="margin-top:6px">Server-enforced controls</h2></div></div>

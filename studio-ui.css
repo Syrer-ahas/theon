@@ -171,6 +171,10 @@ body.tw-body::before {
 .account-status { min-height: 20px; margin: 12px 0 0; color: var(--studio-muted); font-size: .78rem; }
 .credit-controls { display: grid; grid-template-columns: minmax(120px,.5fr) auto auto; gap: 9px; margin-top: 16px; }
 .ban-controls { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 14px; }
+.redeem-admin { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--studio-line); }
+.redeem-admin-form { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 9px; }
+.generated-code { display: flex; align-items: center; gap: 9px; margin-top: 10px; }
+.generated-code code { flex: 1; min-width: 0; padding: 12px; border: 1px solid rgba(101,214,166,.3); border-radius: 10px; background: rgba(101,214,166,.08); color: #c8f5df; font: 700 .78rem ui-monospace,monospace; overflow-wrap: anywhere; }
 .empty-state { padding: 28px; border: 1px dashed var(--studio-line-strong); border-radius: 14px; color: var(--studio-muted); text-align: center; font-size: .8rem; }
 .toast { position: fixed; right: 24px; bottom: 24px; z-index: 60000; max-width: 340px; padding: 13px 16px; border: 1px solid var(--studio-line-strong); border-radius: 13px; background: #1a181f; color: #fff; box-shadow: var(--studio-shadow); font-size: .8rem; opacity: 0; transform: translateY(10px); pointer-events: none; transition: .2s; }
 .toast.show { opacity: 1; transform: none; }

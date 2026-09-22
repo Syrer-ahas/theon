@@ -388,6 +388,33 @@
     }
   }
 
+  async function generateRedeemCode() {
+    const token = window.TacticalSignIn?.getSessionToken?.();
+    const plan = byId('redeemPlan').value;
+    const button = byId('generateRedeemCodeBtn');
+    if (!token) { byId('redeemCodeStatus').textContent = 'An administrator session is required.'; return; }
+    button.disabled = true;
+    byId('redeemCodeStatus').textContent = 'Generating a one-time code…';
+    byId('generatedRedeemCode').hidden = true;
+    try {
+      const response = await fetch('/api/admin-redeem-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        credentials: 'same-origin',
+        body: JSON.stringify({ plan })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.code) throw new Error(payload.error || 'The code could not be generated.');
+      byId('generatedRedeemCodeValue').textContent = payload.code;
+      byId('generatedRedeemCode').hidden = false;
+      byId('redeemCodeStatus').textContent = 'Code generated. Copy it now; it will be shown only here.';
+    } catch (error) {
+      byId('redeemCodeStatus').textContent = error.message || 'The code could not be generated.';
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   function boot() {
     document.querySelectorAll('[data-dashboard-tab]').forEach((tab) => {
       tab.addEventListener('click', () => {
@@ -468,6 +495,15 @@
       if (confirm(`Ban ${byId('managedEmail').value.trim()} from generation and agent access?`)) manageUser('ban');
     });
     byId('unbanUserBtn').addEventListener('click', () => manageUser('unban'));
+    byId('generateRedeemCodeBtn').addEventListener('click', generateRedeemCode);
+    byId('copyRedeemCodeBtn').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(byId('generatedRedeemCodeValue').textContent);
+        toast('Redemption code copied.');
+      } catch (_) {
+        byId('redeemCodeStatus').textContent = 'Clipboard access is unavailable. Select the code manually.';
+      }
+    });
     byId('savePreferencesBtn').addEventListener('click', () => {
       const preferences = {
         defaultGame: byId('defaultGame').value.trim(),

@@ -23,6 +23,10 @@ function customerKey(customerId) {
   return `tactical:stripe-customer:v1:${digest(customerId)}`;
 }
 
+function redeemCodeKey(code) {
+  return `tactical:redeem-code:v1:${digest(code)}`;
+}
+
 async function redisCommand(command) {
   const config = redisConfig();
   if (!config) return null;
@@ -94,4 +98,53 @@ export async function subjectForStripeCustomer(customerId) {
   const config = redisConfig();
   if (config) return await redisCommand(['GET', customerKey(customerId)]) || '';
   return localCustomers.get(customerId) || '';
+}
+
+const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function createCodeValue() {
+  const groups = Array.from({ length: 7 }, () => {
+    const bytes = crypto.randomBytes(4);
+    return Array.from(bytes, (byte) => CODE_ALPHABET[byte % CODE_ALPHABET.length]).join('');
+  });
+  return `TACT-${groups.join('-')}`;
+}
+
+export async function createRedeemCode(plan) {
+  const code = createCodeValue();
+  const record = { plan, status: 'available', createdAt: String(Date.now()) };
+  const config = redisConfig();
+  if (config) {
+    await redisCommand(['HSET', redeemCodeKey(code), ...Object.entries(record).flat()]);
+  } else {
+    localBilling.set(redeemCodeKey(code), record);
+  }
+  return code;
+}
+
+export async function redeemCode(code, plan, subject, email) {
+  const key = redeemCodeKey(code);
+  const config = redisConfig();
+  let record;
+  if (config) {
+    const values = await redisCommand(['HMGET', key, 'plan', 'status']);
+    record = { plan: values?.[0], status: values?.[1] };
+  } else {
+    record = localBilling.get(key) || {};
+  }
+  if (record.plan !== plan || record.status !== 'available') return false;
+
+  const updated = { ...record, status: 'redeemed', redeemedBy: subject, redeemedAt: String(Date.now()) };
+  if (config) {
+    await redisCommand(['HSET', key, ...Object.entries(updated).flat()]);
+  } else {
+    localBilling.set(key, updated);
+  }
+  await saveBillingAccount(subject, {
+    email,
+    status: 'active',
+    plan,
+    subscriptionId: `redeem:${digest(code).slice(0, 16)}`
+  });
+  return true;
 }
