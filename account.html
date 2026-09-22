@@ -181,11 +181,15 @@
           label.textContent = activePlan === 'Free'
             ? 'Free plan · Explore Tactical Web at your own pace.'
             : `${activePlan} · ${billing.status === 'trialing' ? 'Trial active' : 'Subscription active'}`;
-          const paid = activePlan !== 'Free' && Boolean(billing.customerId);
+          const paid = activePlan !== 'Free' && ['active', 'trialing'].includes(billing.status);
           badge.textContent = paid ? 'Active' : 'Not set up';
           badge.className = paid ? 'badge badge-green' : 'badge badge-gray';
-          description.textContent = paid ? 'Subscription and invoices are managed securely by Stripe.' : 'No active paid subscription.';
-          manageButton.disabled = !paid;
+          description.textContent = paid && billing.customerId
+            ? 'Subscription and invoices are managed securely by Stripe.'
+            : paid
+              ? 'Access was activated with a redemption code.'
+              : 'No active paid subscription.';
+          manageButton.disabled = !billing.customerId;
           if (checkoutResult === 'success' && !paid && attempt < 4) {
             label.textContent = 'Payment received · Activating your plan...';
             setTimeout(() => loadBilling(attempt + 1), 1500);
