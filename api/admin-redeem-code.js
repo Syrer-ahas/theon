@@ -1,7 +1,7 @@
 import { verifyGoogleJWT, extractSessionToken } from './_auth.js';
 import { createRedeemCode } from './_billing.js';
 
-const DEFAULT_ADMIN_EMAIL = 'alkhidirea@gmail.com';
+const ADMIN_EMAIL = 'alkhidirea@gmail.com';
 const validPlans = new Set(['pro', 'premium', 'enterprise']);
 
 function normalizeEmail(value) {
@@ -14,8 +14,7 @@ export default async function handler(request, response) {
 
   const token = extractSessionToken(request);
   const admin = token ? await verifyGoogleJWT(token).catch(() => null) : null;
-  const adminEmail = normalizeEmail(process.env.ADMIN_EMAIL || DEFAULT_ADMIN_EMAIL);
-  if (!admin || normalizeEmail(admin.email) !== adminEmail) {
+  if (!admin || normalizeEmail(admin.email) !== ADMIN_EMAIL) {
     return response.status(403).json({ error: 'Administrator access required.' });
   }
 

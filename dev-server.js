@@ -83,7 +83,7 @@ async function handleStatic(response, pathname, cookieHeader = '') {
     const cookie = cookieHeader.split(';').map((item) => item.trim()).find((item) => item.startsWith('tactical-admin-session='));
     const token = cookie ? decodeURIComponent(cookie.slice('tactical-admin-session='.length)) : '';
     const admin = token ? await verifyGoogleJWT(token).catch(() => null) : null;
-    const adminEmail = String(process.env.ADMIN_EMAIL || 'alkhidirea@gmail.com').trim().toLowerCase();
+    const adminEmail = 'alkhidirea@gmail.com';
     if (!admin || String(admin.email || '').trim().toLowerCase() !== adminEmail) {
       return sendJson(response, 404, { error: 'Not found.' });
     }

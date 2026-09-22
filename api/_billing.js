@@ -108,8 +108,7 @@ const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 function createCodeValue() {
   const groups = Array.from({ length: 7 }, () => {
-    const bytes = crypto.randomBytes(4);
-    return Array.from(bytes, (byte) => CODE_ALPHABET[byte % CODE_ALPHABET.length]).join('');
+    return Array.from({ length: 4 }, () => CODE_ALPHABET[crypto.randomInt(0, CODE_ALPHABET.length)]).join('');
   });
   return `TACT-${groups.join('-')}`;
 }
