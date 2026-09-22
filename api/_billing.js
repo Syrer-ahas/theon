@@ -27,6 +27,10 @@ function redeemCodeKey(code) {
   return `tactical:redeem-code:v1:${digest(code)}`;
 }
 
+function redeemClaimKey(code) {
+  return `tactical:redeem-claim:v1:${digest(code)}`;
+}
+
 async function redisCommand(command) {
   const config = redisConfig();
   if (!config) return null;
@@ -133,6 +137,15 @@ export async function redeemCode(code, plan, subject, email) {
     record = localBilling.get(key) || {};
   }
   if (record.plan !== plan || record.status !== 'available') return false;
+
+  if (config) {
+    const claimed = await redisCommand(['SET', redeemClaimKey(code), subject, 'NX', 'EX', '86400']);
+    if (claimed !== 'OK') return false;
+  } else {
+    const claimKey = redeemClaimKey(code);
+    if (localBilling.has(claimKey)) return false;
+    localBilling.set(claimKey, subject);
+  }
 
   const updated = { ...record, status: 'redeemed', redeemedBy: subject, redeemedAt: String(Date.now()) };
   if (config) {
