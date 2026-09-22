@@ -23,7 +23,7 @@ export default async function handler(request, response) {
 
   try {
     const code = await createRedeemCode(plan);
-    return response.status(200).json({ code, plan });
+    return response.status(200).json({ code, plan, validForHours: 24 });
   } catch (error) {
     console.error('Admin redeem code generation failed:', error);
     return response.status(503).json({ error: 'Code generation is temporarily unavailable.' });

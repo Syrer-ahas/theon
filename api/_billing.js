@@ -105,6 +105,7 @@ export async function subjectForStripeCustomer(customerId) {
 }
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const REDEEM_CODE_TTL_MS = 24 * 60 * 60 * 1000;
 
 function createCodeValue() {
   const groups = Array.from({ length: 7 }, () => {
@@ -115,7 +116,8 @@ function createCodeValue() {
 
 export async function createRedeemCode(plan) {
   const code = createCodeValue();
-  const record = { plan, status: 'available', createdAt: String(Date.now()) };
+  const createdAt = Date.now();
+  const record = { plan, status: 'available', createdAt: String(createdAt), expiresAt: String(createdAt + REDEEM_CODE_TTL_MS) };
   const config = redisConfig();
   if (config) {
     await redisCommand(['HSET', redeemCodeKey(code), ...Object.entries(record).flat()]);
@@ -130,15 +132,18 @@ export async function redeemCode(code, plan, subject, email) {
   const config = redisConfig();
   let record;
   if (config) {
-    const values = await redisCommand(['HMGET', key, 'plan', 'status']);
-    record = { plan: values?.[0], status: values?.[1] };
+    const values = await redisCommand(['HMGET', key, 'plan', 'status', 'expiresAt']);
+    record = { plan: values?.[0], status: values?.[1], expiresAt: values?.[2] };
   } else {
     record = localBilling.get(key) || {};
   }
-  if (record.plan !== plan || record.status !== 'available') return false;
+  const expiresAt = Number(record.expiresAt);
+  if (record.plan !== plan || record.status !== 'available' || !Number.isFinite(expiresAt) || expiresAt <= Date.now()) return false;
+
+  const remainingSeconds = Math.max(1, Math.ceil((expiresAt - Date.now()) / 1000));
 
   if (config) {
-    const claimed = await redisCommand(['SET', redeemClaimKey(code), subject, 'NX', 'EX', '86400']);
+    const claimed = await redisCommand(['SET', redeemClaimKey(code), subject, 'NX', 'EX', String(remainingSeconds)]);
     if (claimed !== 'OK') return false;
   } else {
     const claimKey = redeemClaimKey(code);
