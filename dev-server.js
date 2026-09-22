@@ -2,6 +2,7 @@ import http from 'http';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
+import { verifyGoogleJWT } from './api/_auth.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 3000);
@@ -77,7 +78,16 @@ async function handleApi(request, response, pathname) {
   }
 }
 
-async function handleStatic(response, pathname) {
+async function handleStatic(response, pathname, cookieHeader = '') {
+  if (pathname === '/dashboard.html') {
+    const cookie = cookieHeader.split(';').map((item) => item.trim()).find((item) => item.startsWith('tactical-admin-session='));
+    const token = cookie ? decodeURIComponent(cookie.slice('tactical-admin-session='.length)) : '';
+    const admin = token ? await verifyGoogleJWT(token).catch(() => null) : null;
+    const adminEmail = String(process.env.ADMIN_EMAIL || 'alkhidirea@gmail.com').trim().toLowerCase();
+    if (!admin || String(admin.email || '').trim().toLowerCase() !== adminEmail) {
+      return sendJson(response, 404, { error: 'Not found.' });
+    }
+  }
   const relative = pathname === '/' ? 'index.html' : decodeURIComponent(pathname).replace(/^\/+/, '');
   const target = path.resolve(root, relative);
   if (target !== root && !target.startsWith(root + path.sep)) return sendJson(response, 403, { error: 'Forbidden.' });
@@ -108,7 +118,7 @@ const server = http.createServer(async (request, response) => {
     return response.end();
   }
   if (url.pathname.startsWith('/api/')) return handleApi(request, response, url.pathname);
-  return handleStatic(response, url.pathname);
+  return handleStatic(response, url.pathname, request.headers.cookie || '');
 });
 
 server.listen(port, host, () => {

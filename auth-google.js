@@ -73,8 +73,20 @@
       settle(null, 'Google sign-in could not be saved.');
       return;
     }
+    establishAdminSession(credential);
     settle(session);
   }
+
+  function establishAdminSession(credential) {
+    fetch('/api/admin-session', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${credential}` },
+      credentials: 'same-origin'
+    }).catch(() => {});
+  }
+
+  const existingSession = window.TacticalAuth?.getSession?.();
+  if (existingSession?.credential) establishAdminSession(existingSession.credential);
 
   function ensureGoogleInit() {
     if (initialised) return true;
