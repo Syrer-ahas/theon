@@ -3,7 +3,7 @@
   const ADMIN_EMAIL = 'alkhidirea@gmail.com';
   const session = window.TacticalAuth?.getSession?.();
   if (!session || session.email !== ADMIN_EMAIL) {
-    window.location.replace('index.html');
+    window.location.replace('/');
     return;
   }
 
@@ -457,7 +457,7 @@
       event.preventDefault();
       byId('saveDraftBtn').click();
       if (!byId('quickPrompt').value.trim()) return;
-      window.location.href = 'generator.html';
+      window.location.href = '/generator';
     });
     byId('createSnapshotBtn').addEventListener('click', createSnapshot);
     byId('saveGoalBtn').addEventListener('click', () => {
@@ -536,7 +536,7 @@
     });
     byId('signOutBtn').addEventListener('click', () => {
       window.TacticalSignIn?.signOut?.();
-      window.location.replace('index.html');
+      window.location.replace('/');
     });
     window.addEventListener('tw-credits-changed', refresh);
     window.addEventListener('online', runDiagnostics);

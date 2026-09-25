@@ -1,0 +1,23 @@
+{
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/generator.html", "destination": "/generator", "permanent": true },
+    { "source": "/plugins.html", "destination": "/plugins", "permanent": true },
+    { "source": "/blog.html", "destination": "/blog", "permanent": true },
+    { "source": "/pro.html", "destination": "/pro", "permanent": true },
+    { "source": "/affiliate.html", "destination": "/affiliate", "permanent": true },
+    { "source": "/account.html", "destination": "/account", "permanent": true },
+    { "source": "/privacy.html", "destination": "/privacy", "permanent": true },
+    { "source": "/WindowGeneration.html", "destination": "/agent", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/generator", "destination": "/generator.html" },
+    { "source": "/plugins", "destination": "/plugins.html" },
+    { "source": "/blog", "destination": "/blog.html" },
+    { "source": "/pro", "destination": "/pro.html" },
+    { "source": "/affiliate", "destination": "/affiliate.html" },
+    { "source": "/account", "destination": "/account.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/agent", "destination": "/WindowGeneration.html" }
+  ]
+}
