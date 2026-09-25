@@ -134,13 +134,13 @@
   installPageTransitions();
 
   const NAV_ITEMS = [
-    { key: 'home', label: 'Home', href: 'index.html' },
-    { key: 'generator', label: 'Generator', href: 'generator.html' },
-    { key: 'plugins', label: 'Plugins', href: 'plugins.html' },
-    { key: 'blog', label: 'Blog', href: 'blog.html' },
-    { key: 'pro', label: 'Get Pro', href: 'pro.html' },
-    { key: 'affiliate', label: 'Affiliate', href: 'affiliate.html' },
-    { key: 'account', label: 'Account', href: 'account.html' }
+    { key: 'home', label: 'Home', href: '/' },
+    { key: 'generator', label: 'Generator', href: '/generator' },
+    { key: 'plugins', label: 'Plugins', href: '/plugins' },
+    { key: 'blog', label: 'Blog', href: '/blog' },
+    { key: 'pro', label: 'Get Pro', href: '/pro' },
+    { key: 'affiliate', label: 'Affiliate', href: '/affiliate' },
+    { key: 'account', label: 'Account', href: '/account' }
   ];
 
   const LOCK_SVG = '<img src="images/lock.svg" alt="" />';
@@ -164,14 +164,14 @@
     aside.className = 'tw-sidebar';
     aside.id = 'twSidebar';
     aside.innerHTML = `
-      <a class="brand" href="index.html">
+      <a class="brand" href="/">
         <img src="images/logo.png" alt="Tactical Web logo" />
         <span>Tactical Web</span>
       </a>
       <div class="side-label">Navigate</div>
       <nav class="side-nav">${navLinksHtml()}</nav>
       <div class="side-foot">
-        <a class="user-card signed-out" id="userCard" href="account.html">
+        <a class="user-card signed-out" id="userCard" href="/account">
           <div class="user-avatar" id="userAvatar">?</div>
           <div class="user-meta">
             <span class="user-name" id="userName">Not signed in</span>
@@ -214,13 +214,13 @@
     nav.dataset.siteNav = '';
     nav.innerHTML = `
       <div>
-        <a class="btn btn-primary" href="generator.html">Start building</a>
+        <a class="btn btn-primary" href="/generator">Start building</a>
         <button class="btn btn-ghost" data-nav-toggle aria-expanded="false" aria-haspopup="true" type="button" style="padding:8px 10px;" aria-label="Menu"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg></button>
         <div class="nav-menu" data-nav-menu hidden style="position:absolute; right:0; top:calc(100% + 10px); background:#150826; border:1px solid rgba(168,85,247,.3); border-radius:20px; padding:10px; min-width:200px; box-shadow:0 14px 44px rgba(0,0,0,.55); z-index:12000;">
-          <a class="btn btn-ghost" href="blog.html">Blog</a>
-          <a class="btn btn-ghost" href="pro.html">Get Pro</a>
-          <a class="btn btn-ghost" href="affiliate.html">Become Affiliate</a>
-          <a class="btn btn-ghost" href="account.html">Account settings</a>
+          <a class="btn btn-ghost" href="/blog">Blog</a>
+          <a class="btn btn-ghost" href="/pro">Get Pro</a>
+          <a class="btn btn-ghost" href="/affiliate">Become Affiliate</a>
+          <a class="btn btn-ghost" href="/account">Account settings</a>
           <a class="btn btn-ghost" href="https://discord.gg/c2aJ4dBZ4h" target="_blank" rel="noopener">Join Discord</a>
         </div>
       </div>`;
@@ -376,7 +376,7 @@
   function guardAccountLinks() {
     document.addEventListener('click', (e) => {
       if (getSession()) return;
-      const target = e.target.closest && e.target.closest('a[href="account.html"], #userCard, .side-nav a[href$="account.html"], .nav-menu a[href$="account.html"]');
+      const target = e.target.closest && e.target.closest('a[href="/account"], #userCard, .side-nav a[href$="/account"], .nav-menu a[href$="/account"]');
       if (target) {
         e.preventDefault();
         e.stopPropagation();
