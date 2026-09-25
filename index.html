@@ -434,6 +434,22 @@
       })();
 
       document.addEventListener('DOMContentLoaded', () => {
+        const referralCode = new URLSearchParams(window.location.search).get('ref');
+        const trackReferral = async () => {
+          const session = window.TacticalAuth && window.TacticalAuth.getSession && window.TacticalAuth.getSession();
+          const code = referralCode || localStorage.getItem('tactical-affiliate-ref');
+          if (!session || !code) return;
+          const response = await fetch('/api/affiliate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.credential}` },
+            body: JSON.stringify({ action: 'attribute', code })
+          });
+          if (response.ok) localStorage.removeItem('tactical-affiliate-ref');
+        };
+        if (referralCode) localStorage.setItem('tactical-affiliate-ref', referralCode);
+        trackReferral().catch(() => {});
+        document.addEventListener('tactical-auth-changed', () => trackReferral().catch(() => {}));
+
         const inputField = document.getElementById('mechanicInput');
         const modelSelect = document.getElementById('modelSelect');
         const modelTrigger = document.getElementById('modelSelectTrigger');

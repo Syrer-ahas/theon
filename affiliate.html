@@ -31,31 +31,32 @@
         <div class="aff-hero">
           <span class="eyebrow">Affiliate rewards</span>
           <h1>Become an <span class="gradient-text">Affiliate</span>, earn by inviting.</h1>
-          <p class="muted">Generate a referral code, copy the share link, and send it to friends. Referral tracking is separate from the daily credit system.</p>
+          <p class="muted">Create your verified referral link, share it, and track new sign-ups from one place.</p>
         </div>
 
         <div class="aff-grid">
           <section class="panel panel-pad">
             <h3 style="font-size:1.1rem;">Your referral</h3>
             <div class="aff-actions">
-              <button class="btn btn-primary" id="generateBtn" type="button">Generate</button>
+              <button class="btn btn-primary" id="generateBtn" type="button">Create my link</button>
               <button class="btn btn-secondary" id="copyLinkBtn" type="button" disabled>Copy affiliate link</button>
             </div>
             <div class="box">
-              <div class="muted" id="statusText">Your referral code will appear here after you generate one.</div>
+              <div class="muted" id="statusText">Sign in with Google to create your referral link.</div>
               <div class="muted" style="margin-top:12px;font-size:0.82rem;">Referral code</div>
               <div class="code" id="referralCode">None yet</div>
               <div class="muted" style="margin-top:12px;font-size:0.82rem;">Share link (copy/paste)</div>
               <div class="code" id="affiliateLink">None yet</div>
+              <div class="actions" style="margin-top:12px;"><span class="pill-stat">Tracked referrals: <strong id="referralCount">0</strong></span></div>
             </div>
           </section>
 
           <section class="panel panel-pad">
             <h3 style="font-size:1.1rem;">How it works</h3>
             <div style="margin-top:12px;">
-              <div class="step"><div class="step-num">1</div><div><strong>Generate a code</strong><div class="muted" style="font-size:0.9rem;">Confirm your Gmail and your friend's Gmail to qualify.</div></div></div>
+              <div class="step"><div class="step-num">1</div><div><strong>Create your link</strong><div class="muted" style="font-size:0.9rem;">Your verified Google account receives one permanent affiliate code.</div></div></div>
               <div class="step"><div class="step-num">2</div><div><strong>Share the link</strong><div class="muted" style="font-size:0.9rem;">Send the affiliate link to your friend.</div></div></div>
-              <div class="step"><div class="step-num">3</div><div><strong>Track referrals</strong><div class="muted" style="font-size:0.9rem;">Verified referrals appear in your account. Credit rewards are not currently active.</div></div></div>
+              <div class="step"><div class="step-num">3</div><div><strong>Track referrals</strong><div class="muted" style="font-size:0.9rem;">A referral is counted once when a new signed-in user opens your link.</div></div></div>
             </div>
           </section>
         </div>
@@ -81,7 +82,7 @@
       }
 
       function getShareLink(code) {
-        const url = new URL(window.location.href);
+        const url = new URL('/', window.location.origin);
         url.searchParams.set('ref', code);
         return url.toString();
       }
@@ -105,35 +106,34 @@
         finally { document.body.removeChild(ta); }
       }
 
-      function setEmpty(message) {
-        statusText.textContent = message;
-        referralCode.textContent = 'None yet';
-        affiliateLinkEl.textContent = 'None yet';
-        copyLinkBtn.disabled = true;
-      }
-
-      function generateReferralCode() {
-        const userEmail = window.prompt('Enter your Gmail address');
-        const friendEmail = window.prompt("Enter your friend's Gmail address");
-        if (!userEmail || !friendEmail) {
-          setEmpty('Both Gmail addresses are needed to qualify for the referral reward.');
+      async function loadAffiliate() {
+        const session = window.TacticalAuth.getSession();
+        if (!session) {
+          statusText.textContent = 'Sign in with Google to create your referral link.';
+          generateBtn.textContent = 'Sign in to continue';
           return;
         }
-        if (!isGmail(userEmail) || !isGmail(friendEmail)) {
-          setEmpty('Both addresses must be verified Gmail accounts to qualify.');
-          return;
-        }
-
-        const code = 'AFF-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+        generateBtn.textContent = 'Refresh my link';
+        const response = await fetch('/api/affiliate', { headers: { Authorization: `Bearer ${session.credential}` }, cache: 'no-store' });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Affiliate service is unavailable.');
+        const code = data.code;
         referralCode.textContent = code;
         affiliateLinkEl.textContent = getShareLink(code);
-        statusText.textContent = 'Referral code ready. Copy the share link and send it to your friend.';
-
+        document.getElementById('referralCount').textContent = data.referrals || 0;
+        statusText.textContent = 'Your verified referral link is ready to share.';
         localStorage.setItem('tactical-affiliate-code', code);
         copyLinkBtn.disabled = false;
       }
 
-      generateBtn.addEventListener('click', generateReferralCode);
+      generateBtn.addEventListener('click', async () => {
+        if (!window.TacticalAuth.getSession()) {
+          try { await window.TacticalSignIn.signInWithGoogle(); } catch (_) { return; }
+        }
+        loadAffiliate().catch((error) => { statusText.textContent = error.message; });
+      });
+      document.addEventListener('tactical-auth-changed', () => loadAffiliate().catch(() => {}));
+      loadAffiliate().catch((error) => { statusText.textContent = error.message; });
 
       copyLinkBtn.addEventListener('click', async () => {
         const link = (affiliateLinkEl.textContent || '').trim();
