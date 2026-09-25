@@ -81,7 +81,7 @@ async function handleApi(request, response, pathname) {
 }
 
 async function handleStatic(response, pathname, cookieHeader = '') {
-  if (pathname === '/dashboard.html') {
+  if (pathname === '/dashboard' || pathname === '/dashboard.html') {
     const cookie = cookieHeader.split(';').map((item) => item.trim()).find((item) => item.startsWith('tactical-admin-session='));
     const token = cookie ? decodeURIComponent(cookie.slice('tactical-admin-session='.length)) : '';
     const admin = token ? await verifyGoogleJWT(token).catch(() => null) : null;
@@ -90,7 +90,21 @@ async function handleStatic(response, pathname, cookieHeader = '') {
       return sendJson(response, 404, { error: 'Not found.' });
     }
   }
-  const relative = pathname === '/' ? 'index.html' : decodeURIComponent(pathname).replace(/^\/+/, '');
+  const cleanRoutes = {
+    '/': 'index.html',
+    '/home': 'index.html',
+    '/generator': 'generator.html',
+    '/plugins': 'plugins.html',
+    '/blog': 'blog.html',
+    '/pro': 'pro.html',
+    '/affiliate': 'affiliate.html',
+    '/account': 'account.html',
+    '/privacy': 'privacy.html',
+    '/agent': 'WindowGeneration.html',
+    '/dashboard': 'dashboard.html'
+  };
+  const decodedPath = decodeURIComponent(pathname);
+  const relative = cleanRoutes[decodedPath] || decodedPath.replace(/^\/+/, '');
   const target = path.resolve(root, relative);
   if (target !== root && !target.startsWith(root + path.sep)) return sendJson(response, 403, { error: 'Forbidden.' });
 
