@@ -19,7 +19,7 @@
         align-items: center;
         justify-content: center;
         padding: 12px 28px 70px;
-        opacity: 0;
+        opacity: .24;
         transform: translateY(14px);
         animation: homeContentIn 900ms 180ms cubic-bezier(.2,.8,.2,1) forwards;
       }
@@ -411,7 +411,9 @@
         const video = document.getElementById('homeVideo');
         if (!video) return;
         const reveal = () => video.classList.add('is-ready');
+        video.addEventListener('loadeddata', reveal, { once: true });
         video.addEventListener('canplay', reveal, { once: true });
+        if (video.readyState >= 2) reveal();
         video.play().catch(() => {});
         document.addEventListener('visibilitychange', () => {
           if (document.hidden) video.pause();
