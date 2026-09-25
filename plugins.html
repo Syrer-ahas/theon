@@ -13,8 +13,13 @@
   <style>
     .plugins-head { margin-bottom: 24px; }
     .plugins-head h1 { font-size: clamp(2rem, 4.5vw, 3.2rem); margin: 14px 0 12px; line-height: 1.08; }
-    .plugins-empty { min-height: 240px; display: grid; place-items: center; text-align: center; padding: 36px; }
-    .plugins-empty h2 { margin-bottom: 10px; }
+    .plugin-section { margin-top: 28px; }
+    .plugin-section:first-of-type { margin-top: 0; }
+    .plugin-separator { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .plugin-separator::after { content: ''; height: 1px; flex: 1; background: linear-gradient(90deg, rgba(192, 132, 252, .5), transparent); }
+    .plugin-separator h2 { margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: .12em; color: #e9d5ff; white-space: nowrap; }
+    .plugins-empty { min-height: 120px; display: grid; place-items: center; text-align: center; padding: 28px; }
+    .plugins-empty p { margin: 0; }
   </style>
 </head>
 <body data-page="plugins">
@@ -26,11 +31,17 @@
         <h1>Available <span class="gradient-text">plugins.</span></h1>
         <p class="muted">Your plugin collection will appear here.</p>
       </header>
-      <section class="panel plugins-empty" aria-live="polite">
-        <div>
-          <h2>No plugins added yet.</h2>
-          <p class="muted">Send the plugin names and details in your next message to populate this tab.</p>
-        </div>
+      <section class="plugin-section" aria-labelledby="reshade-heading">
+        <div class="plugin-separator"><h2 id="reshade-heading">Reshade Presets</h2></div>
+        <div class="panel plugins-empty"><p class="muted">No presets added yet.</p></div>
+      </section>
+      <section class="plugin-section" aria-labelledby="lspdfr-heading">
+        <div class="plugin-separator"><h2 id="lspdfr-heading">LSPDFR Plugins</h2></div>
+        <div class="panel plugins-empty"><p class="muted">No LSPDFR plugins added yet.</p></div>
+      </section>
+      <section class="plugin-section" aria-labelledby="hud-heading">
+        <div class="plugin-separator"><h2 id="hud-heading">Free Tier Tactical HUD</h2></div>
+        <div class="panel plugins-empty"><p class="muted">No Tactical HUD plugins added yet.</p></div>
       </section>
     </main>
   </div>
