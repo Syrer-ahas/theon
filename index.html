@@ -19,6 +19,44 @@
         align-items: center;
         justify-content: center;
         padding: 12px 28px 70px;
+        opacity: 0;
+        transform: translateY(14px);
+        animation: homeContentIn 900ms 180ms cubic-bezier(.2,.8,.2,1) forwards;
+      }
+      @keyframes homeContentIn {
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .home-video {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        pointer-events: none;
+        opacity: 0;
+        filter: saturate(.82) contrast(1.08);
+        transition: opacity 1.2s ease;
+      }
+      .home-video.is-ready { opacity: .42; }
+      .home-video-shade {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background:
+          linear-gradient(180deg, rgba(23, 16, 36, .52), rgba(23, 16, 36, .72)),
+          radial-gradient(circle at 50% 42%, rgba(124, 58, 237, .16), transparent 56%);
+      }
+      body.tw-body[data-page="home"] {
+        background: #171024;
+        animation: none;
+      }
+      body.tw-body[data-page="home"]::before { z-index: 2; }
+      body.tw-body[data-page="home"] .tw-page { position: relative; z-index: 3; }
+      @media (prefers-reduced-motion: reduce) {
+        .home-content { opacity: 1; transform: none; animation: none; }
+        .home-video { transition: none; }
       }
       .main-wrapper {
         display: flex;
@@ -277,6 +315,10 @@
     <link rel="stylesheet" href="newsletter-popup.css" />
   </head>
   <body data-page="home">
+    <video class="home-video" id="homeVideo" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+      <source src="home.mp4" type="video/mp4" />
+    </video>
+    <div class="home-video-shade" aria-hidden="true"></div>
     <div class="tw-page">
       <div class="tw-topbar"></div>
       <div class="home-content">
@@ -365,6 +407,18 @@
     <script src="credit-system.js"></script>
     <script src="https://accounts.google.com/gsi/client" async></script>
     <script>
+      (() => {
+        const video = document.getElementById('homeVideo');
+        if (!video) return;
+        const reveal = () => video.classList.add('is-ready');
+        video.addEventListener('canplay', reveal, { once: true });
+        video.play().catch(() => {});
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) video.pause();
+          else video.play().catch(() => {});
+        });
+      })();
+
       document.addEventListener('DOMContentLoaded', () => {
         const inputField = document.getElementById('mechanicInput');
         const modelSelect = document.getElementById('modelSelect');
