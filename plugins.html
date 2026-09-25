@@ -18,8 +18,14 @@
     .plugin-separator { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
     .plugin-separator::after { content: ''; height: 1px; flex: 1; background: linear-gradient(90deg, rgba(192, 132, 252, .5), transparent); }
     .plugin-separator h2 { margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: .12em; color: #e9d5ff; white-space: nowrap; }
+    .plugin-list { display: grid; gap: 12px; }
+    .plugin-item { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; }
+    .plugin-item h3 { margin: 0 0 5px; font-size: 1rem; }
+    .plugin-item p { margin: 0; }
+    .plugin-download { flex: 0 0 auto; white-space: nowrap; }
     .plugins-empty { min-height: 120px; display: grid; place-items: center; text-align: center; padding: 28px; }
     .plugins-empty p { margin: 0; }
+    @media (max-width: 560px) { .plugin-item { align-items: stretch; flex-direction: column; } .plugin-download { width: 100%; justify-content: center; } }
   </style>
 </head>
 <body data-page="plugins">
@@ -33,7 +39,15 @@
       </header>
       <section class="plugin-section" aria-labelledby="reshade-heading">
         <div class="plugin-separator"><h2 id="reshade-heading">Reshade Presets</h2></div>
-        <div class="panel plugins-empty"><p class="muted">No presets added yet.</p></div>
+        <div class="plugin-list">
+          <article class="panel plugin-item">
+            <div>
+              <h3>Vivid Reshade</h3>
+              <p class="muted">Vivid Crisp ReShade preset with included shader files.</p>
+            </div>
+            <a class="btn btn-primary plugin-download" href="downloads/vivid-reshade.zip" download="vivid-reshade.zip">Download ZIP</a>
+          </article>
+        </div>
       </section>
       <section class="plugin-section" aria-labelledby="lspdfr-heading">
         <div class="plugin-separator"><h2 id="lspdfr-heading">LSPDFR Plugins</h2></div>
