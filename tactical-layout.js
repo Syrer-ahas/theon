@@ -136,6 +136,7 @@
   const NAV_ITEMS = [
     { key: 'home', label: 'Home', href: 'index.html' },
     { key: 'generator', label: 'Generator', href: 'generator.html' },
+    { key: 'plugins', label: 'Plugins', href: 'plugins.html' },
     { key: 'blog', label: 'Blog', href: 'blog.html' },
     { key: 'pro', label: 'Get Pro', href: 'pro.html' },
     { key: 'affiliate', label: 'Affiliate', href: 'affiliate.html' },

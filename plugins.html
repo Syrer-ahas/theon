@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tactical Web — Plugins</title>
+  <meta name="description" content="Browse Tactical Web plugins." />
+  <link rel="icon" type="image/png" href="images/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tactical-theme.css" />
+  <style>
+    .plugins-head { margin-bottom: 24px; }
+    .plugins-head h1 { font-size: clamp(2rem, 4.5vw, 3.2rem); margin: 14px 0 12px; line-height: 1.08; }
+    .plugins-empty { min-height: 240px; display: grid; place-items: center; text-align: center; padding: 36px; }
+    .plugins-empty h2 { margin-bottom: 10px; }
+  </style>
+</head>
+<body data-page="plugins">
+  <div class="tw-page">
+    <div class="tw-topbar"></div>
+    <main class="tw-container">
+      <header class="plugins-head">
+        <span class="eyebrow">Tactical Web</span>
+        <h1>Available <span class="gradient-text">plugins.</span></h1>
+        <p class="muted">Your plugin collection will appear here.</p>
+      </header>
+      <section class="panel plugins-empty" aria-live="polite">
+        <div>
+          <h2>No plugins added yet.</h2>
+          <p class="muted">Send the plugin names and details in your next message to populate this tab.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="auth-config.js"></script>
+  <script src="auth-session.js"></script>
+  <script src="tactical-layout.js"></script>
+  <script src="auth-google.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async></script>
+  <script src="auth-ui.js"></script>
+</body>
+</html>
