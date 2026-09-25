@@ -406,7 +406,7 @@
     </div>
 
     <div class="cookie-banner hidden" id="cookieBanner">
-      <div>We use cookies to keep your session and preferences intact. <a href="privacy.html" style="color:#c9a8ff;">Learn more</a></div>
+      <div>We use cookies to keep your session and preferences intact. <a href="/privacy" style="color:#c9a8ff;">Learn more</a></div>
       <div class="cookie-actions">
         <button class="btn btn-ghost" id="cookieDeclineBtn" type="button">Decline</button>
         <button class="btn btn-primary" id="cookieAcceptBtn" type="button">Accept</button>
@@ -541,9 +541,9 @@
             localStorage.setItem('tactical-web-agent-autosend', value ? 'true' : 'false');
           } catch (_) {}
           if (window.TacticalPageLoader && window.TacticalPageLoader.navigate) {
-            window.TacticalPageLoader.navigate('WindowGeneration.html');
+            window.TacticalPageLoader.navigate('/agent');
           } else {
-            window.location.href = 'WindowGeneration.html';
+            window.location.href = '/agent';
           }
         });
         if (inputField) {
@@ -559,7 +559,7 @@
             try { await window.TacticalSignIn.signInWithGoogle(); await window.TacticalCredits.sync({ force: true }); }
             catch (_) {}
           } else {
-            window.location.href = 'account.html';
+            window.location.href = '/account';
           }
           refreshHomeAccess();
         });

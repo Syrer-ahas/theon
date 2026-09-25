@@ -48,8 +48,8 @@
       <button class="user-menu-toggle" type="button" aria-label="Open account menu" aria-expanded="false" title="${session.email}">${avatarInner}</button>
       <div class="user-menu-panel" hidden>
         <div class="user-menu-identity"><strong>${session.name || 'User'}</strong><span>${session.email}</span></div>
-        <a class="user-menu-action user-menu-blue" href="account.html">Account settings</a>
-        <a class="user-menu-action user-menu-blue" href="pro.html">Get Pro</a>
+        <a class="user-menu-action user-menu-blue" href="/account">Account settings</a>
+        <a class="user-menu-action user-menu-blue" href="/pro">Get Pro</a>
         <button class="user-menu-action user-menu-red" type="button" data-user-logout>Log out</button>
       </div>`;
     const toggle = menu.querySelector('.user-menu-toggle');
@@ -62,7 +62,7 @@
     menu.querySelector('[data-user-logout]').addEventListener('click', () => {
       window.TacticalAuth.clearSession();
       // clearSession dispatches tactical-auth-changed; render() will teardown.
-      window.location.href = 'index.html';
+      window.location.href = '/';
     });
     document.addEventListener('click', (event) => {
       if (!menu.contains(event.target)) { panel.hidden = true; toggle.setAttribute('aria-expanded', 'false'); }

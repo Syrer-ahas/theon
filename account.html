@@ -74,7 +74,7 @@
           </div>
           <div class="plan-row" style="margin-top:16px;">
             <div><h2>Your plan</h2><p class="muted" id="planLabel">Free plan · Explore Tactical Web at your own pace.</p></div>
-            <a class="btn btn-primary" href="pro.html">View plans</a>
+            <a class="btn btn-primary" href="/pro">View plans</a>
           </div>
           <div class="stats-row" id="usageStats">
             <div class="stat-card"><strong id="statPresets">0</strong><span>Presets generated</span></div>
@@ -205,7 +205,7 @@
 
       // If somehow reached without a session, send them home (the layout also gates this).
       if (!session && window.location.pathname.includes('account.html')) {
-        window.location.href = 'index.html';
+        window.location.href = '/';
       }
 
       if (session) {
@@ -291,7 +291,7 @@
 
       document.getElementById('logoutButton').addEventListener('click', () => {
         window.TacticalAuth.clearSession();
-        window.location.href = 'index.html';
+            window.location.href = '/';
       });
 
       document.getElementById('billingHistoryBtn').addEventListener('click', async () => {
