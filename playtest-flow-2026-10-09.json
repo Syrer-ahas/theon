@@ -1,0 +1,1402 @@
+[
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -2,
+      "OpeningLead": -1,
+      "CrossingDeadline": 1791548464.514878,
+      "MapVoteSession": 1,
+      "RoundPhase": "Group",
+      "RoundValue": 1,
+      "OpeningSelected": -2,
+      "OpeningCandidates": "[{\"Name\":\"Player2\",\"UserId\":-2,\"DisplayName\":\"Player2\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 1,
+      "RoundState": "Active",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548420.430549,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548464.179167,
+    "players": {
+      "1": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.42431640625, 3, 104.117431640625"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 3, 2"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "52.5, 3, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -2,
+      "OpeningLead": -1,
+      "CrossingDeadline": 1791548464.514878,
+      "MapVoteSession": 1,
+      "RoundPhase": "Group",
+      "RoundValue": 1,
+      "OpeningSelected": -2,
+      "OpeningCandidates": "[{\"Name\":\"Player2\",\"UserId\":-2,\"DisplayName\":\"Player2\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 1,
+      "RoundState": "Ending",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548420.430549,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548464.546078,
+    "players": {
+      "1": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.42431640625, 3, 104.117431640625"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 3, 2"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "52.5, 3, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -2,
+      "OpeningLead": -1,
+      "CrossingDeadline": 1791548464.514878,
+      "MapVoteSession": 1,
+      "RoundPhase": "",
+      "RoundValue": 1,
+      "OpeningSelected": -2,
+      "OpeningCandidates": "[{\"Name\":\"Player2\",\"UserId\":-2,\"DisplayName\":\"Player2\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 1,
+      "RoundState": "Ending",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548420.430549,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548464.662485,
+    "players": {
+      "1": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.42431640625, 3, 104.117431640625"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 3, 2"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "52.5, 3, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": true,
+      "HeroPlayer": -2,
+      "OpeningLead": -1,
+      "CrossingDeadline": 1791548464.514878,
+      "MapVoteSession": 2,
+      "RoundPhase": "",
+      "RoundValue": 1,
+      "OpeningSelected": -2,
+      "OpeningCandidates": "[{\"Name\":\"Player2\",\"UserId\":-2,\"DisplayName\":\"Player2\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 12,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 1,
+      "RoundState": "Intermission",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548420.430549,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548468.666162,
+    "players": {
+      "1": {
+        "role": "Lobby",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "-163, 21.5, 156"
+      },
+      "2": {
+        "role": "Lobby",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "-163, 21.5, 156"
+      },
+      "3": {
+        "role": "Lobby",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "-163, 21.5, 156"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -2,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548464.514878,
+      "MapVoteSession": 2,
+      "RoundPhase": "",
+      "LastDodgerWinRounds": 0,
+      "RoundValue": 2,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "RoundState": "Choosing",
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 2,
+      "MapVoteDuration": 12,
+      "MapVoteTimeLeft": 1,
+      "OpeningPhase": "Pick",
+      "OpeningDeadline": 1791548494.366078,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548482.366342,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player1",
+        "pos": "48.5, 6, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player2",
+        "pos": "48.5, 6, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player3",
+        "pos": "52.5, 6, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548534.476922,
+      "MapVoteSession": 2,
+      "RoundPhase": "Group",
+      "RoundValue": 2,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 2,
+      "RoundState": "Active",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548504.394916,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548504.47737,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.5, 6, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 6, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "52.5, 6, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548534.476922,
+      "MapVoteSession": 2,
+      "RoundPhase": "Group",
+      "RoundValue": 2,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 2,
+      "RoundState": "Active",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548504.394916,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548504.477509,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.5, 6, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 6, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "52.5, 6, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 2,
+      "CrossingTarget": "Line1",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548545.811338,
+      "MapVoteSession": 2,
+      "RoundPhase": "Group",
+      "RoundValue": 2,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 2,
+      "RoundState": "Active",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548504.394916,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548515.81163,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 1,
+        "locked": false,
+        "name": "Player1",
+        "pos": "46.95182418823242, 2.9992527961730957, 204.55178833007812"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.569091796875, 3, 112.539306640625"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 1,
+        "locked": false,
+        "name": "Player3",
+        "pos": "48.80224609375, 3, 204.99462890625"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 3,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548554.393598,
+      "MapVoteSession": 2,
+      "RoundPhase": "Group",
+      "RoundValue": 2,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 2,
+      "RoundState": "Active",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548504.394916,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548524.393851,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 2,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.14595031738281, 3, 15.836898803710938"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.593994140625, 3, 110.916748046875"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 2,
+        "locked": false,
+        "name": "Player3",
+        "pos": "48.850990295410156, 3, 18.30101203918457"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 3,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548554.393598,
+      "MapVoteSession": 2,
+      "RoundPhase": "Group",
+      "RoundValue": 2,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 2,
+      "RoundState": "Ending",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548504.394916,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548554.442386,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 2,
+        "locked": false,
+        "name": "Player1",
+        "pos": "47.62353515625, 3, 11.179443359375"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.593994140625, 3, 110.916748046875"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 2,
+        "locked": false,
+        "name": "Player3",
+        "pos": "49.7396240234375, 3, 11.8861083984375"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 3,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548554.393598,
+      "MapVoteSession": 2,
+      "RoundPhase": "",
+      "RoundValue": 2,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 2,
+      "RoundState": "Ending",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548504.394916,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548554.560307,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 2,
+        "locked": false,
+        "name": "Player1",
+        "pos": "47.62353515625, 3, 11.179443359375"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.593994140625, 3, 110.916748046875"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 2,
+        "locked": false,
+        "name": "Player3",
+        "pos": "49.7396240234375, 3, 11.8861083984375"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 3,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": true,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548554.393598,
+      "MapVoteSession": 3,
+      "RoundPhase": "",
+      "RoundValue": 2,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 12,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 2,
+      "RoundState": "Intermission",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548504.394916,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548558.578338,
+    "players": {
+      "1": {
+        "role": "Lobby",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "-163, 21.5, 156"
+      },
+      "2": {
+        "role": "Lobby",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "-163, 21.5, 156"
+      },
+      "3": {
+        "role": "Lobby",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "-163, 21.5, 156"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 3,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548554.393598,
+      "MapVoteSession": 3,
+      "RoundPhase": "",
+      "LastDodgerWinRounds": 0,
+      "RoundValue": 3,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "RoundState": "Choosing",
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 3,
+      "MapVoteDuration": 12,
+      "MapVoteTimeLeft": 1,
+      "OpeningPhase": "Pick",
+      "OpeningDeadline": 1791548584.228609,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548572.22887,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player1",
+        "pos": "48.5, 6, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player2",
+        "pos": "48.5, 6, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player3",
+        "pos": "52.5, 6, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548602.560015,
+      "MapVoteSession": 3,
+      "RoundPhase": "Group",
+      "RoundValue": 3,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 3,
+      "RoundState": "Active",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548582.441749,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548572.560433,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.5, 6, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 6, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "52.5, 6, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548602.560015,
+      "MapVoteSession": 3,
+      "RoundPhase": "Group",
+      "RoundValue": 3,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 3,
+      "RoundState": "Active",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548582.441749,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548572.560697,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.5, 6, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 6, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "52.5, 6, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548602.560015,
+      "MapVoteSession": 3,
+      "RoundPhase": "Group",
+      "RoundValue": 3,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 3,
+      "RoundState": "Active",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548582.441749,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548572.560874,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.5, 6, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 6, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "52.5, 6, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548602.560015,
+      "MapVoteSession": 3,
+      "RoundPhase": "Group",
+      "RoundValue": 3,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 3,
+      "RoundState": "Ending",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548582.441749,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548602.656855,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.5, 3, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 3, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "52.5, 3, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548602.560015,
+      "MapVoteSession": 3,
+      "RoundPhase": "",
+      "RoundValue": 3,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 3,
+      "RoundState": "Ending",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548582.441749,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548602.757304,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.5, 3, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 3, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "52.5, 3, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": true,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548602.560015,
+      "MapVoteSession": 4,
+      "RoundPhase": "",
+      "RoundValue": 3,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 12,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 3,
+      "RoundState": "Intermission",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548582.441749,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548606.775975,
+    "players": {
+      "1": {
+        "role": "Lobby",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "-163, 21.5, 156"
+      },
+      "2": {
+        "role": "Lobby",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "-163, 21.5, 156"
+      },
+      "3": {
+        "role": "Lobby",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "-163, 21.5, 156"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548602.560015,
+      "MapVoteSession": 4,
+      "RoundPhase": "",
+      "LastDodgerWinRounds": 0,
+      "RoundValue": 4,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "RoundState": "Choosing",
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 4,
+      "MapVoteDuration": 12,
+      "MapVoteTimeLeft": 1,
+      "OpeningPhase": "Pick",
+      "OpeningDeadline": 1791548632.45965,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548620.459923,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player1",
+        "pos": "48.5, 6, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player2",
+        "pos": "48.5, 6, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player3",
+        "pos": "52.5, 6, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548640.789855,
+      "MapVoteSession": 4,
+      "RoundPhase": "Solo",
+      "RoundValue": 4,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 4,
+      "RoundState": "Active",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548630.673302,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548620.790129,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.5, 6, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 6, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player3",
+        "pos": "52.5, 6, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548640.789855,
+      "MapVoteSession": 4,
+      "RoundPhase": "Solo",
+      "RoundValue": 4,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 4,
+      "RoundState": "Active",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548630.673302,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548620.790274,
+    "players": {
+      "1": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.5, 6, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 6, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player3",
+        "pos": "52.5, 6, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548670.838278,
+      "MapVoteSession": 4,
+      "RoundPhase": "Group",
+      "RoundValue": 4,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 0,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 4,
+      "RoundState": "Active",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548630.673302,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548640.841612,
+    "players": {
+      "1": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.5, 3, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.5, 3, 111"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "52.5, 6, 2"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548670.838278,
+      "MapVoteSession": 4,
+      "RoundPhase": "Group",
+      "RoundValue": 4,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 4,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 4,
+      "RoundState": "Ending",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548630.673302,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548649.555446,
+    "players": {
+      "1": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.5, 3, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.483154296875, 3, 111.006103515625"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": true,
+        "crossings": 1,
+        "locked": false,
+        "name": "Player3",
+        "pos": "48.85343933105469, 3, 201.45758056640625"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548670.838278,
+      "MapVoteSession": 4,
+      "RoundPhase": "",
+      "RoundValue": 4,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 1,
+      "LastDodgerWinRounds": 4,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 4,
+      "RoundState": "Ending",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548630.673302,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548649.655997,
+    "players": {
+      "1": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "48.5, 3, 2"
+      },
+      "2": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "48.483154296875, 3, 111.006103515625"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": true,
+        "crossings": 1,
+        "locked": false,
+        "name": "Player3",
+        "pos": "48.797027587890625, 3, 204.42308044433594"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": true,
+      "HeroPlayer": -1,
+      "OpeningLead": -2,
+      "CrossingDeadline": 1791548670.838278,
+      "MapVoteSession": 5,
+      "RoundPhase": "",
+      "RoundValue": 4,
+      "OpeningSelected": -1,
+      "OpeningCandidates": "[{\"Name\":\"Player1\",\"UserId\":-1,\"DisplayName\":\"Player1\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "MapVoteTimeLeft": 12,
+      "LastDodgerWinRounds": 4,
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 4,
+      "RoundState": "Intermission",
+      "MapVoteDuration": 12,
+      "OpeningPhase": "",
+      "OpeningDeadline": 1791548630.673302,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548653.675786,
+    "players": {
+      "1": {
+        "role": "Lobby",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player1",
+        "pos": "-163, 21.5, 156"
+      },
+      "2": {
+        "role": "Lobby",
+        "reached": false,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player2",
+        "pos": "-163, 21.5, 156"
+      },
+      "3": {
+        "role": "Lobby",
+        "reached": true,
+        "crossings": 0,
+        "locked": false,
+        "name": "Player3",
+        "pos": "-163, 21.5, 156"
+      }
+    }
+  },
+  {
+    "state": {
+      "CrossingWave": 1,
+      "CrossingTarget": "Line2",
+      "MapVoteOpen": false,
+      "HeroPlayer": -1,
+      "OpeningLead": -1,
+      "CrossingDeadline": 1791548670.838278,
+      "MapVoteSession": 5,
+      "RoundPhase": "",
+      "LastDodgerWinRounds": 4,
+      "RoundValue": 1,
+      "OpeningCandidates": "[{\"Name\":\"Player2\",\"UserId\":-2,\"DisplayName\":\"Player2\"},{\"Name\":\"Player3\",\"UserId\":-3,\"DisplayName\":\"Player3\"}]",
+      "RoundState": "Choosing",
+      "OpeningChoiceHint": "Hero: cross alone first  ·  Chicken: cross together",
+      "OpeningSession": 5,
+      "MapVoteDuration": 12,
+      "MapVoteTimeLeft": 1,
+      "OpeningPhase": "Pick",
+      "OpeningDeadline": 1791548679.341347,
+      "_lemonadeUniqueId": "R5T6s9AMR5T6",
+      "MapVoteCounts": "{\"Classic Valley\":0,\"Desert Canyon\":0}"
+    },
+    "time": 1791548667.341773,
+    "players": {
+      "1": {
+        "role": "Thrower",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player1",
+        "pos": "48.5, 6, 111"
+      },
+      "2": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player2",
+        "pos": "48.5, 6, 2"
+      },
+      "3": {
+        "role": "Runner",
+        "reached": false,
+        "crossings": 0,
+        "locked": true,
+        "name": "Player3",
+        "pos": "52.5, 6, 2"
+      }
+    }
+  }
+]

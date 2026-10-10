@@ -1,0 +1,79 @@
+{
+  "canvas": {
+    "width": 2233,
+    "height": 3423
+  },
+  "parts": [
+    {
+      "name": "Panel",
+      "className": "ImageLabel",
+      "x": 0,
+      "y": 0,
+      "width": 2213,
+      "height": 2835,
+      "textureWidth": 3197,
+      "textureHeight": 4096
+    },
+    {
+      "name": "CloseButton",
+      "className": "ImageButton",
+      "x": 1823,
+      "y": 0,
+      "width": 410,
+      "height": 444,
+      "textureWidth": 946,
+      "textureHeight": 1024
+    },
+    {
+      "name": "VehicleButton",
+      "className": "ImageButton",
+      "x": 112,
+      "y": 505,
+      "width": 974,
+      "height": 354,
+      "textureWidth": 2048,
+      "textureHeight": 744
+    },
+    {
+      "name": "WeaponsButton",
+      "className": "ImageButton",
+      "x": 1138,
+      "y": 505,
+      "width": 974,
+      "height": 354,
+      "textureWidth": 2048,
+      "textureHeight": 744
+    },
+    {
+      "name": "FrameNot1",
+      "className": "ImageLabel",
+      "x": 112,
+      "y": 867,
+      "width": 974,
+      "height": 244,
+      "textureWidth": 2048,
+      "textureHeight": 513
+    },
+    {
+      "name": "FrameNot2",
+      "className": "ImageLabel",
+      "x": 1138,
+      "y": 867,
+      "width": 974,
+      "height": 244,
+      "textureWidth": 2048,
+      "textureHeight": 513
+    },
+    {
+      "name": "ClearPlotButton",
+      "className": "ImageButton",
+      "x": 487,
+      "y": 2983,
+      "width": 1257,
+      "height": 440,
+      "textureWidth": 2048,
+      "textureHeight": 717
+    }
+  ],
+  "meanChannelError": 0.043820618938340605
+}

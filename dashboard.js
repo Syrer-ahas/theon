@@ -13,19 +13,7 @@
   const getJson = (key, fallback) => { try { return JSON.parse(get(key, '')) ?? fallback; } catch (_) { return fallback; } };
   const set = (key, value) => { try { localStorage.setItem(key, value); return true; } catch (_) { return false; } };
   let toastTimer;
-  let serverPlan = 'Free';
-
-  async function loadBillingPlan() {
-    try {
-      const response = await fetch('/api/billing', {
-        headers: { Authorization: `Bearer ${session.credential}` },
-        cache: 'no-store'
-      });
-      const billing = await response.json().catch(() => ({}));
-      if (response.ok) serverPlan = ({ pro: 'Tactical PRO', premium: 'Tactical Premium', enterprise: 'Tactical Enterprise' })[billing.plan] || 'Free';
-    } catch (_) {}
-    byId('profilePlan').textContent = serverPlan;
-  }
+  const serverPlan = 'Free';
 
   function toast(message) {
     const element = byId('toast');
@@ -388,33 +376,6 @@
     }
   }
 
-  async function generateRedeemCode() {
-    const token = window.TacticalSignIn?.getSessionToken?.();
-    const plan = byId('redeemPlan').value;
-    const button = byId('generateRedeemCodeBtn');
-    if (!token) { byId('redeemCodeStatus').textContent = 'An administrator session is required.'; return; }
-    button.disabled = true;
-    byId('redeemCodeStatus').textContent = 'Generating a one-time code…';
-    byId('generatedRedeemCode').hidden = true;
-    try {
-      const response = await fetch('/api/admin-redeem-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        credentials: 'same-origin',
-        body: JSON.stringify({ plan })
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload.code) throw new Error(payload.error || 'The code could not be generated.');
-      byId('generatedRedeemCodeValue').textContent = payload.code;
-      byId('generatedRedeemCode').hidden = false;
-      byId('redeemCodeStatus').textContent = 'Code generated. Copy it now; it will be shown only here.';
-    } catch (error) {
-      byId('redeemCodeStatus').textContent = error.message || 'The code could not be generated.';
-    } finally {
-      button.disabled = false;
-    }
-  }
-
   function boot() {
     document.querySelectorAll('[data-dashboard-tab]').forEach((tab) => {
       tab.addEventListener('click', () => {
@@ -495,15 +456,6 @@
       if (confirm(`Ban ${byId('managedEmail').value.trim()} from generation and agent access?`)) manageUser('ban');
     });
     byId('unbanUserBtn').addEventListener('click', () => manageUser('unban'));
-    byId('generateRedeemCodeBtn').addEventListener('click', generateRedeemCode);
-    byId('copyRedeemCodeBtn').addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(byId('generatedRedeemCodeValue').textContent);
-        toast('Redemption code copied.');
-      } catch (_) {
-        byId('redeemCodeStatus').textContent = 'Clipboard access is unavailable. Select the code manually.';
-      }
-    });
     byId('savePreferencesBtn').addEventListener('click', () => {
       const preferences = {
         defaultGame: byId('defaultGame').value.trim(),
@@ -527,7 +479,7 @@
       try { await importData(file); } catch (error) { toast(error.message || 'The backup could not be imported.'); }
       event.target.value = '';
     });
-    byId('refreshBtn').addEventListener('click', () => { refresh(); loadBillingPlan(); toast('Dashboard refreshed.'); });
+    byId('refreshBtn').addEventListener('click', () => { refresh(); toast('Dashboard refreshed.'); });
     byId('storageSearch').addEventListener('input', renderStorage);
     byId('clearPreferencesBtn').addEventListener('click', () => {
       localStorage.removeItem('tactical-web-preferences');
@@ -552,7 +504,6 @@
     byId('quickPrompt').value = savedDraft;
     byId('launchCount').textContent = `${savedDraft.length} / 600`;
     refresh();
-    loadBillingPlan();
   }
 
   function loadPreferences() {

@@ -49,7 +49,6 @@
       <div class="user-menu-panel" hidden>
         <div class="user-menu-identity"><strong>${session.name || 'User'}</strong><span>${session.email}</span></div>
         <a class="user-menu-action user-menu-blue" href="/account">Account settings</a>
-        <a class="user-menu-action user-menu-blue" href="/pro">Get Pro</a>
         <button class="user-menu-action user-menu-red" type="button" data-user-logout>Log out</button>
       </div>`;
     const toggle = menu.querySelector('.user-menu-toggle');

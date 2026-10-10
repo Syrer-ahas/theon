@@ -1,0 +1,16 @@
+{
+  "studio": "TEST",
+  "gui": "StarterGui.Buttons",
+  "enabled": true,
+  "verifiedVisually": true,
+  "assets": {
+    "http://127.0.0.1:8770/Buttons/Button1.png": "rbxassetid://102379429761495",
+    "http://127.0.0.1:8770/Buttons/Button2.png": "rbxassetid://100659369067984"
+  },
+  "frame9Status": "Complete: updated Server Luck Bundle in StarterGui.Frame9. Independent Panel and 199 Button1, exported at 4096px width, loaded and visually verified in Studio play mode with alignment error under one pixel.",
+  "frame9Assets": {
+    "Panel": "rbxassetid://125373646660454",
+    "Button1": "rbxassetid://128471053700568"
+  },
+  "frame9Manifest": "Frame9/manifest.json"
+}

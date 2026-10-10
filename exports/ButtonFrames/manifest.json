@@ -1,0 +1,59 @@
+{
+  "parts": [
+    {
+      "gui": "Buttons",
+      "name": "Button1",
+      "x": 1019,
+      "y": 0,
+      "width": 964,
+      "height": 419,
+      "file": "Buttons/Button1.png",
+      "textureWidth": 4096,
+      "textureHeight": 1780,
+      "bytes": 435491
+    },
+    {
+      "gui": "Buttons",
+      "name": "Button2",
+      "x": 0,
+      "y": 0,
+      "width": 964,
+      "height": 419,
+      "file": "Buttons/Button2.png",
+      "textureWidth": 4096,
+      "textureHeight": 1780,
+      "bytes": 354371
+    },
+    {
+      "gui": "Frame9",
+      "name": "Panel",
+      "x": 0,
+      "y": 0,
+      "width": 4069,
+      "height": 1360,
+      "file": "Frame9/Panel.png",
+      "textureWidth": 4096,
+      "textureHeight": 1369,
+      "bytes": 4956949,
+      "source": "Figma native PNG at 2x"
+    },
+    {
+      "gui": "Frame9",
+      "name": "Button1",
+      "x": 3052,
+      "y": 913,
+      "width": 964,
+      "height": 419,
+      "file": "Frame9/Button1.png",
+      "textureWidth": 4096,
+      "textureHeight": 1780,
+      "bytes": 570725
+    }
+  ],
+  "verification": {
+    "meanChannelError": 0.2129251497005988,
+    "maxError": 201,
+    "pixelsAbove8": 3396,
+    "pixels": 334000
+  }
+}

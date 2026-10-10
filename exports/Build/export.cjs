@@ -1,0 +1,38 @@
+const fs = require('fs');
+const path = require('path');
+const {DOMParser, XMLSerializer} = require('../InterfacePanels/render-tools/node_modules/@xmldom/xmldom');
+const {Resvg} = require('../InterfacePanels/render-tools/node_modules/@resvg/resvg-js');
+const {PNG} = require('../InterfacePanels/render-tools/node_modules/pngjs');
+const xml = new XMLSerializer();
+const children = n => Array.from(n.childNodes).filter(n => n.nodeType === 1);
+const source = new DOMParser().parseFromString(fs.readFileSync(path.join(__dirname,'source.svg'),'utf8'),'image/svg+xml').documentElement;
+const nodes = children(source);
+const index = nodes.findIndex(n => n.tagName === 'mask' && n.getAttribute('x') === '72' && n.getAttribute('y') === '72');
+if(index < 0 || nodes[index+1].tagName !== 'path' || nodes[index+2].tagName !== 'path') throw Error('B artwork not identified');
+const button = source.cloneNode(true);
+for(const n of children(button).slice(index,index+3)) button.removeChild(n);
+const letter = source.cloneNode(false);
+for(const n of nodes.slice(index,index+3)) letter.appendChild(n.cloneNode(true));
+const render = (root,width) => new Resvg(xml.serializeToString(root),{fitTo:{mode:'width',value:width},font:{loadSystemFonts:false}}).render().asPng();
+const reference = PNG.sync.read(render(source,1050));
+const background = PNG.sync.read(render(button,1050));
+const overlay = PNG.sync.read(render(letter,1050));
+let error=0;
+for(let i=0;i<reference.data.length;i+=4){
+ const a=overlay.data[i+3]/255,b=background.data[i+3]/255,r=reference.data[i+3]/255;
+ for(let c=0;c<3;c++) error+=Math.abs(overlay.data[i+c]*a+background.data[i+c]*b*(1-a)-reference.data[i+c]*r);
+ error+=Math.abs((a+b*(1-a))*255-reference.data[i+3]);
+}
+const verification={meanChannelError:error/reference.data.length};
+if(verification.meanChannelError>.1) throw Error('Recomposition mismatch '+JSON.stringify(verification));
+letter.setAttribute('viewBox','72 72 179 180');
+letter.setAttribute('width','179');letter.setAttribute('height','180');
+fs.writeFileSync(path.join(__dirname,'Button.svg'),xml.serializeToString(button));
+fs.writeFileSync(path.join(__dirname,'B-cropped.svg'),xml.serializeToString(letter));
+fs.writeFileSync(path.join(__dirname,'Button.png'),render(button,2048));
+fs.writeFileSync(path.join(__dirname,'B.png'),render(letter,512));
+fs.writeFileSync(path.join(__dirname,'reference.png'),render(source,1050));
+fs.writeFileSync(path.join(__dirname,'preview.png'),render(source,300));
+const manifest={canvas:{width:1050,height:1050},button:{width:2048,height:2048},B:{x:72,y:72,width:179,height:180},verification};
+fs.writeFileSync(path.join(__dirname,'manifest.json'),JSON.stringify(manifest,null,2));
+console.log(JSON.stringify(manifest));

@@ -1,0 +1,19 @@
+{
+  "canvas": {
+    "width": 1050,
+    "height": 1050
+  },
+  "button": {
+    "width": 2048,
+    "height": 2048
+  },
+  "B": {
+    "x": 72,
+    "y": 72,
+    "width": 179,
+    "height": 180
+  },
+  "verification": {
+    "meanChannelError": 0.0003844380000366089
+  }
+}

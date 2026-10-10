@@ -1,13 +1,9 @@
 (() => {
   'use strict';
   const el = (id) => document.getElementById(id);
-  const state = { session: null, chats: [], activeId: null, busy: false, credits: 0, plan: 'free', downloads: new Map() };
+  const state = { session: null, chats: [], activeId: null, busy: false, credits: 0, downloads: new Map() };
 
-  function planName() {
-    return ({ pro: 'Tactical PRO', premium: 'Tactical Premium', enterprise: 'Tactical Enterprise' })[state.plan] || 'Free';
-  }
-  function isPaid() { return state.plan !== 'free'; }
-  function chatLimit() { return isPaid() ? Infinity : 2; }
+  function chatLimit() { return 2; }
   function storageKey() { return `tactical-web-saved-chats:${state.session?.email?.toLowerCase() || 'guest'}`; }
   function uid() { return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`; }
   function activeChat() { return state.chats.find((chat) => chat.id === state.activeId) || null; }
@@ -31,7 +27,7 @@
     const current = activeChat();
     if (current && current.messages.length === 0) return current;
     if (state.chats.length >= chatLimit()) {
-      showNotice('Free accounts can save up to two chats. Continue an existing chat, delete one, or upgrade for more.');
+      showNotice('You can save up to two chats. Continue an existing chat or delete one to create space.');
       return null;
     }
     const chat = { id: uid(), title: 'New conversation', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), model: el('agentModel').value, messages: [] };
@@ -77,9 +73,9 @@
       button.append(title, date, remove);
       list.appendChild(button);
     });
-    el('chatPlan').textContent = isPaid() ? `${planName()} · ${state.chats.length} saved chats` : `Free plan · ${state.chats.length} of 2 chats used`;
+    el('chatPlan').textContent = `Free plan · ${state.chats.length} of 2 chats used`;
     el('newChatBtn').disabled = !state.session || (!isPaid() && state.chats.length >= 2 && activeChat()?.messages.length > 0);
-    el('upgradeChatLink').hidden = isPaid();
+    el('upgradeChatLink').hidden = true;
   }
 
   function createMessageNode(message) {
@@ -226,26 +222,12 @@
       const signedIn = await window.TacticalSignIn.signInWithGoogle();
       if (!signedIn) return;
       state.session = signedIn;
-      await syncBilling();
       loadChats();
       await window.TacticalCredits.sync({ force: true });
       clearNotice();
       render();
       processHomepageDraft();
     } catch (error) { showNotice(error.message || 'Google sign-in could not be completed.'); }
-  }
-
-  async function syncBilling() {
-    state.plan = 'free';
-    if (!state.session?.credential) return;
-    try {
-      const response = await fetch('/api/billing', {
-        headers: { Authorization: `Bearer ${state.session.credential}` },
-        cache: 'no-store'
-      });
-      const billing = await response.json().catch(() => ({}));
-      if (response.ok && ['pro', 'premium', 'enterprise'].includes(billing.plan)) state.plan = billing.plan;
-    } catch (_) {}
   }
 
   function processHomepageDraft() {
@@ -267,7 +249,6 @@
 
   async function boot() {
     state.session = window.TacticalSignIn.getSession();
-    await syncBilling();
     loadChats();
     el('newChatBtn').addEventListener('click', () => { clearNotice(); makeChat(); el('chatInput').focus(); });
     el('sendBtn').addEventListener('click', () => sendMessage());
@@ -285,7 +266,6 @@
     window.addEventListener('tw-credits-changed', (event) => { state.credits = event.detail?.authenticated ? Number(event.detail.credits || 0) : 0; render(); });
     document.addEventListener('tactical-auth-changed', async (event) => {
       state.session = event.detail?.session || null;
-      await syncBilling();
       loadChats();
       render();
     });

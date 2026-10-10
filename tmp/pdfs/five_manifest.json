@@ -1,0 +1,47 @@
+[
+  {
+    "key": "MWB",
+    "company": "MWB Elektrotechnik Service GmbH",
+    "email": "bewerbung@mwb-elektrotechnik.de",
+    "area": "Elektrotechnik",
+    "letter": "C:\\Users\\alkhi\\Downloads\\VSCODE-USESTRICTLY!\\output\\pdf\\Bewerbung_MWB_Alkhidir_Al_Ahmad.pdf",
+    "payload": "C:\\Users\\alkhi\\Downloads\\VSCODE-USESTRICTLY!\\tmp\\pdfs\\payload_MWB.json",
+    "bottom": 175.8897637795277
+  },
+  {
+    "key": "Schmidt_Koch",
+    "company": "Schmidt + Koch GmbH - Autohaus Bremerhaven",
+    "email": "bewerbung@schmidt-und-koch.de",
+    "area": "Kfz-Mechatronik",
+    "letter": "C:\\Users\\alkhi\\Downloads\\VSCODE-USESTRICTLY!\\output\\pdf\\Bewerbung_Schmidt_Koch_Alkhidir_Al_Ahmad.pdf",
+    "payload": "C:\\Users\\alkhi\\Downloads\\VSCODE-USESTRICTLY!\\tmp\\pdfs\\payload_Schmidt_Koch.json",
+    "bottom": 175.8897637795277
+  },
+  {
+    "key": "Muth_Bahr",
+    "company": "Muth & Bahr Haustechnik GmbH",
+    "email": "buero@muth-bahr.de",
+    "area": "Sanitär-, Heizungs- und Klimatechnik",
+    "letter": "C:\\Users\\alkhi\\Downloads\\VSCODE-USESTRICTLY!\\output\\pdf\\Bewerbung_Muth_Bahr_Alkhidir_Al_Ahmad.pdf",
+    "payload": "C:\\Users\\alkhi\\Downloads\\VSCODE-USESTRICTLY!\\tmp\\pdfs\\payload_Muth_Bahr.json",
+    "bottom": 175.8897637795277
+  },
+  {
+    "key": "Heinen_Energy",
+    "company": "Heinen-Energy",
+    "email": "kontakt@heinen-energy.de",
+    "area": "Sanitär-, Heizungs- und Klimatechnik",
+    "letter": "C:\\Users\\alkhi\\Downloads\\VSCODE-USESTRICTLY!\\output\\pdf\\Bewerbung_Heinen_Energy_Alkhidir_Al_Ahmad.pdf",
+    "payload": "C:\\Users\\alkhi\\Downloads\\VSCODE-USESTRICTLY!\\tmp\\pdfs\\payload_Heinen_Energy.json",
+    "bottom": 175.8897637795277
+  },
+  {
+    "key": "Ahrens",
+    "company": "Ahrens Hoch- & Tiefbau GmbH",
+    "email": "bewerbung@ahrens-gmbh.de",
+    "area": "Maurer- und Hochbauarbeiten",
+    "letter": "C:\\Users\\alkhi\\Downloads\\VSCODE-USESTRICTLY!\\output\\pdf\\Bewerbung_Ahrens_Alkhidir_Al_Ahmad.pdf",
+    "payload": "C:\\Users\\alkhi\\Downloads\\VSCODE-USESTRICTLY!\\tmp\\pdfs\\payload_Ahrens.json",
+    "bottom": 175.8897637795277
+  }
+]

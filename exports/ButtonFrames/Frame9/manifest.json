@@ -1,0 +1,36 @@
+{
+  "sourceFrame": {
+    "width": 4069,
+    "height": 1360
+  },
+  "parts": [
+    {
+      "name": "Panel",
+      "class": "ImageLabel",
+      "x": 0,
+      "y": 0,
+      "width": 4069,
+      "height": 1360,
+      "textureWidth": 4096,
+      "textureHeight": 1369,
+      "file": "Frame9/Panel.png"
+    },
+    {
+      "name": "Button1",
+      "class": "ImageButton",
+      "x": 3052,
+      "y": 913,
+      "width": 964,
+      "height": 419,
+      "textureWidth": 4096,
+      "textureHeight": 1780,
+      "file": "Frame9/Button1.png"
+    }
+  ],
+  "verification": {
+    "meanChannelError": 0.21245209580838323,
+    "maxError": 219,
+    "pixelsAbove16": 1965,
+    "pixels": 334000
+  }
+}

@@ -1,0 +1,2 @@
+const fs=require('fs'),path=require('path');const p=path.join(__dirname,'export.cjs');let s=fs.readFileSync(p,'utf8');
+s=s.replace("'source.svg'","'complete-source.svg'").replace("['PanelBorder',[0],4096,'ImageLabel'],['Header',[1,2,3,4,5,6,7,8],4096,'ImageLabel'],['Panel',[9],4096,'ImageLabel']","['Panel',[0,1,2,3,4,5,6,7,8,9],4096,'ImageLabel']").replace("['FrameNot2',[31,32],2048,'ImageLabel']","['FrameNot2',[31,32],2048,'ImageLabel'],['ClearPlotButton',[33,34,35,36,37],2048,'ImageButton']").replaceAll('2833','3423').replaceAll('2832','3422');fs.writeFileSync(p,s);

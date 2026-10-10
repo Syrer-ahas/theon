@@ -1,0 +1,32 @@
+
+## Zwanzig weitere Bewerbungen vom 04.10.2026
+
+Alle E-Mails wurden von alkhidirea@gmail.com für das Schülerpraktikum vom 16. bis 27.11.2026 gesendet. Gmail bestätigt für jede Nachricht den Status SENT und zwei PDF-Anhänge (individuelles Anschreiben und passender Lebenslauf). Ein Praktikumsplatz ist noch nicht zugesagt. Heizungsbau, dm und Bremerhaven Bus wurden ausgeschlossen.
+
+| Betrieb | Bereich | Empfänger | Status | Quelle |
+|---|---|---|---|---|
+| CI-Gate Development & Consulting GmbH | IT-Systeme und Softwareentwicklung | bewerbung@ci-gate.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb26344bca3) | [Betriebsseite](https://cigate.eu/jobs) |
+| netactive GmbH | IT-Systemintegration | info@netactive.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb2cc7343a5) | [Betriebsseite](https://netactive.de/karriere) |
+| Benthin GmbH | Fachinformatik und Anwendungsentwicklung | jobs@benthin.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb32e921747) | [Betriebsseite](https://www.benthin.com/fachinformatiker) |
+| EUROGATE | Informatik im Hafen | bewerbungen@eurogategroup.eu | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb38c9e279d) | [Betriebsseite](https://www1.eurogate.de/karriere/ausbildungsprofil/ausbildung-fachinformatikerin-anwendungsentwicklung-m-w-d/) |
+| bremenports GmbH & Co. KG | Industriemechanik und Hafentechnik | bewerbung@bremenports.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb3f83d7f69) | [Betriebsseite](https://www.bremenports.de/karriere/lernen) |
+| Heise Werft GmbH | Industriemechanik und Schiffsreparatur | salge@heise-werft.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb47df80e4a) | [Betriebsseite](https://heise-werft.de/stellenangebote/) |
+| E+A Elektrotechnik und Aggregatebau | Elektrotechnik und elektrische Maschinen | vertrieb@eunda.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb4c146fc06) | [Betriebsseite](https://www.eunda.de/karriere/) |
+| BREDO DRY DOCKS GmbH | Industriemechanik und Schiffbau | bewerbung@bredo.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb55d8dd50f) | [Betriebsseite](https://www.bredo.de/jobs) |
+| FAIRPLAY TOWAGE Group | Industriemechanik im maritimen Bereich | bewerbung@fairplay-towage.com | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb5b9660b33) | [Betriebsseite](https://fairplay-towage.group/de/ausbildung-zum-industriemechaniker-m-w-d/) |
+| Huth Metall + Zaunbau GmbH | Metallbau und Schlosserei | bewerbung@huth.team | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb613096906) | [Betriebsseite](https://www.huth.team/karriere/) |
+| H+P Stahl- und Maschinenbau GmbH | Konstruktionsmechanik und Stahlbau | info@hp-stahlbau.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb66a9814a7) | [Betriebsseite](https://www.hp-stahlbau.de/karriere/) |
+| Unterweser Stahl- und Maschinenbau GmbH | Metallbau und Maschinenbau | bewerbung@hr-gruppe.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb6c221a0d6) | [Betriebsseite](https://www.usm-bhv.de/karriere/stellenangebote/metallbauer-konstruktionstechnik-m-w-d-usm-bremerhaven-ausbildung) |
+| North Repair Service GmbH | Schiffbau und Metallbau | info@northrepair-service.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb75f55fc6f) | [Betriebsseite](https://northrepair-service.de/jobs) |
+| Werner Automobile GmbH, Nutzfahrzeug-Service | Kfz-Mechatronik für Nutzfahrzeuge | gabriele.meyer@wernerautomobile.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb7a3b03435) | [Betriebsseite](https://www.make-it-in-germany.com/de/arbeiten-in-deutschland/jobboerse/job/job-10000-1206034489-S) |
+| Bobrink Gruppe, Standort Bremerhaven-Süd | Kfz-Mechatronik | bewerbung@bobrink-gruppe.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb83b732862) | [Betriebsseite](https://www.bobrink.de/unternehmen/karriere/kfz-mechatroniker/) |
+| Ordemann GmbH, Dachdeckerei | Dachdeckerhandwerk | dachdeckerei@ordemann.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb890f1fb6f) | [Betriebsseite](https://www.ordemann.de/de/dachdeckerei/ausbildung/) |
+| Kunert Bedachungen | Dachdeckerhandwerk | info@kunert-bedachungen.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb8f5372b4e) | [Betriebsseite](https://kunert-bedachungen.de/kontakt) |
+| INOXI Segelmacherei | Segelmacherhandwerk | info@inoxi.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb956a074c0) | [Betriebsseite](https://www.inoxi.de/UeBER-INOXI/JOBS/) |
+| Rönner Verwaltungsgesellschaft mbH, IT | IT-Systemadministration | k.balcke@hr-gruppe.de | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fb9d731fe2b) | [Betriebsseite](https://www.hr-gruppe.de/karriere/offene-stellen/stellenangebot?cHash=466201b17a1a1bc9ed3f5906f2f7f5f7&tx_hrjobs_hrgruppejobsdetailview%5Baction%5D=detail&tx_hrjobs_hrgruppejobsdetailview%5Bcontroller%5D=Job&tx_hrjobs_hrgruppejobsdetailview%5Bjob%5D=30) |
+| Datacon GmbH & Co. KG | IT und Digitalisierung | karriere@datacon.biz | [Gesendet](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a107fba038ee882) | [Betriebsseite](https://www.seier-gruppe.de/karriere/jobanzeige/job-details/werkstudent-it--application-management-digitalisierung-ki-m-w-d) |
+
+Heinen-Energy wurde am 04.10.2026 höflich abgesagt, nachdem der Betrieb wegen eines häufig anwesenden Hundes nachgefragt hatte. [Gesendete Absage](https://mail.google.com/mail/u/?authuser=alkhidirea%40gmail.com#all/1a1026693e293e83).
+
+Der IT-Lebenslauf wurde für die neuen Informatik-Bewerbungen erstellt. Die Berufsorientierung im Mai 2026 bei InCoTrain mit den Berufsfeldern Medien Bild und Ton, Tischler und Hauswirtschaft wurde anhand der in Downloads vorhandenen Zertifikats-PDF belegt. Es wurden keine Programmierkenntnisse oder Berufserfahrung erfunden.
+

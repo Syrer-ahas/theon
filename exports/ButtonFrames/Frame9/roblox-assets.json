@@ -1,0 +1,10 @@
+{
+  "gui": "StarterGui.Frame9",
+  "design": "Server Luck Bundle",
+  "assets": {
+    "http://127.0.0.1:8770/Frame9/Panel.png": "rbxassetid://125373646660454",
+    "http://127.0.0.1:8770/Frame9/Button1.png": "rbxassetid://128471053700568"
+  },
+  "verifiedVisually": true,
+  "alignmentPixels": 0.9924312233924866
+}

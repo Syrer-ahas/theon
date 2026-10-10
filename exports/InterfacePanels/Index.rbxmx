@@ -1,0 +1,565 @@
+<?xml version='1.0' encoding='utf-8'?>
+<roblox version="4">
+  <Item class="ScreenGui">
+    <Properties>
+      <string name="Name">Index</string>
+      <bool name="Enabled">false</bool>
+      <bool name="ResetOnSpawn">false</bool>
+      <bool name="IgnoreGuiInset">true</bool>
+      <token name="ScreenInsets">0</token>
+      <token name="ZIndexBehavior">1</token>
+      <int name="DisplayOrder">120</int>
+    </Properties>
+    <Item class="BindableEvent">
+      <Properties>
+        <string name="Name">ButtonActivated</string>
+      </Properties>
+    </Item>
+    <Item class="ImageLabel">
+      <Properties>
+        <string name="Name">Panel</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>0</XO>
+          <YS>0.5</YS>
+          <YO>0</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>961</XO>
+          <YS>0</YS>
+          <YO>676</YO>
+        </UDim2>
+        <int name="ZIndex">1</int>
+        <Content name="Image">
+          <url>rbxassetid://115281564766227</url>
+        </Content>
+        <token name="ResampleMode">0</token>
+        <token name="ScaleType">0</token>
+      </Properties>
+    </Item>
+    <Item class="Frame">
+      <Properties>
+        <string name="Name">FrameNot1</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>-360</XO>
+          <YS>0.5</YS>
+          <YO>-139</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>150</XO>
+          <YS>0</YS>
+          <YO>150</YO>
+        </UDim2>
+        <int name="ZIndex">2</int>
+      </Properties>
+      <Item class="ImageLabel">
+        <Properties>
+          <string name="Name">Artwork</string>
+          <float name="BackgroundTransparency">1</float>
+          <int name="BorderSizePixel">0</int>
+          <int name="ZIndex">2</int>
+          <UDim2 name="Size">
+            <XS>1</XS>
+            <XO>0</XO>
+            <YS>1</YS>
+            <YO>0</YO>
+          </UDim2>
+          <Content name="Image">
+            <url>rbxassetid://91255863825877</url>
+          </Content>
+          <token name="ResampleMode">0</token>
+          <token name="ScaleType">0</token>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Frame">
+      <Properties>
+        <string name="Name">FrameNot2</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>-188</XO>
+          <YS>0.5</YS>
+          <YO>-139</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>150</XO>
+          <YS>0</YS>
+          <YO>150</YO>
+        </UDim2>
+        <int name="ZIndex">2</int>
+      </Properties>
+      <Item class="ImageLabel">
+        <Properties>
+          <string name="Name">Artwork</string>
+          <float name="BackgroundTransparency">1</float>
+          <int name="BorderSizePixel">0</int>
+          <int name="ZIndex">2</int>
+          <UDim2 name="Size">
+            <XS>1</XS>
+            <XO>0</XO>
+            <YS>1</YS>
+            <YO>0</YO>
+          </UDim2>
+          <Content name="Image">
+            <url>rbxassetid://134381238730695</url>
+          </Content>
+          <token name="ResampleMode">0</token>
+          <token name="ScaleType">0</token>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Frame">
+      <Properties>
+        <string name="Name">FrameNot3</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>-13</XO>
+          <YS>0.5</YS>
+          <YO>-139</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>150</XO>
+          <YS>0</YS>
+          <YO>150</YO>
+        </UDim2>
+        <int name="ZIndex">2</int>
+      </Properties>
+      <Item class="ImageLabel">
+        <Properties>
+          <string name="Name">Artwork</string>
+          <float name="BackgroundTransparency">1</float>
+          <int name="BorderSizePixel">0</int>
+          <int name="ZIndex">2</int>
+          <UDim2 name="Size">
+            <XS>1</XS>
+            <XO>0</XO>
+            <YS>1</YS>
+            <YO>0</YO>
+          </UDim2>
+          <Content name="Image">
+            <url>rbxassetid://74772994782856</url>
+          </Content>
+          <token name="ResampleMode">0</token>
+          <token name="ScaleType">0</token>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Frame">
+      <Properties>
+        <string name="Name">FrameNot4</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>162</XO>
+          <YS>0.5</YS>
+          <YO>-139</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>150</XO>
+          <YS>0</YS>
+          <YO>150</YO>
+        </UDim2>
+        <int name="ZIndex">2</int>
+      </Properties>
+      <Item class="ImageLabel">
+        <Properties>
+          <string name="Name">Artwork</string>
+          <float name="BackgroundTransparency">1</float>
+          <int name="BorderSizePixel">0</int>
+          <int name="ZIndex">2</int>
+          <UDim2 name="Size">
+            <XS>1</XS>
+            <XO>0</XO>
+            <YS>1</YS>
+            <YO>0</YO>
+          </UDim2>
+          <Content name="Image">
+            <url>rbxassetid://95844335078172</url>
+          </Content>
+          <token name="ResampleMode">0</token>
+          <token name="ScaleType">0</token>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Frame">
+      <Properties>
+        <string name="Name">FrameNot5</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>343</XO>
+          <YS>0.5</YS>
+          <YO>-139</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>150</XO>
+          <YS>0</YS>
+          <YO>150</YO>
+        </UDim2>
+        <int name="ZIndex">2</int>
+      </Properties>
+      <Item class="ImageLabel">
+        <Properties>
+          <string name="Name">Artwork</string>
+          <float name="BackgroundTransparency">1</float>
+          <int name="BorderSizePixel">0</int>
+          <int name="ZIndex">2</int>
+          <UDim2 name="Size">
+            <XS>1</XS>
+            <XO>0</XO>
+            <YS>1</YS>
+            <YO>0</YO>
+          </UDim2>
+          <Content name="Image">
+            <url>rbxassetid://99461653117339</url>
+          </Content>
+          <token name="ResampleMode">0</token>
+          <token name="ScaleType">0</token>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Frame">
+      <Properties>
+        <string name="Name">FrameNot6</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>343</XO>
+          <YS>0.5</YS>
+          <YO>28</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>150</XO>
+          <YS>0</YS>
+          <YO>150</YO>
+        </UDim2>
+        <int name="ZIndex">2</int>
+      </Properties>
+      <Item class="ImageLabel">
+        <Properties>
+          <string name="Name">Artwork</string>
+          <float name="BackgroundTransparency">1</float>
+          <int name="BorderSizePixel">0</int>
+          <int name="ZIndex">2</int>
+          <UDim2 name="Size">
+            <XS>1</XS>
+            <XO>0</XO>
+            <YS>1</YS>
+            <YO>0</YO>
+          </UDim2>
+          <Content name="Image">
+            <url>rbxassetid://126819155013945</url>
+          </Content>
+          <token name="ResampleMode">0</token>
+          <token name="ScaleType">0</token>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="ImageButton">
+      <Properties>
+        <string name="Name">CloseButton</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>433</XO>
+          <YS>0.5</YS>
+          <YO>-287</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>94</XO>
+          <YS>0</YS>
+          <YO>102</YO>
+        </UDim2>
+        <int name="ZIndex">3</int>
+        <Content name="Image">
+          <url>rbxassetid://85528323932446</url>
+        </Content>
+        <token name="ResampleMode">0</token>
+        <token name="ScaleType">0</token>
+        <bool name="AutoButtonColor">false</bool>
+        <bool name="Selectable">true</bool>
+      </Properties>
+    </Item>
+    <Item class="ImageButton">
+      <Properties>
+        <string name="Name">EnginesButton</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>-555</XO>
+          <YS>0.5</YS>
+          <YO>-189</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>161</XO>
+          <YS>0</YS>
+          <YO>116</YO>
+        </UDim2>
+        <int name="ZIndex">3</int>
+        <Content name="Image">
+          <url>rbxassetid://85289431116420</url>
+        </Content>
+        <token name="ResampleMode">0</token>
+        <token name="ScaleType">0</token>
+        <bool name="AutoButtonColor">false</bool>
+        <bool name="Selectable">true</bool>
+      </Properties>
+    </Item>
+    <Item class="ImageButton">
+      <Properties>
+        <string name="Name">FuelButton</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>-555</XO>
+          <YS>0.5</YS>
+          <YO>-68</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>161</XO>
+          <YS>0</YS>
+          <YO>125</YO>
+        </UDim2>
+        <int name="ZIndex">3</int>
+        <Content name="Image">
+          <url>rbxassetid://120899209823907</url>
+        </Content>
+        <token name="ResampleMode">0</token>
+        <token name="ScaleType">0</token>
+        <bool name="AutoButtonColor">false</bool>
+        <bool name="Selectable">true</bool>
+      </Properties>
+    </Item>
+    <Item class="ImageButton">
+      <Properties>
+        <string name="Name">WheelsButton</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>-555</XO>
+          <YS>0.5</YS>
+          <YO>57</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>161</XO>
+          <YS>0</YS>
+          <YO>125</YO>
+        </UDim2>
+        <int name="ZIndex">3</int>
+        <Content name="Image">
+          <url>rbxassetid://121157008203031</url>
+        </Content>
+        <token name="ResampleMode">0</token>
+        <token name="ScaleType">0</token>
+        <bool name="AutoButtonColor">false</bool>
+        <bool name="Selectable">true</bool>
+      </Properties>
+    </Item>
+    <Item class="ImageButton">
+      <Properties>
+        <string name="Name">BlocksButton</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>-555</XO>
+          <YS>0.5</YS>
+          <YO>182</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>161</XO>
+          <YS>0</YS>
+          <YO>127</YO>
+        </UDim2>
+        <int name="ZIndex">3</int>
+        <Content name="Image">
+          <url>rbxassetid://110922718733496</url>
+        </Content>
+        <token name="ResampleMode">0</token>
+        <token name="ScaleType">0</token>
+        <bool name="AutoButtonColor">false</bool>
+        <bool name="Selectable">true</bool>
+      </Properties>
+    </Item>
+    <Item class="ImageButton">
+      <Properties>
+        <string name="Name">GunsButton</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>555</XO>
+          <YS>0.5</YS>
+          <YO>-179</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>161</XO>
+          <YS>0</YS>
+          <YO>122</YO>
+        </UDim2>
+        <int name="ZIndex">3</int>
+        <Content name="Image">
+          <url>rbxassetid://79422942188381</url>
+        </Content>
+        <token name="ResampleMode">0</token>
+        <token name="ScaleType">0</token>
+        <bool name="AutoButtonColor">false</bool>
+        <bool name="Selectable">true</bool>
+      </Properties>
+    </Item>
+    <Item class="LocalScript">
+      <Properties>
+        <string name="Name">GuiController</string>
+        <ProtectedString name="Source">do
+    local gui = script.Parent
+    local data = game:GetService("HttpService"):JSONDecode([==[{"name":"Index","canvas":{"width":5547,"height":2952},"parts":[{"name":"Panel","kind":"panel","sourceId":"Index","x":675,"y":0,"width":4197,"height":2952,"file":"Index/Panel.png","textureWidth":4096,"textureHeight":2881,"assetId":"rbxassetid://115281564766227"},{"name":"FrameNot1","kind":"frame","sourceId":"FRAMENOT","x":872,"y":542,"width":654,"height":654,"file":"Index/FrameNot1.png","textureWidth":2048,"textureHeight":2048,"assetId":"rbxassetid://91255863825877"},{"name":"FrameNot2","kind":"frame","sourceId":"FRAMENOT_2","x":1625,"y":541,"width":654,"height":654,"file":"Index/FrameNot2.png","textureWidth":2048,"textureHeight":2048,"assetId":"rbxassetid://134381238730695"},{"name":"FrameNot3","kind":"frame","sourceId":"FRAMENOT_3","x":2390,"y":541,"width":654,"height":654,"file":"Index/FrameNot3.png","textureWidth":2048,"textureHeight":2048,"assetId":"rbxassetid://74772994782856"},{"name":"FrameNot4","kind":"frame","sourceId":"FRAMENOT_4","x":3155,"y":541,"width":654,"height":654,"file":"Index/FrameNot4.png","textureWidth":2048,"textureHeight":2048,"assetId":"rbxassetid://95844335078172"},{"name":"FrameNot5","kind":"frame","sourceId":"FRAMENOT_5","x":3945,"y":541,"width":654,"height":654,"file":"Index/FrameNot5.png","textureWidth":2048,"textureHeight":2048,"assetId":"rbxassetid://99461653117339"},{"name":"FrameNot6","kind":"frame","sourceId":"FRAMENOT_6","x":3945,"y":1271,"width":654,"height":654,"file":"Index/FrameNot6.png","textureWidth":2048,"textureHeight":2048,"assetId":"rbxassetid://126819155013945"},{"name":"CloseButton","kind":"close","sourceId":"CLOSEBUTTN","x":4460,"y":0,"width":412,"height":444,"file":"Index/CloseButton.png","textureWidth":950,"textureHeight":1024,"assetId":"rbxassetid://85528323932446"},{"name":"EnginesButton","kind":"button","sourceId":"BUTTON","x":0,"y":396,"width":702,"height":508,"file":"Index/EnginesButton.png","textureWidth":2048,"textureHeight":1482,"assetId":"rbxassetid://85289431116420"},{"name":"FuelButton","kind":"button","sourceId":"BUTTON_2","x":0,"y":907,"width":702,"height":545,"file":"Index/FuelButton.png","textureWidth":2048,"textureHeight":1590,"assetId":"rbxassetid://120899209823907"},{"name":"WheelsButton","kind":"button","sourceId":"BUTTON_3","x":0,"y":1453,"width":702,"height":547,"file":"Index/WheelsButton.png","textureWidth":2048,"textureHeight":1596,"assetId":"rbxassetid://121157008203031"},{"name":"BlocksButton","kind":"button","sourceId":"BUTTON_4","x":0,"y":1993,"width":702,"height":555,"file":"Index/BlocksButton.png","textureWidth":2048,"textureHeight":1619,"assetId":"rbxassetid://110922718733496"},{"name":"GunsButton","kind":"button","sourceId":"BUTTON_5","x":4845,"y":426,"width":702,"height":533,"file":"Index/GunsButton.png","textureWidth":2048,"textureHeight":1555,"assetId":"rbxassetid://79422942188381"}],"verification":{"meanChannelError":0.04854186543342923,"maxError":1.7647058823529278,"pixelsAbove3":0,"pixels":532000}}]==])
+    gui:SetAttribute("DesignWidth", data.canvas.width)
+    gui:SetAttribute("DesignHeight", data.canvas.height)
+    for _, part in ipairs(data.parts) do
+        local node = gui:WaitForChild(part.name)
+        node:SetAttribute("DesignX", part.x)
+        node:SetAttribute("DesignY", part.y)
+        node:SetAttribute("DesignWidth", part.width)
+        node:SetAttribute("DesignHeight", part.height)
+        node:SetAttribute("ExportWidth", part.textureWidth)
+        node:SetAttribute("ExportHeight", part.textureHeight)
+        node:SetAttribute("FigmaLayer", part.sourceId)
+    end
+end
+local gui = script.Parent
+local cameraConnection
+
+local function layout()
+	local camera = workspace.CurrentCamera
+	if not camera then return end
+	local viewport = camera.ViewportSize
+	if viewport.X &lt;= 0 or viewport.Y &lt;= 0 then return end
+	local width = gui:GetAttribute("DesignWidth")
+	local height = gui:GetAttribute("DesignHeight")
+	local scale = math.min(viewport.X * 0.84 / width, viewport.Y * 0.82 / height, 960 / 4193)
+	for _, node in gui:GetChildren() do
+		if node:IsA("GuiObject") and node:GetAttribute("DesignX") ~= nil then
+			local x, y = node:GetAttribute("DesignX"), node:GetAttribute("DesignY")
+			local w, h = node:GetAttribute("DesignWidth"), node:GetAttribute("DesignHeight")
+			node.Position = UDim2.new(0.5, (x + w / 2 - width / 2) * scale, 0.5, (y + h / 2 - height / 2) * scale)
+			node.Size = UDim2.fromOffset(w * scale, h * scale)
+		end
+	end
+end
+
+local function bindCamera()
+	if cameraConnection then cameraConnection:Disconnect() end
+	local camera = workspace.CurrentCamera
+	if camera then cameraConnection = camera:GetPropertyChangedSignal("ViewportSize"):Connect(layout) end
+	layout()
+end
+
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera)
+bindCamera()
+
+local close = gui:WaitForChild("CloseButton")
+close.Activated:Connect(function()
+	gui.Enabled = false
+end)
+
+local requested = gui:WaitForChild("ButtonActivated")
+for _, node in gui:GetChildren() do
+	if node:IsA("ImageButton") and node ~= close then
+		node.Activated:Connect(function()
+			if gui.Name == "Index" then
+				gui:SetAttribute("SelectedCategory", node.Name:gsub("Button$", ""))
+			end
+			requested:Fire(node.Name)
+		end)
+	end
+end
+
+script.Destroying:Connect(function()
+	if cameraConnection then cameraConnection:Disconnect() end
+end)
+</ProtectedString>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>

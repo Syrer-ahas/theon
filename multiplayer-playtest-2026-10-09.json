@@ -1,0 +1,254 @@
+{
+  "events": [
+    {
+      "state": "Active",
+      "round": 1,
+      "time": 1791546754.318272,
+      "players": [
+        {
+          "role": "Runner",
+          "name": "Player1",
+          "pos": "48.5, 4.5, 1.9999998807907104",
+          "xp": 0,
+          "coins": 0
+        },
+        {
+          "role": "Thrower",
+          "name": "Player2",
+          "pos": "48.5, 4.5, 111",
+          "xp": 0,
+          "coins": 0
+        }
+      ]
+    },
+    {
+      "state": "Ending",
+      "round": 1,
+      "time": 1791546826.681932,
+      "players": [
+        {
+          "role": "Runner",
+          "name": "Player1",
+          "pos": "48.5, 4.5, 81.365234375",
+          "xp": 53,
+          "coins": 60
+        },
+        {
+          "role": "Thrower",
+          "name": "Player2",
+          "pos": "48.5, 4.5, 111",
+          "xp": 0,
+          "coins": 0
+        }
+      ]
+    },
+    {
+      "state": "Intermission",
+      "round": 1,
+      "time": 1791546830.700465,
+      "players": [
+        {
+          "role": "Lobby",
+          "name": "Player1",
+          "pos": "-163, 23, 156",
+          "xp": 53,
+          "coins": 60
+        },
+        {
+          "role": "Lobby",
+          "name": "Player2",
+          "pos": "-163, 23, 156",
+          "xp": 0,
+          "coins": 0
+        }
+      ]
+    },
+    {
+      "state": "Active",
+      "round": 1,
+      "time": 1791546844.367727,
+      "players": [
+        {
+          "role": "Thrower",
+          "name": "Player1",
+          "pos": "48.5, 7.5, 111",
+          "xp": 53,
+          "coins": 60
+        },
+        {
+          "role": "Runner",
+          "name": "Player2",
+          "pos": "48.5, 7.5, 2",
+          "xp": 0,
+          "coins": 0
+        }
+      ]
+    },
+    {
+      "state": "Ending",
+      "round": 1,
+      "time": 1791546875.353002,
+      "players": [
+        {
+          "role": "Thrower",
+          "name": "Player1",
+          "pos": "48.5, 4.5, 111",
+          "xp": 53,
+          "coins": 70
+        },
+        {
+          "role": "Thrower",
+          "name": "Player2",
+          "pos": "48.5009765625, 4.5, 81.36376953125",
+          "xp": 0,
+          "coins": 0
+        }
+      ]
+    },
+    {
+      "state": "Intermission",
+      "round": 1,
+      "time": 1791546879.699195,
+      "players": [
+        {
+          "role": "Lobby",
+          "name": "Player1",
+          "pos": "-163, 23, 156",
+          "xp": 88,
+          "coins": 70
+        },
+        {
+          "role": "Lobby",
+          "name": "Player2",
+          "pos": "-163, 23, 156",
+          "xp": 6,
+          "coins": 0
+        }
+      ]
+    },
+    {
+      "state": "Active",
+      "round": 2,
+      "time": 1791546893.416286,
+      "players": [
+        {
+          "role": "Runner",
+          "name": "Player1",
+          "pos": "48.5, 7.5, 2",
+          "xp": 88,
+          "coins": 70
+        },
+        {
+          "role": "Thrower",
+          "name": "Player2",
+          "pos": "48.5, 7.5, 111",
+          "xp": 6,
+          "coins": 0
+        }
+      ]
+    },
+    {
+      "state": "Ending",
+      "round": 2,
+      "time": 1791546948.847319,
+      "players": [
+        {
+          "role": "Thrower",
+          "name": "Player1",
+          "pos": "48.5, 4.5, 69.36404418945312",
+          "xp": 88,
+          "coins": 70
+        },
+        {
+          "role": "Thrower",
+          "name": "Player2",
+          "pos": "48.5, 4.5, 111",
+          "xp": 6,
+          "coins": 10
+        }
+      ]
+    },
+    {
+      "state": "Intermission",
+      "round": 2,
+      "time": 1791546953.047256,
+      "players": [
+        {
+          "role": "Lobby",
+          "name": "Player1",
+          "pos": "-163, 23, 156",
+          "xp": 99,
+          "coins": 70
+        },
+        {
+          "role": "Lobby",
+          "name": "Player2",
+          "pos": "-163, 23, 156",
+          "xp": 41,
+          "coins": 10
+        }
+      ]
+    },
+    {
+      "state": "Active",
+      "round": 3,
+      "time": 1791546966.730299,
+      "players": [
+        {
+          "role": "Runner",
+          "name": "Player1",
+          "pos": "48.5, 7.5, 2",
+          "xp": 99,
+          "coins": 70
+        },
+        {
+          "role": "Thrower",
+          "name": "Player2",
+          "pos": "48.5, 7.5, 111",
+          "xp": 41,
+          "coins": 10
+        }
+      ]
+    }
+  ],
+  "players": {
+    "1": {
+      "tags": 1,
+      "wins": 1,
+      "userId": -1,
+      "catches": 1,
+      "name": "Player1",
+      "xp": 99,
+      "level": 1,
+      "coins": 70,
+      "parts": {
+        "Left Leg": "0, 0, 0",
+        "Right Arm": "0, 0, 0",
+        "Head": "0, 0, 0",
+        "Right Leg": "0, 0, 0",
+        "Torso": "0, 0, 0",
+        "HumanoidRootPart": "0.639216, 0.635294, 0.647059",
+        "Left Arm": "0, 0, 0"
+      }
+    },
+    "2": {
+      "tags": 1,
+      "wins": 0,
+      "userId": -2,
+      "catches": 0,
+      "name": "Player2",
+      "xp": 41,
+      "level": 1,
+      "coins": 10,
+      "parts": {
+        "Left Leg": "0, 0, 0",
+        "Right Arm": "0, 0, 0",
+        "Head": "0, 0, 0",
+        "Right Leg": "0, 0, 0",
+        "Torso": "0, 0, 0",
+        "HumanoidRootPart": "0.639216, 0.635294, 0.647059",
+        "Left Arm": "0, 0, 0"
+      }
+    }
+  }
+}

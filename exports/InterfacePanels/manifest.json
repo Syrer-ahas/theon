@@ -1,0 +1,275 @@
+[
+  {
+    "name": "Settings",
+    "canvas": {
+      "width": 4193,
+      "height": 2952
+    },
+    "parts": [
+      {
+        "name": "Panel",
+        "kind": "panel",
+        "sourceId": "Settings",
+        "x": 0,
+        "y": 0,
+        "width": 4193,
+        "height": 2952,
+        "file": "Settings/Panel.png",
+        "textureWidth": 4096,
+        "textureHeight": 2884
+      },
+      {
+        "name": "FrameNot1",
+        "kind": "frame",
+        "sourceId": "FRAMENOT",
+        "x": 195,
+        "y": 542,
+        "width": 3804,
+        "height": 654,
+        "file": "Settings/FrameNot1.png",
+        "textureWidth": 4096,
+        "textureHeight": 704
+      },
+      {
+        "name": "CloseButton",
+        "kind": "close",
+        "sourceId": "CLOSEBUTTN",
+        "x": 3783,
+        "y": 0,
+        "width": 410,
+        "height": 444,
+        "file": "Settings/CloseButton.png",
+        "textureWidth": 946,
+        "textureHeight": 1024
+      }
+    ],
+    "verification": {
+      "meanChannelError": 0.04514062731586105,
+      "maxError": 1.1532179930795863,
+      "pixelsAbove3": 0,
+      "pixels": 704000
+    }
+  },
+  {
+    "name": "PlotAccess",
+    "canvas": {
+      "width": 4193,
+      "height": 2952
+    },
+    "parts": [
+      {
+        "name": "Panel",
+        "kind": "panel",
+        "sourceId": "PlotAccess",
+        "x": 0,
+        "y": 0,
+        "width": 4193,
+        "height": 2952,
+        "file": "PlotAccess/Panel.png",
+        "textureWidth": 4096,
+        "textureHeight": 2884
+      },
+      {
+        "name": "CloseButton",
+        "kind": "close",
+        "sourceId": "CLOSEBTN",
+        "x": 3783,
+        "y": 0,
+        "width": 410,
+        "height": 444,
+        "file": "PlotAccess/CloseButton.png",
+        "textureWidth": 946,
+        "textureHeight": 1024
+      },
+      {
+        "name": "Button1",
+        "kind": "button",
+        "sourceId": "BUTTON",
+        "x": 197,
+        "y": 537,
+        "width": 3800,
+        "height": 537,
+        "file": "PlotAccess/Button1.png",
+        "textureWidth": 4096,
+        "textureHeight": 579
+      }
+    ],
+    "verification": {
+      "meanChannelError": 0.00028345140418021,
+      "maxError": 1.0022914263744696,
+      "pixelsAbove3": 0,
+      "pixels": 704000
+    }
+  },
+  {
+    "name": "Index",
+    "canvas": {
+      "width": 5547,
+      "height": 2952
+    },
+    "parts": [
+      {
+        "name": "Panel",
+        "kind": "panel",
+        "sourceId": "Index",
+        "x": 675,
+        "y": 0,
+        "width": 4197,
+        "height": 2952,
+        "file": "Index/Panel.png",
+        "textureWidth": 4096,
+        "textureHeight": 2881
+      },
+      {
+        "name": "FrameNot1",
+        "kind": "frame",
+        "sourceId": "FRAMENOT",
+        "x": 872,
+        "y": 542,
+        "width": 654,
+        "height": 654,
+        "file": "Index/FrameNot1.png",
+        "textureWidth": 2048,
+        "textureHeight": 2048
+      },
+      {
+        "name": "FrameNot2",
+        "kind": "frame",
+        "sourceId": "FRAMENOT_2",
+        "x": 1625,
+        "y": 541,
+        "width": 654,
+        "height": 654,
+        "file": "Index/FrameNot2.png",
+        "textureWidth": 2048,
+        "textureHeight": 2048
+      },
+      {
+        "name": "FrameNot3",
+        "kind": "frame",
+        "sourceId": "FRAMENOT_3",
+        "x": 2390,
+        "y": 541,
+        "width": 654,
+        "height": 654,
+        "file": "Index/FrameNot3.png",
+        "textureWidth": 2048,
+        "textureHeight": 2048
+      },
+      {
+        "name": "FrameNot4",
+        "kind": "frame",
+        "sourceId": "FRAMENOT_4",
+        "x": 3155,
+        "y": 541,
+        "width": 654,
+        "height": 654,
+        "file": "Index/FrameNot4.png",
+        "textureWidth": 2048,
+        "textureHeight": 2048
+      },
+      {
+        "name": "FrameNot5",
+        "kind": "frame",
+        "sourceId": "FRAMENOT_5",
+        "x": 3945,
+        "y": 541,
+        "width": 654,
+        "height": 654,
+        "file": "Index/FrameNot5.png",
+        "textureWidth": 2048,
+        "textureHeight": 2048
+      },
+      {
+        "name": "FrameNot6",
+        "kind": "frame",
+        "sourceId": "FRAMENOT_6",
+        "x": 3945,
+        "y": 1271,
+        "width": 654,
+        "height": 654,
+        "file": "Index/FrameNot6.png",
+        "textureWidth": 2048,
+        "textureHeight": 2048
+      },
+      {
+        "name": "CloseButton",
+        "kind": "close",
+        "sourceId": "CLOSEBUTTN",
+        "x": 4460,
+        "y": 0,
+        "width": 412,
+        "height": 444,
+        "file": "Index/CloseButton.png",
+        "textureWidth": 950,
+        "textureHeight": 1024
+      },
+      {
+        "name": "EnginesButton",
+        "kind": "button",
+        "sourceId": "BUTTON",
+        "x": 0,
+        "y": 396,
+        "width": 702,
+        "height": 508,
+        "file": "Index/EnginesButton.png",
+        "textureWidth": 2048,
+        "textureHeight": 1482
+      },
+      {
+        "name": "FuelButton",
+        "kind": "button",
+        "sourceId": "BUTTON_2",
+        "x": 0,
+        "y": 907,
+        "width": 702,
+        "height": 545,
+        "file": "Index/FuelButton.png",
+        "textureWidth": 2048,
+        "textureHeight": 1590
+      },
+      {
+        "name": "WheelsButton",
+        "kind": "button",
+        "sourceId": "BUTTON_3",
+        "x": 0,
+        "y": 1453,
+        "width": 702,
+        "height": 547,
+        "file": "Index/WheelsButton.png",
+        "textureWidth": 2048,
+        "textureHeight": 1596
+      },
+      {
+        "name": "BlocksButton",
+        "kind": "button",
+        "sourceId": "BUTTON_4",
+        "x": 0,
+        "y": 1993,
+        "width": 702,
+        "height": 555,
+        "file": "Index/BlocksButton.png",
+        "textureWidth": 2048,
+        "textureHeight": 1619
+      },
+      {
+        "name": "GunsButton",
+        "kind": "button",
+        "sourceId": "BUTTON_5",
+        "x": 4845,
+        "y": 426,
+        "width": 702,
+        "height": 533,
+        "file": "Index/GunsButton.png",
+        "textureWidth": 2048,
+        "textureHeight": 1555
+      }
+    ],
+    "verification": {
+      "meanChannelError": 0.048541060111300376,
+      "maxError": 1.7647058823529278,
+      "pixelsAbove3": 0,
+      "pixels": 532000
+    }
+  }
+]

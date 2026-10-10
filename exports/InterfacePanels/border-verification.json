@@ -1,0 +1,26 @@
+[
+  {
+    "gui": "Settings",
+    "region": "header bottom cyan outline",
+    "checked": 1842,
+    "failures": 0
+  },
+  {
+    "gui": "PlotAccess",
+    "region": "header bottom cyan outline",
+    "checked": 1842,
+    "failures": 0
+  },
+  {
+    "gui": "PlotAccess",
+    "region": "button bottom cyan outline",
+    "checked": 1865,
+    "failures": 0
+  },
+  {
+    "gui": "Index",
+    "region": "header bottom cyan outline",
+    "checked": 1842,
+    "failures": 0
+  }
+]

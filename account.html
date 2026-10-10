@@ -74,7 +74,6 @@
           </div>
           <div class="plan-row" style="margin-top:16px;">
             <div><h2>Your plan</h2><p class="muted" id="planLabel">Free plan · Explore Tactical Web at your own pace.</p></div>
-            <a class="btn btn-primary" href="/pro">View plans</a>
           </div>
           <div class="stats-row" id="usageStats">
             <div class="stat-card"><strong id="statPresets">0</strong><span>Presets generated</span></div>
@@ -127,13 +126,6 @@
         </section>
 
         <section class="panel section">
-          <h2>Billing &amp; payment</h2>
-          <p class="muted">Manage your Stripe subscription, payment method, and invoices.</p>
-          <div class="connected-row"><div class="service"><div><strong>Stripe billing</strong><div class="muted" id="billingDescription" style="font-size:0.82rem;">Checking billing status...</div></div></div><span class="badge badge-gray" id="billingBadge">Checking</span></div>
-          <div class="actions"><button class="btn btn-secondary" id="billingHistoryBtn" type="button" disabled>Manage billing</button></div>
-        </section>
-
-        <section class="panel section">
           <h2>Local data</h2>
           <p class="muted">Preferences are stored only in this browser. Clearing them does not sign you out or affect downloaded presets.</p>
           <div class="actions">
@@ -157,52 +149,6 @@
     <script>
       const session = window.TacticalAuth.getSession();
       const avatar = document.getElementById('avatar');
-      let activePlan = 'Free';
-      const checkoutResult = new URLSearchParams(window.location.search).get('checkout');
-
-      function planName(plan) {
-        return ({ pro: 'Tactical PRO', premium: 'Tactical Premium', enterprise: 'Tactical Enterprise' })[plan] || 'Free';
-      }
-
-      async function loadBilling(attempt = 0) {
-        if (!session) return;
-        const label = document.getElementById('planLabel');
-        const badge = document.getElementById('billingBadge');
-        const description = document.getElementById('billingDescription');
-        const manageButton = document.getElementById('billingHistoryBtn');
-        try {
-          const response = await fetch('/api/billing', {
-            headers: { Authorization: `Bearer ${session.credential}` },
-            cache: 'no-store'
-          });
-          const billing = await response.json().catch(() => ({}));
-          if (!response.ok) throw new Error(billing.error || 'Billing status is unavailable.');
-          activePlan = planName(billing.plan);
-          label.textContent = activePlan === 'Free'
-            ? 'Free plan · Explore Tactical Web at your own pace.'
-            : `${activePlan} · ${billing.status === 'trialing' ? 'Trial active' : 'Subscription active'}`;
-          const paid = activePlan !== 'Free' && ['active', 'trialing'].includes(billing.status);
-          badge.textContent = paid ? 'Active' : 'Not set up';
-          badge.className = paid ? 'badge badge-green' : 'badge badge-gray';
-          description.textContent = paid && billing.customerId
-            ? 'Subscription and invoices are managed securely by Stripe.'
-            : paid
-              ? 'Access was activated with a redemption code.'
-              : 'No active paid subscription.';
-          manageButton.disabled = !billing.customerId;
-          if (checkoutResult === 'success' && !paid && attempt < 4) {
-            label.textContent = 'Payment received · Activating your plan...';
-            setTimeout(() => loadBilling(attempt + 1), 1500);
-          } else if (checkoutResult === 'success' && paid) {
-            document.getElementById('settingsStatus').textContent = `${activePlan} is now active.`;
-            history.replaceState({}, '', 'account.html');
-          }
-        } catch (error) {
-          badge.textContent = 'Unavailable';
-          description.textContent = error.message;
-        }
-      }
-
       // If somehow reached without a session, send them home (the layout also gates this).
       if (!session && window.location.pathname.includes('account.html')) {
         window.location.href = '/';
@@ -216,8 +162,6 @@
         document.getElementById('googleStatus').textContent = 'Connected as ' + session.email;
         document.getElementById('googleBadge').textContent = 'Connected';
         document.getElementById('googleBadge').className = 'badge badge-green';
-        loadBilling();
-
         const now = new Date();
         if (!localStorage.getItem('tactical-web-first-seen')) localStorage.setItem('tactical-web-first-seen', now.toISOString());
         const firstSeen = new Date(localStorage.getItem('tactical-web-first-seen'));
@@ -262,7 +206,6 @@
         localStorage.setItem('tactical-web-activity-log', JSON.stringify(log));
       } else {
         document.getElementById('memberSince').textContent = '';
-        document.getElementById('billingHistoryBtn').disabled = true;
       }
 
       window.addEventListener('tw-credits-changed', (event) => {
@@ -294,25 +237,6 @@
             window.location.href = '/';
       });
 
-      document.getElementById('billingHistoryBtn').addEventListener('click', async () => {
-        const button = document.getElementById('billingHistoryBtn');
-        button.disabled = true;
-        document.getElementById('settingsStatus').textContent = 'Opening secure Stripe billing...';
-        try {
-          const response = await fetch('/api/create-portal-session', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${session.credential}`, 'Content-Type': 'application/json' },
-            body: '{}'
-          });
-          const payload = await response.json().catch(() => ({}));
-          if (!response.ok || !payload.url) throw new Error(payload.error || 'Billing could not be opened.');
-          window.location.assign(payload.url);
-        } catch (error) {
-          document.getElementById('settingsStatus').textContent = error.message;
-          button.disabled = false;
-        }
-      });
-
       document.getElementById('exportDataBtn').addEventListener('click', () => {
         const data = {
           exportedAt: new Date().toISOString(),
@@ -320,7 +244,6 @@
           preferences: JSON.parse(localStorage.getItem('tactical-web-preferences') || '{}'),
           activityLog: JSON.parse(localStorage.getItem('tactical-web-activity-log') || '[]'),
           affiliateCode: localStorage.getItem('tactical-affiliate-code') || null,
-          plan: activePlan
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);

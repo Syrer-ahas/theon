@@ -2,14 +2,10 @@ import { verifyGoogleJWT, extractSessionToken } from './_auth.js';
 import { getCreditAccount } from './_credits.js';
 
 export default async function handler(request, response) {
-  response.setHeader('Access-Control-Allow-Origin', '*');
-  response.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  response.setHeader('Access-Control-Allow-Headers', 'Authorization');
   response.setHeader('Cache-Control', 'private, no-store, max-age=0');
 
-  if (request.method === 'OPTIONS') return response.status(204).end();
   if (request.method !== 'GET') {
-    response.setHeader('Allow', 'GET, OPTIONS');
+    response.setHeader('Allow', 'GET');
     return response.status(405).json({ error: 'Method not allowed.' });
   }
 

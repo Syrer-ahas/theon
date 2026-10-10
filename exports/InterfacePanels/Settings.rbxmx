@@ -1,0 +1,195 @@
+<?xml version='1.0' encoding='utf-8'?>
+<roblox version="4">
+  <Item class="ScreenGui">
+    <Properties>
+      <string name="Name">Settings</string>
+      <bool name="Enabled">false</bool>
+      <bool name="ResetOnSpawn">false</bool>
+      <bool name="IgnoreGuiInset">true</bool>
+      <token name="ScreenInsets">0</token>
+      <token name="ZIndexBehavior">1</token>
+      <int name="DisplayOrder">120</int>
+    </Properties>
+    <Item class="BindableEvent">
+      <Properties>
+        <string name="Name">ButtonActivated</string>
+      </Properties>
+    </Item>
+    <Item class="ImageLabel">
+      <Properties>
+        <string name="Name">Panel</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>0</XO>
+          <YS>0.5</YS>
+          <YO>0</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>960</XO>
+          <YS>0</YS>
+          <YO>676</YO>
+        </UDim2>
+        <int name="ZIndex">1</int>
+        <Content name="Image">
+          <url>rbxassetid://125934933562908</url>
+        </Content>
+        <token name="ResampleMode">0</token>
+        <token name="ScaleType">0</token>
+      </Properties>
+    </Item>
+    <Item class="Frame">
+      <Properties>
+        <string name="Name">FrameNot1</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>0</XO>
+          <YS>0.5</YS>
+          <YO>-139</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>871</XO>
+          <YS>0</YS>
+          <YO>150</YO>
+        </UDim2>
+        <int name="ZIndex">2</int>
+      </Properties>
+      <Item class="ImageLabel">
+        <Properties>
+          <string name="Name">Artwork</string>
+          <float name="BackgroundTransparency">1</float>
+          <int name="BorderSizePixel">0</int>
+          <int name="ZIndex">2</int>
+          <UDim2 name="Size">
+            <XS>1</XS>
+            <XO>0</XO>
+            <YS>1</YS>
+            <YO>0</YO>
+          </UDim2>
+          <Content name="Image">
+            <url>rbxassetid://136367438509009</url>
+          </Content>
+          <token name="ResampleMode">0</token>
+          <token name="ScaleType">0</token>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="ImageButton">
+      <Properties>
+        <string name="Name">CloseButton</string>
+        <Vector2 name="AnchorPoint">
+          <X>0.5</X>
+          <Y>0.5</Y>
+        </Vector2>
+        <float name="BackgroundTransparency">1</float>
+        <int name="BorderSizePixel">0</int>
+        <UDim2 name="Position">
+          <XS>0.5</XS>
+          <XO>433</XO>
+          <YS>0.5</YS>
+          <YO>-287</YO>
+        </UDim2>
+        <UDim2 name="Size">
+          <XS>0</XS>
+          <XO>94</XO>
+          <YS>0</YS>
+          <YO>102</YO>
+        </UDim2>
+        <int name="ZIndex">3</int>
+        <Content name="Image">
+          <url>rbxassetid://117812010302663</url>
+        </Content>
+        <token name="ResampleMode">0</token>
+        <token name="ScaleType">0</token>
+        <bool name="AutoButtonColor">false</bool>
+        <bool name="Selectable">true</bool>
+      </Properties>
+    </Item>
+    <Item class="LocalScript">
+      <Properties>
+        <string name="Name">GuiController</string>
+        <ProtectedString name="Source">do
+    local gui = script.Parent
+    local data = game:GetService("HttpService"):JSONDecode([==[{"name":"Settings","canvas":{"width":4193,"height":2952},"parts":[{"name":"Panel","kind":"panel","sourceId":"Settings","x":0,"y":0,"width":4193,"height":2952,"file":"Settings/Panel.png","textureWidth":4096,"textureHeight":2884,"assetId":"rbxassetid://125934933562908"},{"name":"FrameNot1","kind":"frame","sourceId":"FRAMENOT","x":195,"y":542,"width":3804,"height":654,"file":"Settings/FrameNot1.png","textureWidth":4096,"textureHeight":704,"assetId":"rbxassetid://136367438509009"},{"name":"CloseButton","kind":"close","sourceId":"CLOSEBUTTN","x":3783,"y":0,"width":410,"height":444,"file":"Settings/CloseButton.png","textureWidth":946,"textureHeight":1024,"assetId":"rbxassetid://117812010302663"}],"verification":{"meanChannelError":0.04514167455293771,"maxError":1.1532179930795863,"pixelsAbove3":0,"pixels":704000}}]==])
+    gui:SetAttribute("DesignWidth", data.canvas.width)
+    gui:SetAttribute("DesignHeight", data.canvas.height)
+    for _, part in ipairs(data.parts) do
+        local node = gui:WaitForChild(part.name)
+        node:SetAttribute("DesignX", part.x)
+        node:SetAttribute("DesignY", part.y)
+        node:SetAttribute("DesignWidth", part.width)
+        node:SetAttribute("DesignHeight", part.height)
+        node:SetAttribute("ExportWidth", part.textureWidth)
+        node:SetAttribute("ExportHeight", part.textureHeight)
+        node:SetAttribute("FigmaLayer", part.sourceId)
+    end
+end
+local gui = script.Parent
+local cameraConnection
+
+local function layout()
+	local camera = workspace.CurrentCamera
+	if not camera then return end
+	local viewport = camera.ViewportSize
+	if viewport.X &lt;= 0 or viewport.Y &lt;= 0 then return end
+	local width = gui:GetAttribute("DesignWidth")
+	local height = gui:GetAttribute("DesignHeight")
+	local scale = math.min(viewport.X * 0.84 / width, viewport.Y * 0.82 / height, 960 / 4193)
+	for _, node in gui:GetChildren() do
+		if node:IsA("GuiObject") and node:GetAttribute("DesignX") ~= nil then
+			local x, y = node:GetAttribute("DesignX"), node:GetAttribute("DesignY")
+			local w, h = node:GetAttribute("DesignWidth"), node:GetAttribute("DesignHeight")
+			node.Position = UDim2.new(0.5, (x + w / 2 - width / 2) * scale, 0.5, (y + h / 2 - height / 2) * scale)
+			node.Size = UDim2.fromOffset(w * scale, h * scale)
+		end
+	end
+end
+
+local function bindCamera()
+	if cameraConnection then cameraConnection:Disconnect() end
+	local camera = workspace.CurrentCamera
+	if camera then cameraConnection = camera:GetPropertyChangedSignal("ViewportSize"):Connect(layout) end
+	layout()
+end
+
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera)
+bindCamera()
+
+local close = gui:WaitForChild("CloseButton")
+close.Activated:Connect(function()
+	gui.Enabled = false
+end)
+
+local requested = gui:WaitForChild("ButtonActivated")
+for _, node in gui:GetChildren() do
+	if node:IsA("ImageButton") and node ~= close then
+		node.Activated:Connect(function()
+			if gui.Name == "Index" then
+				gui:SetAttribute("SelectedCategory", node.Name:gsub("Button$", ""))
+			end
+			requested:Fire(node.Name)
+		end)
+	end
+end
+
+script.Destroying:Connect(function()
+	if cameraConnection then cameraConnection:Disconnect() end
+end)
+</ProtectedString>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>

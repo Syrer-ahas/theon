@@ -96,7 +96,6 @@ async function handleStatic(response, pathname, cookieHeader = '') {
     '/generator': 'generator.html',
     '/plugins': 'plugins.html',
     '/blog': 'blog.html',
-    '/pro': 'pro.html',
     '/affiliate': 'affiliate.html',
     '/account': 'account.html',
     '/privacy': 'privacy.html',

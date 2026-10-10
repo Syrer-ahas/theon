@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Common",
+    "nodeId": "93:3241",
+    "url": "https://www.figma.com/api/mcp/asset/2d96ec15-97a3-4a1c-8025-c382bbc6b4a5.png"
+  },
+  {
+    "name": "Uncommon",
+    "nodeId": "134:2",
+    "url": "https://www.figma.com/api/mcp/asset/0ef431c4-d7c9-4619-b192-6e4b417f82bf.png"
+  },
+  {
+    "name": "Rare",
+    "nodeId": "94:3338",
+    "url": "https://www.figma.com/api/mcp/asset/71322271-a4f6-4d17-a167-3d79a8088453.png"
+  },
+  {
+    "name": "Epic",
+    "nodeId": "94:3341",
+    "url": "https://www.figma.com/api/mcp/asset/323c559b-7ab3-409c-bdf4-0bc983425f88.png"
+  },
+  {
+    "name": "Legendary",
+    "nodeId": "94:3348",
+    "url": "https://www.figma.com/api/mcp/asset/2102a1eb-1397-41c8-a3be-a159fc0acf59.png"
+  },
+  {
+    "name": "Mythic",
+    "nodeId": "134:5",
+    "url": "https://www.figma.com/api/mcp/asset/2c2183e2-7198-49d8-82ec-4a3bc3e6ecf5.png"
+  },
+  {
+    "name": "Divine",
+    "nodeId": "134:8",
+    "url": "https://www.figma.com/api/mcp/asset/f61cf2e7-f650-43e7-ac58-767b97c0a133.png"
+  },
+  {
+    "name": "Secret",
+    "nodeId": "134:11",
+    "url": "https://www.figma.com/api/mcp/asset/192f37b2-c392-4b92-b762-3f6a5434df5d.png"
+  }
+]

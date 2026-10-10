@@ -138,7 +138,6 @@
     { key: 'generator', label: 'Generator', href: '/generator' },
     { key: 'plugins', label: 'Plugins', href: '/plugins' },
     { key: 'blog', label: 'Blog', href: '/blog' },
-    { key: 'pro', label: 'Get Pro', href: '/pro' },
     { key: 'affiliate', label: 'Affiliate', href: '/affiliate' },
     { key: 'account', label: 'Account', href: '/account' }
   ];
@@ -218,21 +217,12 @@
         <button class="btn btn-ghost" data-nav-toggle aria-expanded="false" aria-haspopup="true" type="button" style="padding:8px 10px;" aria-label="Menu"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg></button>
         <div class="nav-menu" data-nav-menu hidden style="position:absolute; right:0; top:calc(100% + 10px); background:#150826; border:1px solid rgba(168,85,247,.3); border-radius:20px; padding:10px; min-width:200px; box-shadow:0 14px 44px rgba(0,0,0,.55); z-index:12000;">
           <a class="btn btn-ghost" href="/blog">Blog</a>
-          <a class="btn btn-ghost" href="/pro">Get Pro</a>
           <a class="btn btn-ghost" href="/affiliate">Become Affiliate</a>
           <a class="btn btn-ghost" href="/account">Account settings</a>
           <a class="btn btn-ghost" href="https://discord.gg/c2aJ4dBZ4h" target="_blank" rel="noopener">Join Discord</a>
         </div>
       </div>`;
     topbar.appendChild(nav);
-    if (!topbar.querySelector('.upgrade-btn')) {
-      const up = document.createElement('button');
-      up.className = 'upgrade-btn';
-      up.type = 'button';
-      up.innerHTML = '<span>UPGRADE</span>';
-      up.addEventListener('click', () => { navigateWithLoader('pro.html'); });
-      topbar.appendChild(up);
-    }
   }
 
   // ---- User card ---------------------------------------------------------
