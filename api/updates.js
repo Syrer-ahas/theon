@@ -20,15 +20,15 @@ module.exports = (req, res) => {
   }
 
   return res.status(200).json({
-    version: "1.0.3",
-    previousVersion: "1.0.0",
-    releaseDate: "2026-10-28T18:47:20.868Z",
-    releaseNotes: "• Fixed ReShade preset generator bug (resolved \"sharpen is not defined\")\n• Enhanced ReShade photorealistic & Dark Vibrant Noir shader engine\n• Enforced zero dither dots across PD80 and QuantV shaders\n• Instant global over-the-air auto-updates with hot-swapping\n• Performance improvements and bug fixes",
+    version: "1.0.4",
+    previousVersion: "1.0.3",
+    releaseDate: "2026-10-28T19:30:21.177Z",
+    releaseNotes: "• Fixed ReShade library discovery bug for remote users (resolved \"The ReShade library was not found\")\n• Standalone preset generation with auto-detection for Steam, Epic Games, and Rockstar GTA V\n• Direct standalone .ini and .zip generation with drop-in instructions\n• Global OTA auto-updates with hot-swapping\n• Performance improvements and bug fixes",
     asarFileName: "app.asar",
     downloadUrl: "https://raw.githubusercontent.com/Syrer-ahas/theon/main/downloads/updates/app.asar",
     fallbackUrl: "https://www.tacticalweb.online/downloads/updates/app.asar",
-    sizeBytes: 60978001,
+    sizeBytes: 61030094,
     sizeMb: "58.2 MB",
-    sha256: "f7a7b8db77def52b129d92acabba03a3b9c13f011f5bc3bc21e33770dc98d961"
+    sha256: "11ba8aa96b8038a63e2055990559f091737f3eb46d1178693017506cfcd1c963"
   });
 };

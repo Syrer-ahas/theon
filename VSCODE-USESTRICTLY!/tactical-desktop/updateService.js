@@ -23,7 +23,7 @@ function getAppVersion() {
       if (pkg.version) return pkg.version;
     }
   } catch (e) {}
-  return (app && typeof app.getVersion === 'function') ? app.getVersion() : '1.0.3';
+  return (app && typeof app.getVersion === 'function') ? app.getVersion() : '1.0.4';
 }
 
 function getUpdatesDir() {
@@ -388,7 +388,7 @@ async function applyUpdateAndRelaunch() {
  */
 async function publishUpdate({ version: requestedVersion, releaseNotes, asarSourcePath } = {}) {
   const currentVer = getAppVersion();
-  let nextVer = requestedVersion || '1.0.3';
+  let nextVer = requestedVersion || '1.0.4';
 
   const updatesDir = getUpdatesDir();
   const targetAsar = path.join(updatesDir, 'app.asar');

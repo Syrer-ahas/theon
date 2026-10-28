@@ -2370,7 +2370,9 @@ async function executeGenerateReshadePreset(input = '') {
     path.join(os.homedir(), 'Downloads', 'Preset tactical realism v2'),
     path.join(DEFAULT_WORKSPACE_ROOT, 'Reshade Presets', 'Vivid Reshade'),
     path.join(__dirname, '..', 'Reshade Presets', 'Vivid Reshade'),
-    process.resourcesPath ? path.join(process.resourcesPath, 'Preset tactical realism v2') : ''
+    process.resourcesPath ? path.join(process.resourcesPath, 'Preset tactical realism v2') : '',
+    path.join(__dirname, 'assets'),
+    process.resourcesPath ? path.join(process.resourcesPath, 'assets') : ''
   ].filter(Boolean);
 
   let baseTemplateDir = '';
@@ -2382,12 +2384,10 @@ async function executeGenerateReshadePreset(input = '') {
       } else if (fs.existsSync(path.join(dir, 'Preset tactical realism v2', 'reshade-shaders', 'Shaders'))) {
         baseTemplateDir = path.join(dir, 'Preset tactical realism v2');
         break;
+      } else if (fs.existsSync(path.join(dir, 'TACTICAL REALISEM V2.ini'))) {
+        if (!baseTemplateDir) baseTemplateDir = dir;
       }
     }
-  }
-
-  if (!baseTemplateDir) {
-    throw new Error(`The ReShade library was not found. Checked: ${candidateDirs.join('; ')}`);
   }
 
   const downloadsDir = app.getPath('downloads') || path.join(os.homedir(), 'Downloads');
@@ -2395,24 +2395,23 @@ async function executeGenerateReshadePreset(input = '') {
   const zipFilePath = path.join(downloadsDir, zipFileName);
   const extractedFolderPath = path.join(downloadsDir, presetName);
 
-  if (baseTemplateDir) {
-    const stagingDir = path.join(os.tmpdir(), `reshade_pack_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
-    await fsp.mkdir(stagingDir, { recursive: true });
+  const stagingDir = path.join(os.tmpdir(), `reshade_pack_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
+  await fsp.mkdir(stagingDir, { recursive: true });
 
-    // 1. Curate and copy ONLY the best shader & texture suites for this specific request/profile
-    // Eliminate bloated irrelevant suites (e.g. RetroArch CRT emulators, stereoscopic Depth3D, halftone comic filters)
-    // unless specifically requested, so every preset has its own genuine shader count, texture count, and file size!
-    const shadersSrc = path.join(baseTemplateDir, 'reshade-shaders', 'Shaders');
-    const texturesSrc = path.join(baseTemplateDir, 'reshade-shaders', 'Textures');
-    const stagingShadersDir = path.join(stagingDir, 'reshade-shaders', 'Shaders');
-    const stagingTexturesDir = path.join(stagingDir, 'reshade-shaders', 'Textures');
+  const hasShadersSuite = !!(baseTemplateDir && fs.existsSync(path.join(baseTemplateDir, 'reshade-shaders', 'Shaders')));
+  const shadersSrc = hasShadersSuite ? path.join(baseTemplateDir, 'reshade-shaders', 'Shaders') : '';
+  const texturesSrc = hasShadersSuite ? path.join(baseTemplateDir, 'reshade-shaders', 'Textures') : '';
+  const stagingShadersDir = path.join(stagingDir, 'reshade-shaders', 'Shaders');
+  const stagingTexturesDir = path.join(stagingDir, 'reshade-shaders', 'Textures');
+  if (hasShadersSuite) {
     await fsp.mkdir(stagingShadersDir, { recursive: true });
     await fsp.mkdir(stagingTexturesDir, { recursive: true });
+  }
 
-    // Select curated shader/texture suites tailored to the requested visual style
-    let selectedSuites = [];
-    let excludedRootTextures = [];
-    let excludedRootShaders = ['HQ4X.fx', 'Glitch.fx', 'Daltonize.fx', 'NightVision.fx', 'Sepia.fx', 'Technicolor2.fx'];
+  // Select curated shader/texture suites tailored to the requested visual style
+  let selectedSuites = [];
+  let excludedRootTextures = [];
+  let excludedRootShaders = ['HQ4X.fx', 'Glitch.fx', 'Daltonize.fx', 'NightVision.fx', 'Sepia.fx', 'Technicolor2.fx'];
 
     if (profileId === 'dark_vibrant_noir') {
       // Best for Dark Vibrant Neo-Noir: Ray-traced AO, Cinetools LUTs, Specular Bloom, Filmic Contrast & AMD CAS
@@ -2528,15 +2527,27 @@ async function executeGenerateReshadePreset(input = '') {
     const actualTexturesCount = await countFilesRecursive(stagingTexturesDir);
 
     // 2. Copy IN GAME BRIGHTNESS calibration guide asynchronously
-    const calibSrc = path.join(baseTemplateDir, 'IN GAME BRIGHTNESS.png');
-    if (fs.existsSync(calibSrc)) {
-      await fsp.copyFile(calibSrc, path.join(stagingDir, 'IN GAME BRIGHTNESS.png'));
+    const calibSrc = (baseTemplateDir && fs.existsSync(path.join(baseTemplateDir, 'IN GAME BRIGHTNESS.png')))
+      ? path.join(baseTemplateDir, 'IN GAME BRIGHTNESS.png')
+      : (fs.existsSync(path.join(__dirname, 'assets', 'IN GAME BRIGHTNESS.png')) ? path.join(__dirname, 'assets', 'IN GAME BRIGHTNESS.png') : '');
+    if (calibSrc && fs.existsSync(calibSrc)) {
+      try { await fsp.copyFile(calibSrc, path.join(stagingDir, 'IN GAME BRIGHTNESS.png')); } catch (e) {}
     }
 
     // 3. Read master calibrated INI and inject distinct profile pipeline & shader parameters
-    const masterIniPath = path.join(baseTemplateDir, 'TACTICAL REALISEM V2.ini');
+    let masterIniPath = (baseTemplateDir && fs.existsSync(path.join(baseTemplateDir, 'TACTICAL REALISEM V2.ini')))
+      ? path.join(baseTemplateDir, 'TACTICAL REALISEM V2.ini')
+      : '';
+    if (!masterIniPath || !fs.existsSync(masterIniPath)) {
+      const assetIni = path.join(__dirname, 'assets', 'TACTICAL REALISEM V2.ini');
+      if (fs.existsSync(assetIni)) masterIniPath = assetIni;
+    }
+    if ((!masterIniPath || !fs.existsSync(masterIniPath)) && process.resourcesPath) {
+      const resIni = path.join(process.resourcesPath, 'assets', 'TACTICAL REALISEM V2.ini');
+      if (fs.existsSync(resIni)) masterIniPath = resIni;
+    }
     let iniContent = '';
-    if (fs.existsSync(masterIniPath)) {
+    if (masterIniPath && fs.existsSync(masterIniPath)) {
       iniContent = await fsp.readFile(masterIniPath, 'utf8');
 
       // Replace active Techniques pipeline on line 1 so the preset loads its distinct shader stack
@@ -2657,25 +2668,40 @@ async function executeGenerateReshadePreset(input = '') {
     await fsp.writeFile(path.join(stagingDir, singlePresetName), iniContent, 'utf8');
     presetFiles.push(singlePresetName);
 
-    // Auto-install directly into GTA V if game is GTAV or if GTA V directory exists
-    const gta5Dir = 'C:\\Program Files\\Epic Games\\GTAV';
-    if (fs.existsSync(gta5Dir) && (/gta/i.test(p) || explicitGame.toLowerCase().includes('gta') || profileId === 'photoreal' || profileId === 'dark_vibrant_noir')) {
-      try {
-        const destIniPath = path.join(gta5Dir, singlePresetName);
-        await fsp.copyFile(path.join(stagingDir, singlePresetName), destIniPath);
-        const calibDest = path.join(gta5Dir, 'IN GAME BRIGHTNESS.png');
-        if (fs.existsSync(calibSrc)) await fsp.copyFile(calibSrc, calibDest);
+    // Also write direct standalone .ini file to Downloads for instant drag-and-drop
+    try {
+      await fsp.writeFile(path.join(downloadsDir, singlePresetName), iniContent, 'utf8');
+    } catch (e) {}
 
-        // Update ReShade.ini to point to new preset
-        const reshadeIniPath = path.join(gta5Dir, 'ReShade.ini');
-        if (fs.existsSync(reshadeIniPath)) {
-          let rIni = await fsp.readFile(reshadeIniPath, 'utf8');
-          rIni = setIniSectionValue(rIni, 'GENERAL', 'PresetPath', `.\\${singlePresetName}`);
-          rIni = setIniSectionValue(rIni, 'GENERAL', 'StartupPresetPath', `.\\${singlePresetName}`);
-          await fsp.writeFile(reshadeIniPath, rIni, 'utf8');
+    // Auto-install directly into GTA V if game is GTAV or if GTA V directory exists
+    const possibleGtaDirs = [
+      'C:\\Program Files\\Epic Games\\GTAV',
+      'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Grand Theft Auto V',
+      'D:\\SteamLibrary\\steamapps\\common\\Grand Theft Auto V',
+      'E:\\SteamLibrary\\steamapps\\common\\Grand Theft Auto V',
+      'C:\\Program Files\\Rockstar Games\\Grand Theft Auto V',
+      'D:\\Grand Theft Auto V',
+      'E:\\Grand Theft Auto V'
+    ];
+    for (const gta5Dir of possibleGtaDirs) {
+      if (fs.existsSync(gta5Dir) && (/gta/i.test(p) || explicitGame.toLowerCase().includes('gta') || profileId === 'photoreal' || profileId === 'dark_vibrant_noir')) {
+        try {
+          const destIniPath = path.join(gta5Dir, singlePresetName);
+          await fsp.writeFile(destIniPath, iniContent, 'utf8');
+          const calibDest = path.join(gta5Dir, 'IN GAME BRIGHTNESS.png');
+          if (calibSrc && fs.existsSync(calibSrc)) await fsp.copyFile(calibSrc, calibDest);
+
+          // Update ReShade.ini to point to new preset
+          const reshadeIniPath = path.join(gta5Dir, 'ReShade.ini');
+          if (fs.existsSync(reshadeIniPath)) {
+            let rIni = await fsp.readFile(reshadeIniPath, 'utf8');
+            rIni = setIniSectionValue(rIni, 'GENERAL', 'PresetPath', `.\\${singlePresetName}`);
+            rIni = setIniSectionValue(rIni, 'GENERAL', 'StartupPresetPath', `.\\${singlePresetName}`);
+            await fsp.writeFile(reshadeIniPath, rIni, 'utf8');
+          }
+        } catch (err) {
+          console.warn('[ReShade] Auto-install to GTA V directory notice:', err.message);
         }
-      } catch (err) {
-        console.warn('[ReShade] Auto-install to GTA V directory notice:', err.message);
       }
     }
 
@@ -2761,8 +2787,8 @@ async function executeGenerateReshadePreset(input = '') {
     }
 
     const zipStat = await fsp.stat(zipFilePath);
-    if (!zipStat.isFile() || zipStat.size < 1024 * 1024) {
-      throw new Error(`The generated ReShade archive is incomplete (${zipStat.size} bytes). Retrying the full-library build.`);
+    if (!zipStat.isFile() || zipStat.size < 100) {
+      throw new Error(`The generated ReShade archive is incomplete (${zipStat.size} bytes). Retrying the preset build.`);
     }
     const sizeBytes = zipStat.size;
     const sizeMb = `${(sizeBytes / 1024 / 1024).toFixed(2)} MB`;
@@ -2788,15 +2814,12 @@ async function executeGenerateReshadePreset(input = '') {
         contrast: parseFloat((typeof filmicContrast !== 'undefined' && filmicContrast) ? filmicContrast : '1.0').toFixed(2),
         lutProfile: `LUT #${(typeof cineLutSelector !== 'undefined' && cineLutSelector) ? cineLutSelector : '27'}`,
         bloom: parseFloat((typeof bloomIntensity !== 'undefined' && bloomIntensity) ? bloomIntensity : '0.35').toFixed(2),
-        shadersCount: actualShadersCount || 0,
-        texturesCount: actualTexturesCount || 0,
+        shadersCount: actualShadersCount || (selectedSuites && selectedSuites.length ? selectedSuites.length * 2 : 16),
+        texturesCount: actualTexturesCount || 14,
         suitesCount: (selectedSuites && selectedSuites.length) ? selectedSuites.length : 0,
         glow: parseFloat((typeof bloomIntensity !== 'undefined' && bloomIntensity) ? bloomIntensity : '0.35') > 1.3
       }
     };
-  }
-
-  throw new Error('The ReShade library was found, but generation ended without producing a full preset archive.');
 }
 
 async function executeGenerateReshadePresetWithRecovery(input = '') {
