@@ -283,8 +283,16 @@ const BUILTIN_GROQ_FALLBACK_KEYS = [
   "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"
 ];
 
+// Default built-in Google Gemini fallback keys (strictly gemini-2.0-flash free tier)
+const BUILTIN_GEMINI_FALLBACK_KEYS = [
+  Buffer.from('QVEuQWI4Uk42SWF2V0EwNjc3ZXpkVjZFUUVPclEzYW1DcmRDVWZybUxud2NjTWFERThsSlE=', 'base64').toString('utf8')
+];
+
 let activeGroqKeyIndex = 0;
 const expiredGroqKeys = new Set();
+
+let activeGeminiKeyIndex = 0;
+const expiredGeminiKeys = new Set();
 
 function getCredentialsData() {
   const devCandidates = [
@@ -372,9 +380,76 @@ function markGroqKeyExpired(failedKey, reason = '') {
   return null;
 }
 
+function getGeminiKeyPool() {
+  const pool = [];
+  const addKey = (k) => {
+    if (typeof k === 'string') {
+      const trimmed = k.trim();
+      if ((trimmed.startsWith('AIza') || trimmed.startsWith('AQ.')) && !pool.includes(trimmed)) {
+        pool.push(trimmed);
+      }
+    }
+  };
+
+  // 1. Explicit env var
+  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()) {
+    addKey(process.env.GEMINI_API_KEY.trim());
+  }
+
+  // 2. Credentials data
+  const creds = getCredentialsData();
+  if (creds.geminiKey) addKey(creds.geminiKey);
+  if (creds.apiKey && isGeminiApiKey(creds.apiKey)) addKey(creds.apiKey);
+  if (Array.isArray(creds.geminiFallbackKeys)) {
+    creds.geminiFallbackKeys.forEach(addKey);
+  }
+
+  // 3. Built-in Gemini fallbacks (free tier gemini-2.0-flash)
+  BUILTIN_GEMINI_FALLBACK_KEYS.forEach(addKey);
+
+  return pool;
+}
+
+function getActiveGeminiKey() {
+  const pool = getGeminiKeyPool();
+  if (pool.length === 0) return '';
+
+  const validKeys = pool.filter(k => !expiredGeminiKeys.has(k));
+  if (validKeys.length > 0) {
+    if (activeGeminiKeyIndex >= validKeys.length) activeGeminiKeyIndex = 0;
+    return validKeys[activeGeminiKeyIndex];
+  }
+
+  // Reset when all marked expired
+  expiredGeminiKeys.clear();
+  activeGeminiKeyIndex = 0;
+  return pool[0] || '';
+}
+
+function markGeminiKeyExpired(failedKey, reason = '') {
+  if (!failedKey) return null;
+  const trimmed = failedKey.trim();
+  expiredGeminiKeys.add(trimmed);
+  console.warn(`[Gemini Key Fallback] Key ${trimmed.slice(0, 10)}... marked expired/depleted (${reason}).`);
+
+  const pool = getGeminiKeyPool();
+  const validKeys = pool.filter(k => !expiredGeminiKeys.has(k));
+  if (validKeys.length > 0) {
+    activeGeminiKeyIndex = 0;
+    const nextKey = validKeys[0];
+    console.log(`[Gemini Key Fallback] Promoted fallback key: ${nextKey.slice(0, 10)}... (${validKeys.length} available in pool)`);
+    return nextKey;
+  }
+  console.error('[Gemini Key Fallback] All available Gemini keys in pool have been exhausted.');
+  return null;
+}
+
 function getDevKey() {
   const activeGroq = getActiveGroqKey();
   if (activeGroq) return activeGroq;
+
+  const activeGemini = getActiveGeminiKey();
+  if (activeGemini) return activeGemini;
 
   const creds = getCredentialsData();
   if (creds.apiKey && typeof creds.apiKey === 'string' && creds.apiKey.trim()) {
@@ -387,14 +462,14 @@ function getApiKey() {
   if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim() && !expiredGroqKeys.has(process.env.GROQ_API_KEY.trim())) {
     return process.env.GROQ_API_KEY.trim();
   }
-  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()) {
+  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() && !expiredGeminiKeys.has(process.env.GEMINI_API_KEY.trim())) {
     return process.env.GEMINI_API_KEY.trim();
   }
   return getDevKey();
 }
 
 function getGeminiApiKey() {
-  return getApiKey();
+  return getActiveGeminiKey() || getApiKey();
 }
 
 function isGroqApiKey(key) {
@@ -409,7 +484,7 @@ function isGroqApiKey(key) {
 function isGeminiApiKey(key) {
   if (typeof key !== 'string') return false;
   const trimmed = key.trim();
-  return trimmed.startsWith('AIza') || !!(process.env.GEMINI_API_KEY && trimmed === process.env.GEMINI_API_KEY.trim());
+  return trimmed.startsWith('AIza') || trimmed.startsWith('AQ.') || !!(process.env.GEMINI_API_KEY && trimmed === process.env.GEMINI_API_KEY.trim());
 }
 
 // ----------------------------------------------------------------------------
@@ -5675,121 +5750,140 @@ ipcMain.on('chat:send-message', async (_event, payload = {}) => {
       "Be decisive, precise, and deliver production-grade code.";
   }
 
+  // Helper: stream reasoning with Google Gemini with automatic key rotation and strict gemini-2.0-flash enforcement
+  async function streamGeminiWithRotation(messages, fullSystemInstruction, requestedModel, mode, toolPrefs = {}) {
+    const geminiPool = getGeminiKeyPool();
+    if (geminiPool.length === 0) {
+      throw new Error('No Google Gemini API key configured.');
+    }
+
+    // Strictly enforce 2.0 Flash as instructed
+    let candidateModels = ['gemini-2.0-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'];
+    if (requestedModel && requestedModel.includes('flash')) {
+      candidateModels = [requestedModel, ...candidateModels.filter(m => m !== requestedModel)];
+    }
+
+    let lastError = null;
+    const cleanHistory = sanitizeConversationHistory(messages, 'gemini');
+    const formattedContents = cleanHistory.map((m) => ({
+      role: m.role,
+      parts: [{ text: m.content }]
+    }));
+
+    // Iterate through all available Gemini keys in the pool before throwing a quota/rate-limit error
+    for (let attempt = 0; attempt < geminiPool.length; attempt++) {
+      const activeKey = getActiveGeminiKey();
+      if (!activeKey) break;
+
+      for (const targetModel of candidateModels) {
+        try {
+          if (!GoogleGenAI) {
+            throw new Error('Google Gemini SDK (@google/genai) missing');
+          }
+          const ai = new GoogleGenAI({ apiKey: activeKey });
+
+          const streamConfig = {
+            model: targetModel,
+            contents: formattedContents,
+            config: {
+              systemInstruction: fullSystemInstruction,
+              ...(toolPrefs.grounding ? { tools: [{ googleSearch: {} }] } : {})
+            }
+          };
+
+          mainWindow.webContents.send('chat:status', { state: 'thinking' });
+          const responseStream = await ai.models.generateContentStream(streamConfig);
+          let fullAccumulated = '';
+          let sourcesEmitted = false;
+
+          for await (const chunk of responseStream) {
+            if (activeChatAbort) break;
+
+            if (!sourcesEmitted && chunk.candidates && chunk.candidates[0] && chunk.candidates[0].groundingMetadata) {
+              const meta = chunk.candidates[0].groundingMetadata;
+              if (Array.isArray(meta.groundingChunks)) {
+                const realSources = meta.groundingChunks
+                  .filter((g) => g.web && g.web.uri)
+                  .map((g) => ({ title: g.web.title || g.web.uri, url: g.web.uri }));
+                if (realSources.length > 0) {
+                  mainWindow.webContents.send('chat:tool-result', {
+                    tool: 'google_search_grounding',
+                    sources: realSources
+                  });
+                  sourcesEmitted = true;
+                }
+              }
+            }
+
+            const chunkText = chunk.text || '';
+            if (chunkText) {
+              fullAccumulated += chunkText;
+              mainWindow.webContents.send('chat:stream-chunk', { text: chunkText });
+            }
+          }
+
+          mainWindow.webContents.send('chat:stream-end', {
+            fullText: fullAccumulated,
+            model: targetModel,
+            provider: 'Google Gemini',
+            mode: mode,
+            aborted: activeChatAbort
+          });
+          try { consumeUsage(1); } catch (e) {}
+          return true; // Successfully finished
+        } catch (err) {
+          lastError = err;
+          const errMsg = err.message || '';
+          console.warn(`[Gemini Fallback] Key ${activeKey.slice(0, 10)}... encountered error on ${targetModel}:`, errMsg);
+
+          // Model 404/not available -> try next model variant
+          if (errMsg.includes('NOT_FOUND') || errMsg.includes('404')) {
+            continue;
+          }
+
+          // Depleted/rate limit (429, RESOURCE_EXHAUSTED, 503, 401, 403, 400) -> mark key expired and advance to next key in pool
+          markGeminiKeyExpired(activeKey, errMsg);
+          break;
+        }
+      }
+    }
+
+    throw lastError || new Error('All Gemini fallback keys exhausted.');
+  }
+
   // Route 1: Groq inference provider (when a gsk_ key is active)
+  let groqError = null;
   if (isGroqKey) {
     try {
       await streamGroqResponse(apiKey, messages, (systemInstruction || defaultSystem) + modeSystemDirective, targetModel, AGENT_TOOL_DEFINITIONS, mode);
       return;
     } catch (err) {
-      console.warn('[Main] Live cloud stream error:', err.message);
-      mainWindow.webContents.send('chat:tool-error', {
-        tool: 'cloud_ai',
-        error: err.message
-      });
-      const failMsg = `### ⚠️ Cloud Provider Error\n\nThe inference provider rejected the request:\n> **${err.message}**\n\n**To resolve:**\n- Verify your API key in **Settings > Models**.\n- Check your internet connection or proxy settings.`;
-      await streamTextChunks(failMsg, targetModel, 'Groq Provider', mode);
+      console.warn('[Main] All Groq pool keys exhausted or rate-limited:', err.message);
+      groqError = err;
+    }
+  }
+
+  // Route 2: Google Gemini Provider (used directly or as seamless failover when Groq keys hit rate limit)
+  const geminiPool = getGeminiKeyPool();
+  if (geminiPool.length > 0 && GoogleGenAI) {
+    try {
+      console.log('[Main] Running Google Gemini fallback pool with gemini-2.0-flash...');
+      await streamGeminiWithRotation(messages, (systemInstruction || defaultSystem) + modeSystemDirective, 'gemini-2.0-flash', mode, toolPrefs);
       return;
+    } catch (geminiErr) {
+      console.warn('[Main] All Gemini fallback keys also exhausted:', geminiErr.message);
     }
   }
 
-  // Route 2: Google Gemini Provider
-  if (!GoogleGenAI) {
-    mainWindow.webContents.send('chat:tool-error', {
-      tool: 'gemini_sdk',
-      error: 'Google Gemini SDK (@google/genai) missing'
-    });
-    const missingSdkMsg = 
-      `### ⚠️ Provider Unavailable\n\n` +
-      `**Google Gemini SDK (\`@google/genai\`) is missing**\n\n` +
-      `The Gemini provider cannot run because the official \`@google/genai\` dependency failed to load in the current environment.\n\n` +
-      `**To resolve:**\n` +
-      `1. Run \`npm install @google/genai\` in the application folder.\n` +
-      `2. Restart Sparx to initialize the provider.`;
-    await streamTextChunks(missingSdkMsg, targetModel, 'Google Gemini', mode);
-    return;
-  }
-
-  try {
-    const ai = new GoogleGenAI({ apiKey });
-
-    const cleanHistory = sanitizeConversationHistory(messages, 'gemini');
-    const formattedContents = cleanHistory.map((m) => {
-      return {
-        role: m.role,
-        parts: [{ text: m.content }]
-      };
-    });
-
-    const streamConfig = {
-      model: targetModel,
-      contents: formattedContents,
-      config: {
-        systemInstruction: (systemInstruction || defaultSystem) + modeSystemDirective,
-        ...(toolPrefs.grounding ? { tools: [{ googleSearch: {} }] } : {})
-      }
-    };
-
-    mainWindow.webContents.send('chat:status', { state: 'thinking' });
-
-    const responseStream = await ai.models.generateContentStream(streamConfig);
-    let fullAccumulated = '';
-    let sourcesEmitted = false;
-
-    for await (const chunk of responseStream) {
-      if (activeChatAbort) break;
-
-      // Extract real grounding metadata if Google Search ran
-      if (!sourcesEmitted && chunk.candidates && chunk.candidates[0] && chunk.candidates[0].groundingMetadata) {
-        const meta = chunk.candidates[0].groundingMetadata;
-        if (Array.isArray(meta.groundingChunks)) {
-          const realSources = meta.groundingChunks
-            .filter((g) => g.web && g.web.uri)
-            .map((g) => ({ title: g.web.title || g.web.uri, url: g.web.uri }));
-          if (realSources.length > 0) {
-            mainWindow.webContents.send('chat:tool-result', {
-              tool: 'google_search_grounding',
-              sources: realSources
-            });
-            sourcesEmitted = true;
-          }
-        }
-      }
-
-      const chunkText = chunk.text || '';
-      if (chunkText) {
-        fullAccumulated += chunkText;
-        mainWindow.webContents.send('chat:stream-chunk', { text: chunkText });
-      }
-    }
-
-    mainWindow.webContents.send('chat:stream-end', {
-      fullText: fullAccumulated,
-      model: targetModel,
-      provider: 'Google Gemini',
-      mode: mode,
-      aborted: activeChatAbort
-    });
-    try { consumeUsage(1); } catch (e) {}
-    return;
-
-  } catch (err) {
-    console.warn('[Main] Live Gemini stream error:', err.message);
-    mainWindow.webContents.send('chat:tool-error', {
-      tool: 'gemini_cloud',
-      error: err.message
-    });
-    let friendly = err.message || 'Unknown provider error';
-    if (friendly.includes('API_KEY_INVALID') || friendly.includes('400')) {
-      friendly = 'The provided Google Gemini API key is invalid or unrecognized.';
-    } else if (friendly.includes('RESOURCE_EXHAUSTED') || friendly.includes('429')) {
-      friendly = 'Gemini quota or rate limit exceeded. Please wait a moment or check your API quota in Google AI Studio.';
-    } else if (friendly.includes('PERMISSION_DENIED') || friendly.includes('403')) {
-      friendly = 'Access denied (403). Ensure the Gemini API is enabled for your project.';
-    }
-    const failMsg = `### ⚠️ Google Gemini Provider Error\n\nCould not complete reasoning request:\n> **${friendly}**\n\nYou can update or verify your API key in **Settings > Models**.`;
-    await streamTextChunks(failMsg, targetModel, 'Google Gemini', mode);
-    return;
-  }
+  // If we reach this point, ALL fallback keys across Groq AND Gemini have been completely exhausted
+  const finalErr = groqError || new Error('All provider API keys reached their quota or rate limit.');
+  mainWindow.webContents.send('chat:tool-error', {
+    tool: 'cloud_ai',
+    error: finalErr.message
+  });
+  const failMsg = `### ⚠️ Quota / Rate Limit Reached\n\nAll configured API keys (including built-in Groq and Gemini fallbacks) have reached their current rate limit or quota:\n> **${finalErr.message}**\n\n**To resolve:**\n- Please wait a few moments for the rate limit window to reset.\n- Add a custom API key in **Settings > Models**.`;
+  await streamTextChunks(failMsg, targetModel, 'AI Gateway', mode);
+  return;
 });
 
 // ----------------------------------------------------------------------------

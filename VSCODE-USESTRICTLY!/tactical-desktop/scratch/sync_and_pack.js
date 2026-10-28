@@ -79,21 +79,23 @@ if (!fs.existsSync(updatesDir)) {
 fs.copyFileSync(tempAsar, updatesAsar);
 console.log(`  -> Updates Cache: ${updatesAsar} (${(fs.statSync(updatesAsar).size / 1024 / 1024).toFixed(1)} MB)`);
 
-console.log('[6/6] Updating update.json metadata to v1.0.4...');
+console.log('[6/6] Updating update.json metadata to v1.0.5...');
 const hash = crypto.createHash('sha256').update(fs.readFileSync(tempAsar)).digest('hex');
 const size = fs.statSync(tempAsar).size;
 const sizeMb = `${(size / 1024 / 1024).toFixed(1)} MB`;
 
 const manifest = {
-  version: '1.0.4',
-  previousVersion: '1.0.3',
+  version: '1.0.5',
+  previousVersion: '1.0.4',
   releaseDate: new Date().toISOString(),
   releaseNotes: [
+    '• Gemini fallback API key with strict gemini-2.0-flash free tier support',
+    '• Intelligent multi-key rate-limit rotation across all Groq & Gemini fallbacks',
     '• Fixed ReShade library discovery bug for remote users (resolved "The ReShade library was not found")',
-    '• Standalone preset generation with auto-detection for Steam, Epic Games, and Rockstar GTA V',
-    '• Direct standalone .ini and .zip generation with drop-in instructions',
-    '• Global OTA auto-updates with hot-swapping',
-    '• Performance improvements and bug fixes'
+    '• Dynamic update button auto-hiding when up to date',
+    '• Bottom application version & status indicator',
+    '• Standalone preset generation with drop-in instructions',
+    '• Global OTA auto-updates with hot-swapping'
   ].join('\n'),
   asarFileName: 'app.asar',
   downloadUrl: 'https://raw.githubusercontent.com/Syrer-ahas/theon/main/downloads/updates/app.asar',
@@ -106,21 +108,21 @@ const manifest = {
 fs.writeFileSync(updateJsonPath, JSON.stringify(manifest, null, 2), 'utf8');
 console.log(`  -> Updated update.json (version: ${manifest.version}, hash: ${hash.slice(0, 8)}..., size: ${sizeMb})`);
 
-// Update package.json version to 1.0.4
+// Update package.json version to 1.0.5
 const desktopPkgPath = path.join(srcDir, 'package.json');
 if (fs.existsSync(desktopPkgPath)) {
   const pkg = JSON.parse(fs.readFileSync(desktopPkgPath, 'utf8'));
-  pkg.version = '1.0.4';
+  pkg.version = '1.0.5';
   fs.writeFileSync(desktopPkgPath, JSON.stringify(pkg, null, 2), 'utf8');
-  console.log('  -> Updated tactical-desktop/package.json to v1.0.4');
+  console.log('  -> Updated tactical-desktop/package.json to v1.0.5');
 }
 
 const rootPkgPath = path.resolve(__dirname, '..', '..', 'package.json');
 if (fs.existsSync(rootPkgPath)) {
   const pkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
-  pkg.version = '1.0.4';
+  pkg.version = '1.0.5';
   fs.writeFileSync(rootPkgPath, JSON.stringify(pkg, null, 2), 'utf8');
-  console.log('  -> Updated root package.json to v1.0.4');
+  console.log('  -> Updated root package.json to v1.0.5');
 }
 
 console.log('\n[SUCCESS] Sync, pack, and installation completed cleanly!');

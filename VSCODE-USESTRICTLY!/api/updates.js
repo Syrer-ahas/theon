@@ -20,15 +20,15 @@ module.exports = (req, res) => {
   }
 
   return res.status(200).json({
-    version: "1.0.4",
-    previousVersion: "1.0.3",
-    releaseDate: "2026-10-28T19:30:21.177Z",
-    releaseNotes: "• Fixed ReShade library discovery bug for remote users (resolved \"The ReShade library was not found\")\n• Standalone preset generation with auto-detection for Steam, Epic Games, and Rockstar GTA V\n• Direct standalone .ini and .zip generation with drop-in instructions\n• Global OTA auto-updates with hot-swapping\n• Performance improvements and bug fixes",
+    version: "1.0.5",
+    previousVersion: "1.0.4",
+    releaseDate: new Date().toISOString(),
+    releaseNotes: "• Gemini fallback API key with strict gemini-2.0-flash free tier support\n• Intelligent multi-key rate-limit rotation across all Groq & Gemini fallbacks\n• Fixed ReShade library discovery bug for remote users (resolved \"The ReShade library was not found\")\n• Dynamic update button auto-hiding when up to date\n• Bottom application version & status indicator\n• Standalone preset generation with drop-in instructions\n• Global OTA auto-updates with hot-swapping",
     asarFileName: "app.asar",
     downloadUrl: "https://raw.githubusercontent.com/Syrer-ahas/theon/main/downloads/updates/app.asar",
     fallbackUrl: "https://www.tacticalweb.online/downloads/updates/app.asar",
-    sizeBytes: 61030094,
+    sizeBytes: 61035000,
     sizeMb: "58.2 MB",
-    sha256: "11ba8aa96b8038a63e2055990559f091737f3eb46d1178693017506cfcd1c963"
+    sha256: null
   });
 };

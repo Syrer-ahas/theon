@@ -4595,10 +4595,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const res = await window.electronAPI.checkForUpdates();
         const currentVer = res?.currentVersion || '1.0.4';
         if (res && res.updateAvailable) {
+          btnRailUpdate.classList.remove('hidden');
           if (updateBadgeDot) updateBadgeDot.classList.remove('hidden');
           if (railUpdateTooltip) railUpdateTooltip.textContent = `Install Update (v${res.latestVersion})`;
           updateVersionDisplays(currentVer, false);
         } else {
+          // If the app is up to date, hide the download update button
+          btnRailUpdate.classList.add('hidden');
           if (updateBadgeDot) updateBadgeDot.classList.add('hidden');
           if (railUpdateTooltip) railUpdateTooltip.textContent = `Sparx Up to Date`;
           updateVersionDisplays(currentVer, true);
@@ -4726,8 +4729,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.electronAPI && typeof window.electronAPI.onUpdateStatus === 'function') {
       window.electronAPI.onUpdateStatus((status) => {
         if (status && status.updateAvailable) {
+          btnRailUpdate.classList.remove('hidden');
           if (updateBadgeDot) updateBadgeDot.classList.remove('hidden');
           if (railUpdateTooltip) railUpdateTooltip.textContent = `Install Update (v${status.latestVersion})`;
+          updateVersionDisplays(status.currentVersion, false);
+        } else {
+          btnRailUpdate.classList.add('hidden');
+          if (updateBadgeDot) updateBadgeDot.classList.add('hidden');
+          if (status && status.currentVersion) updateVersionDisplays(status.currentVersion, true);
         }
       });
     }
