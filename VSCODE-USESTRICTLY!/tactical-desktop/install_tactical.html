@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sparx Workstation Setup</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background: transparent;
+      overflow: hidden;
+      color: #f4f4f5;
+    }
+
+    .drag-region {
+      -webkit-app-region: drag;
+    }
+    .no-drag {
+      -webkit-app-region: no-drag;
+    }
+
+    /* Windows 11 Native Glass Shell */
+    .installer-window {
+      background: rgba(14, 16, 22, 0.95);
+      backdrop-filter: blur(48px);
+      -webkit-backdrop-filter: blur(48px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      box-shadow: 
+        0 32px 80px -12px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    }
+
+    /* Windows Titlebar Caption Controls */
+    .win-caption-btn {
+      width: 46px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #a1a1aa;
+      cursor: pointer;
+      transition: background-color 0.12s ease, color 0.12s ease;
+    }
+
+    .win-caption-btn:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+    }
+
+    .win-caption-btn:active {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .win-caption-btn.win-close:hover {
+      background-color: #e81123 !important;
+      color: #ffffff !important;
+    }
+
+    .win-caption-btn.win-close:active {
+      background-color: #bf101f !important;
+      color: #ffffff !important;
+    }
+
+    /* Glass Cards */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Custom Checkbox */
+    .custom-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 17px;
+      height: 17px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.04);
+      outline: none;
+      cursor: pointer;
+      display: inline-grid;
+      place-content: center;
+      transition: all 0.15s ease;
+      margin-top: 1px;
+    }
+
+    .custom-checkbox:hover {
+      border-color: rgba(56, 189, 248, 0.5);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .custom-checkbox:checked {
+      background: #0284c7;
+      border-color: #38bdf8;
+    }
+
+    .custom-checkbox:checked::before {
+      content: "";
+      width: 9px;
+      height: 5px;
+      border-left: 2px solid #ffffff;
+      border-bottom: 2px solid #ffffff;
+      transform: rotate(-45deg) translate(1px, -1px);
+    }
+
+    /* Custom Monospace Terminal Log Scrollbar */
+    .terminal-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .terminal-scroll::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .terminal-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+    }
+    .terminal-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Progress Track Animation */
+    .progress-bar-shimmer {
+      background-size: 200% 100%;
+      background-image: linear-gradient(
+        90deg,
+        #0284c7 0%,
+        #38bdf8 50%,
+        #0284c7 100%
+      );
+      animation: shimmer 2s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-3 selection:bg-cyan-500/30 selection:text-white">
+
+  <!-- Ambient Glow Background (Executive subtle lighting) -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute -top-20 left-1/4 w-[420px] h-[340px] bg-cyan-600/10 rounded-full blur-[130px]"></div>
+    <div class="absolute -bottom-20 right-1/4 w-[380px] h-[300px] bg-blue-600/10 rounded-full blur-[120px]"></div>
+  </div>
+
+  <!-- Main Windows-Native Installer Window Frame -->
+  <div id="installer-root" class="installer-window relative z-10 w-full max-w-[720px] h-[490px] flex flex-col overflow-hidden">
+    
+    <!-- Native Windows 11 Titlebar -->
+    <header class="h-9 bg-white/[0.02] border-b border-white/[0.07] flex items-center justify-between select-none drag-region">
+      <!-- Left Title & Branding -->
+      <div class="flex items-center space-x-2.5 px-3">
+        <div class="w-4 h-4 text-cyan-400 flex items-center justify-center">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <span class="text-[12px] font-medium text-zinc-300 tracking-tight">Sparx Setup Wizard</span>
+        <span class="text-[10px] text-zinc-500 font-mono px-1.5 py-0.2 rounded bg-white/[0.04]">v1.0.0</span>
+      </div>
+
+      <!-- Native Windows Caption Buttons (Right) -->
+      <div class="flex items-center no-drag h-full">
+        <!-- Minimize -->
+        <button id="win-btn-minimize" class="win-caption-btn" title="Minimize" aria-label="Minimize">
+          <svg width="10" height="1" viewBox="0 0 10 1" fill="currentColor">
+            <rect width="10" height="1"></rect>
+          </svg>
+        </button>
+        <!-- Close -->
+        <button id="win-btn-close" class="win-caption-btn win-close" title="Close" aria-label="Close">
+          <svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.1">
+            <line x1="0" y1="0" x2="10" y2="10"></line>
+            <line x1="10" y1="0" x2="0" y2="10"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Installer Body (Sidebar + Content Pane) -->
+    <div class="flex-1 flex overflow-hidden">
+      
+      <!-- Left Step Sidebar Rail -->
+      <aside class="w-56 bg-black/25 border-r border-white/[0.06] p-4 flex flex-col justify-between select-none">
+        <div class="space-y-5">
+          <!-- App Identity Card -->
+          <div class="flex items-center space-x-3 px-1 py-0.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-b from-cyan-500/20 to-blue-600/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-sm shadow-cyan-950/40">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </div>
+            <div>
+              <div class="text-[13px] font-semibold text-white tracking-tight flex items-center gap-1.5">
+                Sparx
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              </div>
+              <div class="text-[11px] text-zinc-400">Autonomous IDE</div>
+            </div>
+          </div>
+
+          <!-- Wizard Step Indicators -->
+          <nav class="space-y-1.5 text-[12.5px]">
+            <div id="step-nav-1" class="step-nav-item flex items-center space-x-3 px-3 py-2 rounded-lg bg-white/[0.08] text-white font-medium border border-white/10 shadow-sm transition">
+              <span class="w-4 h-4 rounded-full bg-white text-zinc-950 flex items-center justify-center text-[10px] font-bold">1</span>
+              <span>Overview</span>
+            </div>
+            <div id="step-nav-2" class="step-nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-zinc-400 border border-transparent transition">
+              <span class="w-4 h-4 rounded-full bg-white/[0.04] text-zinc-400 flex items-center justify-center text-[10px] font-bold">2</span>
+              <span>Destination</span>
+            </div>
+            <div id="step-nav-3" class="step-nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-zinc-400 border border-transparent transition">
+              <span class="w-4 h-4 rounded-full bg-white/[0.04] text-zinc-400 flex items-center justify-center text-[10px] font-bold">3</span>
+              <span>Installation</span>
+            </div>
+            <div id="step-nav-4" class="step-nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-zinc-400 border border-transparent transition">
+              <span class="w-4 h-4 rounded-full bg-white/[0.04] text-zinc-400 flex items-center justify-center text-[10px] font-bold">4</span>
+              <span>Finish</span>
+            </div>
+          </nav>
+        </div>
+
+        <!-- Sidebar Footer Info -->
+        <div class="px-2 py-2 rounded-lg bg-white/[0.02] border border-white/[0.04] text-[11px] text-zinc-400 space-y-1">
+          <div class="flex items-center justify-between text-zinc-300 font-medium">
+            <span>Package Mode</span>
+            <span class="text-cyan-400 font-mono text-[10px]">Self-Contained</span>
+          </div>
+          <div class="text-[10.5px] text-zinc-500 leading-tight">All binaries, tools & local models bundled securely.</div>
+        </div>
+      </aside>
+
+      <!-- Right Main Content Panel -->
+      <main class="flex-1 flex flex-col justify-between p-6 overflow-y-auto bg-black/15">
+        
+        <!-- STEP 1: Overview & Welcome -->
+        <section id="step-panel-1" class="step-panel space-y-4">
+          <div class="space-y-1.5">
+            <h1 class="text-lg font-semibold text-white tracking-tight flex items-center gap-2">
+              Welcome to Sparx Workstation
+            </h1>
+            <p class="text-[13px] text-zinc-400 leading-relaxed">
+              Install the autonomous pair-programming IDE and desktop command suite on your PC.
+            </p>
+          </div>
+
+          <!-- Feature Cards -->
+          <div class="space-y-2.5 pt-1">
+            <div class="glass-card p-3 rounded-xl flex items-start space-x-3.5">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400 flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+              </div>
+              <div class="space-y-0.5">
+                <div class="text-[13px] font-medium text-white">Full Autonomous Pair Programmer</div>
+                <div class="text-[11.5px] text-zinc-400 leading-relaxed">Native file tools, live interactive terminal sessions, side-by-side Monaco diff reviews, and desktop automation.</div>
+              </div>
+            </div>
+
+            <div class="glass-card p-3 rounded-xl flex items-start space-x-3.5">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+              </div>
+              <div class="space-y-0.5">
+                <div class="text-[13px] font-medium text-white">Direct ASAR Fast Sync</div>
+                <div class="text-[11.5px] text-zinc-400 leading-relaxed">Seamless in-place updates with zero downtime, instant hot reloads, and persistent workspace memory.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-[12px] text-zinc-500 flex items-center justify-between pt-2">
+            <span>Disk Space Required: <strong class="text-zinc-300 font-medium">~580 MB</strong></span>
+            <span class="text-emerald-400/90 font-medium flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              Windows 10/11 Compatible
+            </span>
+          </div>
+        </section>
+
+        <!-- STEP 2: Destination & Shortcuts -->
+        <section id="step-panel-2" class="step-panel hidden space-y-4">
+          <div class="space-y-1">
+            <h2 class="text-lg font-semibold text-white tracking-tight">Installation Destination</h2>
+            <p class="text-[13px] text-zinc-400">Verify installation folder and system integration options.</p>
+          </div>
+
+          <!-- Directory Card -->
+          <div class="glass-card p-3.5 rounded-xl flex items-center justify-between border-white/10 mt-1">
+            <div class="flex items-center space-x-3.5 overflow-hidden">
+              <div class="w-9 h-9 rounded-lg bg-white/[0.05] border border-white/10 flex items-center justify-center text-zinc-300 flex-shrink-0">
+                <svg class="w-5 h-5 text-zinc-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                </svg>
+              </div>
+              <div class="truncate">
+                <div class="text-[13px] font-semibold text-white flex items-center gap-2">
+                  <span>User Applications</span>
+                  <span class="text-[10px] bg-white/[0.08] text-zinc-300 px-1.5 py-0.5 rounded font-mono">Recommended</span>
+                </div>
+                <div class="text-[11.5px] text-zinc-400 font-mono mt-0.5 truncate" id="disk-target-subtext">AppData\Local\Programs\Sparx</div>
+              </div>
+            </div>
+            <div class="w-5 h-5 rounded-full bg-cyan-400 text-zinc-950 flex items-center justify-center text-xs font-bold flex-shrink-0 ml-3">
+              ✓
+            </div>
+          </div>
+
+          <!-- Shortcut Options -->
+          <div class="space-y-3 pt-3 border-t border-white/[0.07]">
+            <div class="text-[12px] font-semibold text-zinc-300 uppercase tracking-wider">System Integration</div>
+            
+            <label class="flex items-start space-x-3 text-[13px] text-zinc-300 cursor-pointer select-none group">
+              <input type="checkbox" id="opt-cli" checked class="custom-checkbox">
+              <div class="space-y-0.5">
+                <div class="text-[13px] text-zinc-200 font-medium group-hover:text-white transition">Create Start Menu entry</div>
+                <div class="text-[11.5px] text-zinc-400">Add Sparx to Windows Start Menu and register system search shortcut.</div>
+              </div>
+            </label>
+
+            <label class="flex items-start space-x-3 text-[13px] text-zinc-300 cursor-pointer select-none group">
+              <input type="checkbox" id="opt-dock" checked class="custom-checkbox">
+              <div class="space-y-0.5">
+                <div class="text-[13px] text-zinc-200 font-medium group-hover:text-white transition">Create Desktop shortcut</div>
+                <div class="text-[11.5px] text-zinc-400">Place a high-resolution icon directly on your Windows desktop.</div>
+              </div>
+            </label>
+          </div>
+        </section>
+
+        <!-- STEP 3: Live Progress & Monospace Log -->
+        <section id="step-panel-3" class="step-panel hidden space-y-4">
+          <div class="space-y-1">
+            <h2 class="text-lg font-semibold text-white tracking-tight flex items-center justify-between">
+              <span>Installing Sparx</span>
+              <span id="install-pct" class="font-mono text-cyan-400 font-bold text-base">0%</span>
+            </h2>
+            <p id="install-subtext" class="text-[12.5px] text-zinc-400">Writing binaries, configuring runtime and registering shortcuts...</p>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="py-1 space-y-2">
+            <div class="w-full h-2.5 bg-black/50 rounded-full overflow-hidden border border-white/10 p-0.5">
+              <div id="install-progress-bar" class="h-full bg-cyan-400 rounded-full w-0 transition-all duration-200 progress-bar-shimmer"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-zinc-400 font-mono">
+              <span id="install-stage" class="truncate max-w-[340px]">Preparing target directory...</span>
+              <span class="text-zinc-500">Fast Sync</span>
+            </div>
+          </div>
+
+          <!-- Monospace Terminal Log Box -->
+          <div class="space-y-1.5">
+            <div class="text-[11px] font-mono text-zinc-500 uppercase tracking-wider flex items-center justify-between">
+              <span>Live Deployment Log</span>
+              <span class="text-zinc-600">UTF-8</span>
+            </div>
+            <div class="p-3 rounded-xl bg-black/60 border border-white/[0.08] h-32 overflow-y-auto font-mono text-[11px] text-zinc-300 space-y-1 terminal-scroll" id="install-log-box">
+              <div class="text-zinc-500">[INIT] Initializing installer session...</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 4: Complete Screen -->
+        <section id="step-panel-4" class="step-panel hidden space-y-4">
+          <div class="text-center py-4 space-y-3">
+            <div class="w-14 h-14 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-950/40">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <div class="space-y-1">
+              <h2 class="text-xl font-bold text-white tracking-tight">Sparx is Ready</h2>
+              <p class="text-[13px] text-zinc-400 max-w-sm mx-auto">
+                Installation completed successfully. You can now launch Sparx to start pairing with your AI coding assistant.
+              </p>
+            </div>
+          </div>
+
+          <!-- Configuration Card -->
+          <div class="glass-card p-3.5 rounded-xl text-xs text-zinc-300 space-y-2 max-w-sm mx-auto border-white/10">
+            <div class="flex justify-between items-center">
+              <span class="text-zinc-500">Executable</span>
+              <span class="text-white font-mono bg-white/[0.05] px-2 py-0.5 rounded">Sparx.exe</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-zinc-500">Shortcuts</span>
+              <span class="text-zinc-300">Start Menu, Desktop</span>
+            </div>
+            <div class="flex justify-between items-center pt-1 border-t border-white/[0.06]">
+              <span class="text-zinc-500">Status</span>
+              <span class="text-emerald-400 font-medium flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                Operational
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Bottom Action Bar Footer -->
+        <footer class="pt-4 border-t border-white/[0.07] flex items-center justify-between">
+          <button id="btn-cancel" class="px-4 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white hover:bg-white/[0.06] transition outline-none">
+            Cancel
+          </button>
+          
+          <div class="flex items-center space-x-2.5">
+            <button id="btn-back" class="px-4 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 text-xs font-medium text-zinc-300 transition outline-none hidden">
+              Back
+            </button>
+            <button id="btn-next" class="px-5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-xs font-semibold text-zinc-950 transition active:scale-[0.98] outline-none shadow-sm">
+              Continue
+            </button>
+            <button id="btn-done" class="px-5 py-1.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-xs font-semibold text-zinc-950 transition active:scale-[0.98] outline-none shadow-sm shadow-cyan-950/40 hidden">
+              Launch Sparx
+            </button>
+          </div>
+        </footer>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Windows Exit Confirmation Dialog -->
+  <div id="modal-cancel" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-[320px] installer-window rounded-xl p-5 shadow-2xl space-y-4 text-center border-white/15">
+      <div class="w-10 h-10 mx-auto rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
+      <div class="space-y-1">
+        <h3 class="text-sm font-semibold text-white">Exit Sparx Setup?</h3>
+        <p class="text-xs text-zinc-400 leading-relaxed">Sparx has not finished installing. If you exit now, installation will be cancelled.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button id="modal-btn-keep" class="py-1.5 px-3 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] text-xs font-medium text-zinc-200 transition outline-none">
+          Resume
+        </button>
+        <button id="modal-btn-quit" class="py-1.5 px-3 rounded-lg bg-red-600 hover:bg-red-500 text-xs font-semibold text-white transition outline-none">
+          Exit Setup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      step: 1,
+      totalSteps: 4
+    };
+
+    function setStep(newStep) {
+      state.step = newStep;
+
+      for (let i = 1; i <= state.totalSteps; i++) {
+        const nav = document.getElementById(`step-nav-${i}`);
+        const panel = document.getElementById(`step-panel-${i}`);
+
+        if (panel) {
+          if (i === newStep) panel.classList.remove('hidden');
+          else panel.classList.add('hidden');
+        }
+
+        if (nav) {
+          const badge = nav.querySelector('span:first-child');
+          if (i === newStep) {
+            nav.className = 'step-nav-item flex items-center space-x-3 px-3 py-2 rounded-lg bg-white/[0.08] text-white font-medium border border-white/10 shadow-sm transition';
+            if (badge) {
+              badge.className = 'w-4 h-4 rounded-full bg-white text-zinc-950 flex items-center justify-center text-[10px] font-bold';
+              badge.textContent = `${i}`;
+            }
+          } else if (i < newStep) {
+            nav.className = 'step-nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-zinc-300 font-medium border border-transparent transition';
+            if (badge) {
+              badge.className = 'w-4 h-4 rounded-full bg-cyan-400 text-zinc-950 flex items-center justify-center text-[10px] font-bold';
+              badge.textContent = '✓';
+            }
+          } else {
+            nav.className = 'step-nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-zinc-500 border border-transparent transition';
+            if (badge) {
+              badge.className = 'w-4 h-4 rounded-full bg-white/[0.04] text-zinc-500 flex items-center justify-center text-[10px] font-bold';
+              badge.textContent = `${i}`;
+            }
+          }
+        }
+      }
+
+      const btnBack = document.getElementById('btn-back');
+      const btnNext = document.getElementById('btn-next');
+      const btnDone = document.getElementById('btn-done');
+      const btnCancel = document.getElementById('btn-cancel');
+
+      if (btnBack) {
+        if (newStep > 1 && newStep < 4) btnBack.classList.remove('hidden');
+        else btnBack.classList.add('hidden');
+      }
+
+      if (btnNext && btnDone) {
+        if (newStep === 2) {
+          btnNext.textContent = 'Install Now';
+          btnNext.classList.remove('hidden');
+          btnDone.classList.add('hidden');
+          if (btnCancel) btnCancel.classList.remove('opacity-40', 'pointer-events-none');
+        } else if (newStep === 3) {
+          btnNext.classList.add('hidden');
+          btnDone.classList.add('hidden');
+          if (btnCancel) btnCancel.classList.add('opacity-40', 'pointer-events-none');
+          runInstallationProcess();
+        } else if (newStep === 4) {
+          btnNext.classList.add('hidden');
+          btnDone.classList.remove('hidden');
+          if (btnCancel) btnCancel.classList.add('hidden');
+        } else {
+          btnNext.textContent = 'Continue';
+          btnNext.classList.remove('hidden');
+          btnDone.classList.add('hidden');
+          if (btnCancel) btnCancel.classList.remove('opacity-40', 'pointer-events-none');
+        }
+      }
+    }
+
+    function runInstallationProcess() {
+      const bar = document.getElementById('install-progress-bar');
+      const pctLabel = document.getElementById('install-pct');
+      const stageLabel = document.getElementById('install-stage');
+      const subtext = document.getElementById('install-subtext');
+      const logBox = document.getElementById('install-log-box');
+
+      const optCli = document.getElementById('opt-cli')?.checked ?? true;
+      const optDock = document.getElementById('opt-dock')?.checked ?? true;
+
+      const appendLog = (msg, isError = false) => {
+        if (!logBox) return;
+        const line = document.createElement('div');
+        if (isError) {
+          line.className = 'text-red-400 font-semibold';
+        } else if (msg.startsWith('[SUCCESS]') || msg.startsWith('[DONE]')) {
+          line.className = 'text-emerald-400 font-medium';
+        } else if (msg.startsWith('[SHORTCUT]') || msg.startsWith('[EXTRACT]')) {
+          line.className = 'text-cyan-300';
+        } else {
+          line.className = 'text-zinc-400';
+        }
+        line.textContent = msg;
+        logBox.appendChild(line);
+        logBox.scrollTop = logBox.scrollHeight;
+      };
+
+      if (window.electronAPI && typeof window.electronAPI.onInstallStatus === 'function') {
+        window.electronAPI.onInstallStatus((data) => {
+          if (bar) bar.style.width = `${data.percent}%`;
+          if (pctLabel) pctLabel.textContent = `${data.percent}%`;
+          if (stageLabel) stageLabel.textContent = data.stage;
+          if (subtext) subtext.textContent = data.stage;
+          if (data.log) appendLog(data.log);
+        });
+
+        window.electronAPI.onInstallComplete(() => {
+          setTimeout(() => setStep(4), 450);
+        });
+
+        window.electronAPI.onInstallError((data) => {
+          if (subtext) subtext.textContent = 'Error: ' + data.error;
+          appendLog('[ERROR] ' + data.error, true);
+        });
+
+        window.electronAPI.startInstall({
+          createDesktopShortcut: optDock,
+          createStartMenuShortcut: optCli
+        });
+        return;
+      }
+
+      // Simulation fallback for browser preview
+      let pct = 0;
+      const steps = [
+        '[INIT] Scanning system environment...',
+        '[EXTRACT] Extracting Sparx application payload...',
+        '[COPY] Copying executable runtime and libraries...',
+        '[SHORTCUT] Registering Windows desktop shortcut...',
+        '[SHORTCUT] Creating Start Menu program link...',
+        '[DONE] Verification complete.'
+      ];
+      let stepIdx = 0;
+      const timer = setInterval(() => {
+        pct += 12;
+        if (pct > 100) pct = 100;
+        if (bar) bar.style.width = `${pct}%`;
+        if (pctLabel) pctLabel.textContent = `${pct}%`;
+        
+        if (stepIdx < steps.length && pct > (stepIdx + 1) * 16) {
+          appendLog(steps[stepIdx]);
+          if (stageLabel) stageLabel.textContent = steps[stepIdx].replace(/^\[.*?\]\s*/, '');
+          stepIdx++;
+        }
+
+        if (pct >= 100) {
+          clearInterval(timer);
+          setTimeout(() => setStep(4), 450);
+        }
+      }, 180);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Load install information if running inside Electron
+      if (window.electronAPI && typeof window.electronAPI.getInstallInfo === 'function') {
+        try {
+          const info = await window.electronAPI.getInstallInfo();
+          if (info && info.targetDir) {
+            const sub = document.getElementById('disk-target-subtext');
+            if (sub) sub.textContent = info.targetDir;
+          }
+        } catch (e) {}
+      }
+
+      // Windows Titlebar Caption Controls
+      document.getElementById('win-btn-minimize')?.addEventListener('click', () => {
+        if (window.electronAPI && typeof window.electronAPI.minimize === 'function') {
+          window.electronAPI.minimize();
+        }
+      });
+
+      const modalCancel = document.getElementById('modal-cancel');
+      const openQuit = () => {
+        if (state.step === 4) {
+          // If already complete, closing just exits directly
+          if (window.electronAPI && typeof window.electronAPI.close === 'function') {
+            window.electronAPI.close();
+          }
+        } else {
+          modalCancel?.classList.remove('hidden');
+        }
+      };
+      const closeQuit = () => modalCancel?.classList.add('hidden');
+
+      document.getElementById('win-btn-close')?.addEventListener('click', openQuit);
+      document.getElementById('btn-cancel')?.addEventListener('click', openQuit);
+      document.getElementById('modal-btn-keep')?.addEventListener('click', closeQuit);
+      document.getElementById('modal-btn-quit')?.addEventListener('click', () => {
+        closeQuit();
+        if (window.electronAPI && typeof window.electronAPI.close === 'function') {
+          window.electronAPI.close();
+        }
+      });
+
+      // Navigation Wizard Controls
+      document.getElementById('btn-next')?.addEventListener('click', () => {
+        if (state.step < state.totalSteps) setStep(state.step + 1);
+      });
+
+      document.getElementById('btn-back')?.addEventListener('click', () => {
+        if (state.step > 1) setStep(state.step - 1);
+      });
+
+      document.getElementById('btn-done')?.addEventListener('click', () => {
+        if (window.electronAPI && typeof window.electronAPI.launchInstalledApp === 'function') {
+          window.electronAPI.launchInstalledApp();
+        } else {
+          setStep(1);
+        }
+      });
+
+      setStep(1);
+    });
+  </script>
+</body>
+</html>

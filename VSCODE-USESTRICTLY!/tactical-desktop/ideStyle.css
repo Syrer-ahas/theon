@@ -1,0 +1,1383 @@
+/* ============================================================================
+   Sparx AI Workstation — Full IDE Stylesheet
+   Monaco Editor Stage, File Tree, Git Source Control, & Docked Terminal
+   Obsidian Zinc / Midnight OLED Aesthetics
+   ============================================================================ */
+
+/* ----------------------------------------------------------------------------
+   Layout Modes: Chat Mode vs IDE Mode
+   ---------------------------------------------------------------------------- */
+.app-shell.mode-ide .chat-workspace-main {
+  display: none !important;
+}
+
+.app-shell.mode-chat #ide-workspace-stage {
+  display: none !important;
+}
+
+/* Central IDE Workspace Stage */
+.ide-workspace-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  background: var(--bg-deep, #070709);
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  height: 100%;
+}
+
+/* ----------------------------------------------------------------------------
+   Top Viewport Mode Toggle (Topbar integration)
+   ---------------------------------------------------------------------------- */
+.topbar-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: 9999px;
+  padding: 2px;
+  gap: 2px;
+  margin-left: 12px;
+}
+
+.mode-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-muted, #888891);
+  background: transparent;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mode-toggle-btn:hover {
+  color: var(--text-primary, #f4f4f5);
+}
+
+.mode-toggle-btn.active {
+  background: rgba(255, 255, 255, 0.10);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------------------------------
+   Multi-File Tab Bar
+   ---------------------------------------------------------------------------- */
+.ide-tab-bar {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  background: #09090b;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  overflow-x: auto;
+  overflow-y: hidden;
+  user-select: none;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.ide-tab-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.ide-tabs-list {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex: 1;
+}
+
+.ide-tab-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  padding: 0 14px;
+  font-size: 12.5px;
+  color: var(--text-muted, #888891);
+  border-right: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  background: #09090b;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+  position: relative;
+}
+
+.ide-tab-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary, #f4f4f5);
+}
+
+.ide-tab-item.active {
+  background: #0d0d10;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.ide-tab-item.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-purple, #38bdf8);
+}
+
+.ide-tab-dirty {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-purple, #38bdf8);
+  display: none;
+}
+
+.ide-tab-item.dirty .ide-tab-dirty {
+  display: inline-block;
+}
+
+.ide-tab-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  color: var(--text-muted, #888891);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ide-tab-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.ide-tab-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 10px;
+}
+
+.ide-bar-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #888891);
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ide-bar-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* ----------------------------------------------------------------------------
+   Editor Viewport & Diff Viewer Container
+   ---------------------------------------------------------------------------- */
+.ide-editor-body {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+#monaco-editor-container {
+  width: 100%;
+  height: 100%;
+}
+
+.ide-empty-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted, #888891);
+  gap: 12px;
+}
+
+.ide-empty-editor svg {
+  opacity: 0.3;
+}
+
+.btn-open-workspace {
+  background: #ffffff;
+  color: #09090b;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-open-workspace:hover {
+  opacity: 0.9;
+}
+
+/* Inline Diff Reviewer Overlay */
+.ide-diff-overlay {
+  position: absolute;
+  inset: 0;
+  background: #09090b;
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+}
+
+.ide-diff-header {
+  height: 40px;
+  padding: 0 16px;
+  background: #0d0d10;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ide-diff-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ide-diff-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-diff-reject {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-diff-accept {
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 5px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ide-diff-content {
+  flex: 1;
+  overflow: auto;
+  font-family: var(--font-mono, monospace);
+  font-size: 12.5px;
+  line-height: 1.5;
+  padding: 12px 16px;
+  white-space: pre-wrap;
+}
+
+.diff-line-add {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.diff-line-del {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.diff-line-meta {
+  color: var(--text-muted, #888891);
+}
+
+/* ----------------------------------------------------------------------------
+   Docked Bottom Terminal
+   ---------------------------------------------------------------------------- */
+.ide-terminal-dock {
+  height: 220px;
+  min-height: 120px;
+  max-height: 80%;
+  background: #050507;
+  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  flex-shrink: 0;
+  transition: height 0.15s ease;
+}
+
+.ide-terminal-dock.hidden {
+  display: none !important;
+}
+
+.ide-terminal-header {
+  height: 32px;
+  background: #09090b;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  user-select: none;
+}
+
+.ide-terminal-tab-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-primary, #f4f4f5);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ide-terminal-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ide-terminal-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #888891);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+}
+
+.ide-terminal-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.ide-terminal-body {
+  flex: 1;
+  padding: 6px 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ----------------------------------------------------------------------------
+   Sidebar Views: Explorer Tree & Git Panel
+   ---------------------------------------------------------------------------- */
+.sidebar-view-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.sidebar-view-pane.hidden {
+  display: none !important;
+}
+
+/* Explorer Header */
+.explorer-pane-header {
+  padding: 10px 14px 6px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.explorer-workspace-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #888891);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.explorer-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Tree Nodes */
+.explorer-tree-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 6px;
+}
+
+.tree-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: var(--text-secondary, #d4d4d8);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s, color 0.1s;
+}
+
+.tree-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+}
+
+.tree-item.active {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--accent-purple, #38bdf8);
+}
+
+.tree-chevron {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted, #888891);
+  transition: transform 0.15s ease;
+}
+
+.tree-folder.open > .tree-item .tree-chevron {
+  transform: rotate(90deg);
+}
+
+.tree-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tree-children {
+  display: none;
+  padding-left: 14px;
+}
+
+.tree-folder.open > .tree-children {
+  display: block;
+}
+
+/* ----------------------------------------------------------------------------
+   Source Control (Git) Panel
+   ---------------------------------------------------------------------------- */
+.git-pane-header {
+  padding: 12px 14px 8px 14px;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.git-branch-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--accent-purple, #38bdf8);
+  font-weight: 600;
+}
+
+.git-commit-box {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.git-commit-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #ffffff;
+  resize: vertical;
+  min-height: 50px;
+  font-family: inherit;
+  outline: none;
+}
+
+.git-commit-input:focus {
+  border-color: var(--accent-purple, #38bdf8);
+}
+
+.btn-git-commit {
+  background: #ffffff;
+  color: #09090b;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-git-commit:hover {
+  opacity: 0.9;
+}
+
+.git-files-header {
+  padding: 8px 14px 4px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted, #888891);
+}
+
+.git-files-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 8px;
+}
+
+.git-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--text-secondary, #d4d4d8);
+  cursor: pointer;
+}
+
+.git-file-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+}
+
+.git-status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.git-status-badge.modified { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+.git-status-badge.untracked { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+.git-status-badge.added { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+.git-status-badge.deleted { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+/* ----------------------------------------------------------------------------
+   IDE Sidebar Pane & Navigation Tabs
+   ---------------------------------------------------------------------------- */
+.ide-sidebar-pane {
+  width: 250px;
+  min-width: 200px;
+  max-width: 400px;
+  background: #09090c;
+  border-right: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.ide-sidebar-nav {
+  display: flex;
+  align-items: center;
+  background: #070709;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  padding: 4px;
+  gap: 3px;
+}
+
+.ide-nav-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  color: #71717a;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ide-nav-tab:hover {
+  color: #d4d4d8;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ide-nav-tab.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------------------------------
+   Editor Center Column
+   ---------------------------------------------------------------------------- */
+.ide-editor-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  position: relative;
+  background: #070709;
+}
+
+.monaco-editor-stage {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.monaco-editor-container {
+  position: absolute;
+  inset: 0;
+}
+
+.ide-tab-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 8px;
+}
+
+.ide-tool-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: #71717a;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.ide-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.ide-tool-btn.active-copilot {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.25);
+  font-weight: 600;
+}
+
+.ide-tool-btn.btn-return-to-chat {
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #e9d5ff;
+  font-weight: 500;
+  gap: 5px;
+  padding: 3px 9px;
+}
+
+.ide-tool-btn.btn-return-to-chat:hover {
+  background: rgba(168, 85, 247, 0.24);
+  border-color: rgba(168, 85, 247, 0.65);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.35);
+}
+
+/* ----------------------------------------------------------------------------
+   P1 Diff Review Banner (Top of Editor)
+   ---------------------------------------------------------------------------- */
+.ide-diff-review-banner {
+  background: rgba(16, 185, 129, 0.08);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: fadeInBanner 0.2s ease-out;
+  z-index: 10;
+}
+
+.ide-diff-review-banner.hidden {
+  display: none !important;
+}
+
+.diff-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.diff-indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.diff-banner-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #a7f3d0;
+}
+
+.diff-banner-stats {
+  font-size: 11px;
+  color: #6ee7b7;
+  font-family: var(--font-mono);
+}
+
+.diff-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-diff-reject {
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-diff-reject:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ffffff;
+}
+
+.btn-diff-accept {
+  background: #10b981;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 4px 14px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.4);
+}
+
+.btn-diff-accept:hover {
+  background: #059669;
+}
+
+/* ----------------------------------------------------------------------------
+   P1 Docked AI Copilot Sidebar (Side-by-Side Real-Time Coding)
+   ---------------------------------------------------------------------------- */
+.ide-docked-chat-pane {
+  width: 380px;
+  min-width: 300px;
+  max-width: 550px;
+  background: #08080b;
+  border-left: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex-shrink: 0;
+  position: relative;
+  transition: width 0.15s ease;
+}
+
+.ide-docked-chat-pane.collapsed {
+  display: none !important;
+}
+
+.docked-chat-header {
+  height: 38px;
+  padding: 0 12px;
+  background: #0a0a0d;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.docked-chat-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f4f4f5;
+}
+
+.docked-ai-sparkle {
+  color: #38bdf8;
+  font-size: 13px;
+}
+
+.docked-model-tag {
+  font-size: 10px;
+  font-weight: 500;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 1px 6px;
+  border-radius: 9999px;
+}
+
+.docked-chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.docked-header-btn {
+  background: transparent;
+  border: none;
+  color: #71717a;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.docked-header-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.docked-chat-transcript {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.docked-welcome-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.docked-welcome-icon {
+  font-size: 20px;
+  color: #38bdf8;
+  margin-bottom: 6px;
+}
+
+.docked-welcome-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.docked-welcome-desc {
+  font-size: 11.5px;
+  color: #888891;
+  line-height: 1.45;
+  margin: 0 0 12px 0;
+}
+
+.docked-quick-prompts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.docked-prompt-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #d4d4d8;
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.docked-prompt-chip:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+}
+
+/* Docked message bubbles */
+.docked-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.docked-msg-role {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #71717a;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.docked-msg.user .docked-msg-role {
+  color: #a1a1aa;
+}
+
+.docked-msg.assistant .docked-msg-role {
+  color: #38bdf8;
+}
+
+.docked-msg-content {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #e4e4e7;
+  word-break: break-word;
+}
+
+.docked-msg.user .docked-msg-content {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+/* Docked code card with Apply to Editor button */
+.docked-code-card {
+  background: #111114;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  margin: 6px 0;
+  overflow: hidden;
+}
+
+.docked-code-header {
+  background: #16161a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.docked-code-lang {
+  font-size: 10px;
+  color: #71717a;
+  font-family: var(--font-mono);
+}
+
+.docked-code-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-apply-to-editor {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  transition: all 0.15s;
+}
+
+.btn-apply-to-editor:hover {
+  background: #38bdf8;
+  color: #09090b;
+}
+
+.btn-docked-copy {
+  background: transparent;
+  border: none;
+  color: #888891;
+  font-size: 10.5px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.btn-docked-copy:hover {
+  color: #ffffff;
+}
+
+.docked-code-body {
+  padding: 8px 10px;
+  margin: 0;
+  font-family: var(--font-mono) !important;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #f4f4f5;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* Docked Composer */
+.docked-chat-composer {
+  padding: 8px 10px 10px 10px;
+  background: #09090c;
+  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.docked-context-row {
+  display: flex;
+  align-items: center;
+}
+
+.docked-file-pill {
+  font-size: 10.5px;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.docked-composer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  background: #101014;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.docked-composer-row:focus-within {
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+}
+
+#docked-chat-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1.45;
+  outline: none;
+  resize: none;
+  min-height: 20px;
+  max-height: 120px;
+  font-family: inherit;
+  padding: 0;
+}
+
+.docked-mic {
+  width: 26px !important;
+  height: 26px !important;
+  margin-right: 0 !important;
+}
+
+.docked-send-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #38bdf8;
+  border: none;
+  color: #09090b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.docked-send-btn:hover {
+  background: #7dd3fc;
+  transform: translateY(-1px);
+}
+
+/* ----------------------------------------------------------------------------
+   P1 Quick File Switcher (Ctrl+P Modal)
+   ---------------------------------------------------------------------------- */
+.quick-file-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 60px;
+}
+
+.quick-file-modal-overlay.hidden {
+  display: none !important;
+}
+
+.quick-file-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+.quick-file-dialog {
+  position: relative;
+  width: 580px;
+  max-width: 90vw;
+  background: #0f0f13;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.8), 0 0 1px rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: dropInModal 0.15s ease-out;
+}
+
+@keyframes dropInModal {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.quick-file-search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #71717a;
+}
+
+.quick-file-search-row input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-family: inherit;
+}
+
+.quick-file-results {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quick-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.quick-file-item:hover, .quick-file-item.selected {
+  background: rgba(56, 189, 248, 0.15);
+  color: #ffffff;
+}
+
+.quick-file-item.selected {
+  outline: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.quick-file-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-file-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #f4f4f5;
+}
+
+.quick-file-path {
+  font-size: 11px;
+  color: #71717a;
+  margin-left: 6px;
+}
+
+/* ----------------------------------------------------------------------------
+   P1 Global Search Pane (Ctrl+Shift+F)
+   ---------------------------------------------------------------------------- */
+.search-input-box-wrap {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.search-input-inner {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
+.search-input-inner:focus-within {
+  border-color: #38bdf8;
+}
+
+.search-input-inner input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.search-opt-toggles {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.search-opt-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: #71717a;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  padding: 2px 4px;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.search-opt-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.search-opt-btn.active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.search-summary-row {
+  font-size: 11px;
+  color: #888891;
+  padding: 2px 2px 0 2px;
+}
+
+.search-results-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.search-file-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.search-file-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #d4d4d8;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.search-file-header:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.search-match-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 11.5px;
+  padding: 3px 6px 3px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #a1a1aa;
+}
+
+.search-match-item:hover {
+  background: rgba(56, 189, 248, 0.12);
+  color: #ffffff;
+}
+
+.search-match-line {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: #71717a;
+  min-width: 24px;
+}
+
+.search-match-text {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

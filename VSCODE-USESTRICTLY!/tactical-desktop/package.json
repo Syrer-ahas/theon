@@ -1,0 +1,83 @@
+{
+  "name": "sparx",
+  "version": "1.0.3",
+  "description": "Sparx AI Workstation",
+  "main": "main.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "electron .",
+    "installer": "electron . --installer",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win",
+    "build:installer": "electron-builder --win nsis"
+  },
+  "dependencies": {
+    "@google/genai": "^2.30.0",
+    "@xterm/addon-fit": "^0.11.0",
+    "diff": "^9.0.0",
+    "edge-tts": "^1.0.1",
+    "marked": "^18.1.1",
+    "monaco-editor": "^0.57.0",
+    "msedge-tts": "^2.1.1",
+    "node-pty": "^1.1.0",
+    "xterm": "^5.3.0"
+  },
+  "devDependencies": {
+    "electron": "^30.1.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.sparx.app",
+    "productName": "Sparx",
+    "npmRebuild": false,
+    "directories": {
+      "output": "dist"
+    },
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/node-pty/**/*"
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "install_tactical.html",
+      "renderer.js",
+      "style.css",
+      "updateService.js",
+      "lspdfrService.js",
+      "ideService.js",
+      "ideRenderer.js",
+      "ideStyle.css",
+      "memoryService.js",
+      "safetyGuards.js",
+      "terminalService.js",
+      "computerControlService.js",
+      "browserService.js",
+      "accessApprovals.js",
+      "assets/**/*",
+      "bin/**/*",
+      "!app-credentials.json",
+      "!.env*",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "icon": "assets/sparx.ico",
+      "target": [
+        "portable",
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Sparx",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-Standalone.${ext}"
+    }
+  }
+}

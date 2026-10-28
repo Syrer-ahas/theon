@@ -1,0 +1,2838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sparx</title>
+  <link rel="icon" type="image/x-icon" href="assets/sparx.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cascadia+Code:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="node_modules/xterm/css/xterm.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="ideStyle.css" />
+</head>
+<body class="tactical-app">
+
+  <!-- Floating Computer-Use Active Indicator -->
+  <div id="computer-active-banner" class="computer-active-banner hidden" role="status" aria-live="polite">
+    <span class="computer-active-indicator-pulse"></span>
+    <span class="computer-active-text">Sparx is using your computer · <button id="btn-cancel-computer-use" class="btn-cancel-computer-link" type="button">Esc to cancel</button></span>
+  </div>
+
+  <!-- Subtle Purple Halo around cursor during active computer control -->
+  <div id="computer-cursor-halo" class="computer-cursor-halo hidden" aria-hidden="true"></div>
+
+  <!-- Screen-Edge Purple Glow Border during active computer control -->
+  <div id="computer-screen-edge-glow" class="computer-screen-edge-glow hidden" aria-hidden="true"></div>
+
+  <!-- ========================================================================
+       STRICT LOGIN GATE SCREEN (Google OAuth / Gmail Verification Barrier)
+       ======================================================================== -->
+  <div id="login-gate-screen" class="login-gate-screen hidden">
+    <div class="login-backdrop-glow">
+      <div class="login-glow-sphere glow-indigo"></div>
+      <div class="login-glow-sphere glow-cyan"></div>
+      <div class="login-glow-sphere glow-emerald"></div>
+    </div>
+
+    <div class="login-glass-card">
+      <h2 class="login-title">Sparx Workstation</h2>
+      <p class="login-subtitle">Sign in to access your chat workspace, synced conversations, and tools.</p>
+
+      <!-- Continue with Google (Standard OAuth loopback flow) -->
+      <button type="button" class="btn-google-oauth" id="btn-google-oauth">
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <div class="login-divider-row">
+        <div class="login-divider-line"></div>
+        <span class="login-divider-text">OR VERIFIED EMAIL PROVIDER</span>
+        <div class="login-divider-line"></div>
+      </div>
+
+      <!-- Stage 1: Email & Password Input -->
+      <form class="login-auth-form" id="form-login-auth" onsubmit="return false;">
+        <div class="login-input-group">
+          <input type="email" id="login-email-input" class="login-input-field" placeholder="your.name@gmail.com" autocomplete="email" required />
+          <span class="login-input-hint">Allowed: Gmail, Outlook, Yahoo, iCloud, Proton</span>
+        </div>
+
+        <div class="login-input-group" style="margin-top: 10px;">
+          <input type="password" id="login-password-input" class="login-input-field" placeholder="Enter password (min 6 characters)" autocomplete="current-password" required />
+        </div>
+
+        <button type="submit" class="btn-auth-submit" id="btn-auth-submit">Continue</button>
+      </form>
+
+      <!-- Stage 2: OTP Verification Card (Hidden initially) -->
+      <form class="login-auth-form hidden" id="form-login-otp" onsubmit="return false;" style="margin-top: 4px;">
+        <div class="otp-card-header">
+          <span class="otp-card-badge">Verification Required</span>
+          <p class="otp-card-msg">A 6-digit verification code was generated for <b id="otp-target-email" style="color:#ffffff;"></b>. Please enter the OTP to verify:</p>
+        </div>
+
+        <div class="login-input-group">
+          <input type="text" id="login-otp-input" class="login-input-field otp-input" placeholder="• • • • • •" maxlength="6" autocomplete="one-time-code" required />
+        </div>
+
+        <div class="otp-btn-row">
+          <button type="button" class="btn-otp-back" id="btn-otp-back">Back</button>
+          <button type="submit" class="btn-auth-submit" id="btn-otp-verify">Verify & Sign In</button>
+        </div>
+      </form>
+
+      <div class="login-status-msg hidden" id="login-status-msg"></div>
+
+      <div class="login-footer-security">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <span>Encrypted Local Security · Zero Suspicious Domains</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       1. MAIN HEADER / TOP BAR
+       ======================================================================== -->
+  <header class="top-app-bar" id="app-titlebar">
+    <!-- Top-Left: Navigation & System Controls -->
+    <div class="top-bar-left">
+      <div class="nav-arrows no-drag">
+        <button class="nav-arrow-btn" id="btn-nav-back" title="Back">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button class="nav-arrow-btn" id="btn-nav-forward" title="Forward">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <button class="icon-toggle-btn no-drag" id="btn-toggle-sidebar" title="Toggle Sidebar (Ctrl+B)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="9" y1="3" x2="9" y2="21"></line>
+        </svg>
+      </button>
+
+      <div class="system-menu no-drag" id="top-system-menu">
+        <div class="menu-dropdown-wrapper" id="menu-dropdown-file">
+          <button class="top-menu-btn" id="menu-btn-file" type="button" aria-haspopup="true" aria-expanded="false">File</button>
+          <div class="top-menu-popup hidden" id="menu-popup-file" role="menu">
+            <button class="menu-action-item" data-menu-action="new-chat" type="button">
+              <span class="menu-action-label">New Chat</span>
+              <kbd class="menu-action-kbd">Ctrl+N</kbd>
+            </button>
+            <button class="menu-action-item" data-menu-action="open-folder" type="button">
+              <span class="menu-action-label">Open Folder...</span>
+              <kbd class="menu-action-kbd">Ctrl+O</kbd>
+            </button>
+            <button class="menu-action-item" data-menu-action="save-file" type="button">
+              <span class="menu-action-label">Save Active File</span>
+              <kbd class="menu-action-kbd">Ctrl+S</kbd>
+            </button>
+            <div class="menu-popup-sep"></div>
+            <button class="menu-action-item" data-menu-action="settings" type="button">
+              <span class="menu-action-label">Settings</span>
+              <kbd class="menu-action-kbd">Ctrl+,</kbd>
+            </button>
+            <div class="menu-popup-sep"></div>
+            <button class="menu-action-item danger" data-menu-action="exit" type="button">
+              <span class="menu-action-label">Exit Sparx</span>
+              <kbd class="menu-action-kbd">Alt+F4</kbd>
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-dropdown-wrapper" id="menu-dropdown-edit">
+          <button class="top-menu-btn" id="menu-btn-edit" type="button" aria-haspopup="true" aria-expanded="false">Edit</button>
+          <div class="top-menu-popup hidden" id="menu-popup-edit" role="menu">
+            <button class="menu-action-item" data-menu-action="undo" type="button">
+              <span class="menu-action-label">Undo</span>
+              <kbd class="menu-action-kbd">Ctrl+Z</kbd>
+            </button>
+            <button class="menu-action-item" data-menu-action="redo" type="button">
+              <span class="menu-action-label">Redo</span>
+              <kbd class="menu-action-kbd">Ctrl+Y</kbd>
+            </button>
+            <div class="menu-popup-sep"></div>
+            <button class="menu-action-item" data-menu-action="cut" type="button">
+              <span class="menu-action-label">Cut</span>
+              <kbd class="menu-action-kbd">Ctrl+X</kbd>
+            </button>
+            <button class="menu-action-item" data-menu-action="copy" type="button">
+              <span class="menu-action-label">Copy</span>
+              <kbd class="menu-action-kbd">Ctrl+C</kbd>
+            </button>
+            <button class="menu-action-item" data-menu-action="paste" type="button">
+              <span class="menu-action-label">Paste</span>
+              <kbd class="menu-action-kbd">Ctrl+V</kbd>
+            </button>
+            <button class="menu-action-item" data-menu-action="select-all" type="button">
+              <span class="menu-action-label">Select All</span>
+              <kbd class="menu-action-kbd">Ctrl+A</kbd>
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-dropdown-wrapper" id="menu-dropdown-view">
+          <button class="top-menu-btn" id="menu-btn-view" type="button" aria-haspopup="true" aria-expanded="false">View</button>
+          <div class="top-menu-popup hidden" id="menu-popup-view" role="menu">
+            <button class="menu-action-item" data-menu-action="toggle-sidebar" type="button">
+              <span class="menu-action-label">Toggle Sidebar</span>
+              <kbd class="menu-action-kbd">Ctrl+B</kbd>
+            </button>
+            <div class="menu-popup-sep"></div>
+            <button class="menu-action-item" data-menu-action="zoom-in" type="button">
+              <span class="menu-action-label">Zoom In</span>
+              <kbd class="menu-action-kbd">Ctrl++</kbd>
+            </button>
+            <button class="menu-action-item" data-menu-action="zoom-out" type="button">
+              <span class="menu-action-label">Zoom Out</span>
+              <kbd class="menu-action-kbd">Ctrl+-</kbd>
+            </button>
+            <button class="menu-action-item" data-menu-action="zoom-reset" type="button">
+              <span class="menu-action-label">Reset Zoom</span>
+              <kbd class="menu-action-kbd">Ctrl+0</kbd>
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-dropdown-wrapper" id="menu-dropdown-help">
+          <button class="top-menu-btn" id="menu-btn-help" type="button" aria-haspopup="true" aria-expanded="false">Help</button>
+          <div class="top-menu-popup hidden" id="menu-popup-help" role="menu">
+            <button class="menu-action-item" data-menu-action="shortcuts" type="button">
+              <span class="menu-action-label">Keyboard Shortcuts</span>
+              <kbd class="menu-action-kbd">Ctrl+/</kbd>
+            </button>
+            <button class="menu-action-item" data-menu-action="guide" type="button">
+              <span class="menu-action-label">Workstation Guide</span>
+            </button>
+            <div class="menu-popup-sep"></div>
+            <button class="menu-action-item" data-menu-action="about" type="button">
+              <span class="menu-action-label">About Sparx</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top-Center: Window Title Drag Bar -->
+    <div class="top-bar-center no-drag">
+    </div>
+
+    <!-- Top-Right: Actions & macOS Window Controls (Moved to Right Side) -->
+    <div class="top-bar-right no-drag">
+      <button class="icon-action-btn round-action-btn" id="btn-new-chat-top" title="New Session">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+      </button>
+
+      <!-- Windows Window Controls (Minimize, Maximize, Close) -->
+      <div class="windows-caption-controls no-drag" id="windows-caption-group">
+        <button class="win-caption-btn win-btn-minimize" id="btn-minimize" aria-label="Minimize" title="Minimize">
+          <svg width="10" height="1" viewBox="0 0 10 1">
+            <rect width="10" height="1" fill="currentColor"/>
+          </svg>
+        </button>
+        <button class="win-caption-btn win-btn-maximize" id="btn-maximize" aria-label="Maximize" title="Maximize">
+          <svg class="win-icon-maximize" width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <rect x="0.5" y="0.5" width="9" height="9" stroke="currentColor" stroke-width="1"/>
+          </svg>
+        </button>
+        <button class="win-caption-btn win-btn-close" id="btn-close" aria-label="Close" title="Close">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M0.5 0.5L9.5 9.5M9.5 0.5L0.5 9.5" stroke="currentColor" stroke-width="1.1"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       2. WORKSTATION SHELL (Activity Rail + Clean Text Sidebar + Stage)
+       ======================================================================== -->
+  <div class="app-shell" id="app-shell">
+
+    <!-- Far-Left Vertical Activity Rail (Exact Monochrome Line Icons & Tooltips) -->
+    <nav class="activity-rail" id="activity-rail">
+      <div class="rail-top">
+        <!-- 1. Home -->
+        <button class="rail-btn active" data-rail="home" id="rail-btn-home" aria-label="Home">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5L12 3l9 7.5V20a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 20v-9.5z"/>
+            <path d="M9 21.5V12h6v9.5"/>
+          </svg>
+          <span class="rail-tooltip">Home</span>
+        </button>
+
+        <!-- 2. Workspace / Projects (Overlapping rounded squares) -->
+        <button class="rail-btn" data-rail="workspace" id="rail-btn-workspace" aria-label="Workspaces">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="13" height="13" rx="3.5"/>
+            <path d="M8 8h9a3.5 3.5 0 0 1 3.5 3.5v9a3.5 3.5 0 0 1-3.5 3.5H8"/>
+          </svg>
+          <span class="rail-tooltip">Workspaces</span>
+        </button>
+
+        <!-- 3. Scheduled Tasks (Calendar & Clock line icon) -->
+        <button class="rail-btn" data-rail="scheduled-tasks" id="rail-btn-scheduled-tasks" aria-label="Scheduled Tasks">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+            <polyline points="12 14 12 17 14 17"></polyline>
+          </svg>
+          <span class="rail-tooltip">Scheduled Tasks</span>
+        </button>
+
+        <!-- 4. History / Clock -->
+        <button class="rail-btn" data-rail="history" id="rail-btn-history" aria-label="History">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <polyline points="12 7 12 12 15 14"/>
+          </svg>
+          <span class="rail-tooltip">History</span>
+        </button>
+
+        <!-- 5. Library / Docs (Vertical pill books) -->
+        <button class="rail-btn" data-rail="library" id="rail-btn-library" aria-label="Library">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="4.5" height="16" rx="2"/>
+            <rect x="10.5" y="4" width="4.5" height="16" rx="2"/>
+            <path d="M17 5.5l3.5 1.2v12.6l-3.5-1.2z"/>
+          </svg>
+          <span class="rail-tooltip">Library</span>
+        </button>
+
+        <!-- 6. Explore / Custom Agents (Modern @ glyph) -->
+        <button class="rail-btn" data-rail="plugins" id="rail-btn-plugins" aria-label="Plugins">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>
+          </svg>
+          <span class="rail-tooltip">Plugins</span>
+        </button>
+
+        <!-- 7. Connectors (Plug / link line icon) -->
+        <button class="rail-btn" data-rail="connectors" id="rail-btn-connectors" aria-label="Connectors">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22v-5"></path>
+            <path d="M9 8V2"></path>
+            <path d="M15 8V2"></path>
+            <path d="M18 8v5a6 6 0 0 1-12 0V8z"></path>
+          </svg>
+          <span class="rail-tooltip">Connectors</span>
+        </button>
+
+        <!-- 8. More (Three horizontal dots "···" moved beneath Connectors) -->
+        <button class="rail-btn" data-rail="more" id="btn-rail-more" aria-label="More">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="5" cy="12" r="1.5"/>
+            <circle cx="12" cy="12" r="1.5"/>
+            <circle cx="19" cy="12" r="1.5"/>
+          </svg>
+          <span class="rail-tooltip">More</span>
+        </button>
+      </div>
+
+      <div class="rail-bottom">
+        <!-- Update Action Button -->
+        <button class="rail-btn update-btn-cyan" id="btn-rail-update" aria-label="Install Update">
+          <svg class="update-icon-default" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <svg class="update-icon-spinning hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+            <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
+          </svg>
+          <span class="update-badge-dot hidden" id="update-badge-dot"></span>
+          <span class="rail-tooltip" id="rail-update-tooltip">Install Update</span>
+        </button>
+
+        <!-- Profile Avatar Circle -->
+        <div class="user-avatar-circle" id="btn-user-avatar" title="Sparx Operator">
+          <span>SO</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Anchored Account Popup Menu (Compact, Crisp & Inline Accordion) -->
+    <div class="avatar-popup-menu hidden" id="avatar-popup-menu">
+      <div class="popup-user-header">
+        <div class="popup-avatar-mini">SO</div>
+        <div class="popup-user-meta">
+          <span class="popup-user-name">Sparx Operator</span>
+          <span class="popup-user-tier">Studio Pro</span>
+        </div>
+      </div>
+
+      <div class="popup-divider"></div>
+
+      <div class="popup-menu-list">
+        <!-- Inline Accordion Trigger: Usage Remaining -->
+        <div class="accordion-item" id="menu-usage-accordion">
+          <div class="popup-menu-item accordion-trigger" id="menu-usage-trigger">
+            <svg class="menu-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="9"></circle>
+              <polyline points="12 7 12 12 15 14"></polyline>
+            </svg>
+            <span class="popup-item-label">Usage remaining</span>
+            <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          
+          <!-- Collapsible Inline Accordion Tray -->
+          <div class="accordion-tray" id="usage-accordion-tray">
+            <div class="usage-sub-row">
+              <span class="usage-sub-label">Monthly</span>
+              <span class="usage-sub-meta" id="usage-sub-meta-text">100% &nbsp; Nov 19</span>
+            </div>
+            <div class="usage-mini-bar">
+              <div class="usage-mini-fill" id="usage-mini-fill-bar" style="width: 100%;"></div>
+            </div>
+            <div class="usage-sub-action-row" id="link-upgrade-plus">
+              <span>Upgrade to Plus</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </div>
+            <div class="usage-sub-action-row" id="link-learn-more">
+              <span>Learn more</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="popup-menu-item" id="menu-upgrade-limits">
+          <svg class="menu-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
+          </svg>
+          <span class="popup-item-label">Upgrade for higher limits</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </div>
+
+        <!-- Settings (Opens Dedicated Full-Screen Settings View) -->
+        <div class="popup-menu-item" id="menu-settings-btn">
+          <svg class="menu-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span class="popup-item-label">Settings</span>
+          <span class="popup-item-shortcut">Ctrl+,</span>
+        </div>
+
+        <div class="popup-divider"></div>
+
+        <div class="popup-menu-item" id="menu-help-btn">
+          <svg class="menu-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="9"></circle>
+            <circle cx="12" cy="12" r="4"></circle>
+            <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
+            <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line>
+            <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line>
+            <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line>
+          </svg>
+          <span class="popup-item-label">Help</span>
+          <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+
+        <div class="popup-menu-item danger" id="menu-logout-btn">
+          <svg class="menu-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span class="popup-item-label">Log out</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rebuilt Workspace Sidebar (Clean Typography Text List) -->
+    <aside class="project-sidebar" id="workspace-sidebar">
+      <!-- Sidebar Header Workspace Selector -->
+      <div class="sidebar-header">
+        <div class="sidebar-workspace-selector" id="btn-workspace-selector">
+          <span class="workspace-brand-text">Sparx</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <div class="sidebar-header-actions">
+          <button class="mini-icon-btn" id="btn-sidebar-notifications" title="Notifications">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </button>
+          <button class="mini-icon-btn" id="btn-sidebar-search" title="Search conversations">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Roundy "+ New chat" Pill Row -->
+      <div class="sidebar-new-chat-wrap">
+        <button class="new-chat-row-btn" id="btn-new-chat">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          <span>New chat</span>
+        </button>
+      </div>
+
+      <!-- Structured Sidebar: Pinned, Projects, Recents (Clean Typography Links) -->
+      <div class="sidebar-content-scroll">
+        
+        <!-- Pinned Section -->
+        <div class="sidebar-section">
+          <div class="section-title">Pinned</div>
+          <div class="clean-text-list" id="pinned-list">
+          </div>
+        </div>
+
+        <!-- Projects Section -->
+        <div class="sidebar-section">
+          <div class="section-title">Projects</div>
+          <div class="clean-text-list" id="project-chats-list">
+          </div>
+        </div>
+
+        <!-- Recents Section (Dynamic Plain-Text Links) -->
+        <div class="sidebar-section">
+          <div class="section-title">Recents</div>
+          <div class="clean-text-list session-list" id="session-list">
+            <!-- Dynamic session items rendered here -->
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- Main Workspace Stage (Chat Canvas) -->
+    <main class="chat-workspace-main" id="chat-workspace-main">
+      <div class="workspace-stage" id="workspace-stage">
+
+        <!-- Chat Message Transcript (Active Thread) -->
+        <div class="chat-transcript" id="chat-transcript" role="log" aria-label="Conversation" aria-live="off"></div>
+
+        <!-- UNIFIED CENTER HERO & CODEX PROMPT CAPSULE -->
+        <div class="hero-capsule-container" id="hero-capsule-container">
+
+          <!-- Segmented Pill Switcher [ Chat | Work ] above Hero Greeting -->
+          <div class="hero-mode-switch-wrap" id="hero-mode-switch-wrap">
+            <div class="segmented-pill-control" id="hero-mode-switch" data-active="chat" role="tablist" aria-label="Mode Switcher">
+              <div class="pill-slider-glider" id="pill-slider-glider"></div>
+              <button class="pill-btn active" data-mode="chat" type="button" role="tab" aria-selected="true">Chat</button>
+              <button class="pill-btn" data-mode="work" type="button" role="tab" aria-selected="false">Work</button>
+            </div>
+          </div>
+
+          <!-- Center Hero Heading: Dynamic Rotating Title -->
+          <div class="hero-title-wrap" id="hero-title-wrap">
+            <h1 class="hero-heading" id="hero-heading">What should we work on?</h1>
+          </div>
+
+          <!-- Prompt Composer Capsule Card (Focused IDE Input) -->
+          <div class="prompt-capsule-card" id="prompt-capsule-card">
+            
+            <!-- In-Chatbox Approval Morphing Banner (Cool Effect) -->
+            <div class="chatbox-approval-banner hidden" id="chatbox-approval-banner" style="display: none;" role="alertdialog" aria-labelledby="chatbox-approval-text">
+              <div class="chatbox-approval-inner">
+                <div class="chatbox-approval-left">
+                  <span class="chatbox-approval-text" id="chatbox-approval-text">Allow Sparx to Run Commands?</span>
+                </div>
+                <div class="chatbox-approval-actions">
+                  <button class="btn-approval-no" id="btn-chatbox-approval-no" type="button">No</button>
+                  <button class="btn-approval-yes" id="btn-chatbox-approval-yes" type="button">Yes</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Attached Files Tray (Appears above input when files are attached) -->
+            <div class="attached-files-tray hidden" id="attached-files-tray"></div>
+
+            <!-- Top Input Area: Auto-expanding Textarea -->
+            <div class="capsule-input-row">
+              <textarea
+                id="chat-textarea"
+                rows="1"
+                placeholder="Ask Sparx anything…"
+              ></textarea>
+            </div>
+
+            <!-- Voice Recording Status Banner -->
+            <div class="voice-recording-banner hidden" id="voice-recording-banner">
+              <div class="voice-recording-left">
+                <span class="voice-dot-live"></span>
+                <span class="voice-recording-label" id="voice-recording-label">Listening to your voice...</span>
+                <span class="voice-timer" id="voice-recording-timer">00:00</span>
+              </div>
+              <div class="voice-soundwaves" id="voice-soundwaves">
+                <span class="vwave bar1"></span>
+                <span class="vwave bar2"></span>
+                <span class="vwave bar3"></span>
+                <span class="vwave bar4"></span>
+                <span class="vwave bar5"></span>
+              </div>
+              <div class="voice-recording-actions">
+                <button class="voice-btn-cancel" id="btn-voice-cancel" type="button" title="Cancel recording">Cancel</button>
+                <button class="voice-btn-done" id="btn-voice-done" type="button" title="Done speaking">Done</button>
+              </div>
+            </div>
+
+            <!-- Single Focused IDE Toolbar Row -->
+            <div class="capsule-toolbar-row">
+              <div class="toolbar-left">
+                <!-- + Attachment and Tools Popup Wrap (Image 5) -->
+                <div class="toolbar-popup-anchor" id="wrap-attach-popup">
+                  <button class="capsule-icon-btn" id="btn-attach-file" title="Add files and tools" type="button">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  </button>
+
+                  <!-- Popup Menu on + Click (Image 5) -->
+                  <div class="tactical-attach-popup hidden" id="tactical-attach-popup" role="menu">
+                    <div class="attach-popup-scroll">
+                      <div class="attach-popup-item" id="attach-item-files" role="menuitem">
+                        <div class="attach-item-icon">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                        </div>
+                        <div class="attach-item-text"><span class="attach-item-name">Files and folders</span></div>
+                      </div>
+                      <div class="attach-popup-item" id="attach-item-work" role="menuitem">
+                        <div class="attach-item-icon">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        </div>
+                        <div class="attach-item-text"><span class="attach-item-name">Work in a project</span><span class="attach-item-sub">Start a chat in a project</span></div>
+                      </div>
+                      <div class="attach-popup-item" id="attach-item-sketch" role="menuitem">
+                        <div class="attach-item-icon" style="color: #2dd4bf;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path></svg></div>
+                        <div class="attach-item-text"><span class="attach-item-name">Sketch</span><span class="attach-item-sub">Draw a sketch</span></div>
+                      </div>
+                      <div class="attach-popup-item" id="attach-item-documents" role="menuitem">
+                        <div class="attach-item-icon" style="color: #60a5fa;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div>
+                        <div class="attach-item-text"><span class="attach-item-name">Documents</span><span class="attach-item-sub">Create and edit documents</span></div>
+                      </div>
+                      <div class="attach-popup-item" id="attach-item-pdf" role="menuitem">
+                        <div class="attach-item-icon" style="color: #f87171;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg></div>
+                        <div class="attach-item-text"><span class="attach-item-name">PDF</span><span class="attach-item-sub">Read, create, and verify PDFs</span></div>
+                      </div>
+                      <div class="attach-popup-item" id="attach-item-spreadsheets" role="menuitem">
+                        <div class="attach-item-icon" style="color: #34d399;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="3" x2="9" y2="21"></line></svg></div>
+                        <div class="attach-item-text"><span class="attach-item-name">Spreadsheets</span><span class="attach-item-sub">Create and edit spreadsheets</span></div>
+                      </div>
+                      <div class="attach-popup-item" id="attach-item-presentations" role="menuitem">
+                        <div class="attach-item-icon" style="color: #fbbf24;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line></svg></div>
+                        <div class="attach-item-text"><span class="attach-item-name">Presentations</span><span class="attach-item-sub">Create and edit presentations</span></div>
+                      </div>
+                      <div class="attach-popup-item" id="attach-item-template" role="menuitem">
+                        <div class="attach-item-icon" style="color: #c084fc;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></div>
+                        <div class="attach-item-text"><span class="attach-item-name">Template Creator</span><span class="attach-item-sub">Create or update reusable templates from reference content</span></div>
+                      </div>
+                      <div class="attach-popup-item" id="attach-item-browser" role="menuitem">
+                        <div class="attach-item-icon" style="color: #38bdf8;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div>
+                        <div class="attach-item-text"><span class="attach-item-name">Browser</span><span class="attach-item-sub">Control the in-app browser</span></div>
+                      </div>
+                      <div class="attach-popup-item" id="attach-item-studio" role="menuitem">
+                        <div class="attach-item-icon" style="color: #a78bfa;">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                        </div>
+                        <div class="attach-item-text"><span class="attach-item-name">Attach Sparx</span><span class="attach-item-sub">Attach Sparx runtime context</span></div>
+                      </div>
+                      <div class="attach-popup-item" id="attach-item-goal" role="menuitem">
+                        <div class="attach-item-icon" style="color: #f472b6;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="6" r="2"></circle></svg></div>
+                        <div class="attach-item-text"><span class="attach-item-name">Goal</span><span class="attach-item-sub">Set a goal to keep pursuing</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Access Mode Button & Dropdown Wrap (Image 4) -->
+                <div class="toolbar-popup-anchor" id="wrap-access-popup">
+                  <button class="context-pill access-mode-pill" id="access-mode-indicator" data-mode="auto" type="button" title="Approval policy">
+                    <span class="mode-icon-wrap" id="access-mode-icon">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                    </span>
+                    <span id="access-mode-label">Approve for me</span>
+                  </button>
+
+                  <!-- Popup Menu on Access Pill Click (Image 4) -->
+                  <div class="access-approval-popup hidden" id="access-approval-popup" role="menu">
+                    <div class="access-popup-header">
+                      <span class="access-popup-title">How should Sparx actions be approved?</span>
+                      <a href="#" class="access-popup-learn" id="btn-access-learn-more" onclick="return false;">Learn more</a>
+                    </div>
+                    <div class="access-popup-options">
+                      <!-- Option 1: Ask for approval -->
+                      <button class="access-popup-item" data-mode="ask" type="button" role="menuitem">
+                        <div class="access-item-icon">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path>
+                            <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path>
+                            <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path>
+                            <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path>
+                          </svg>
+                        </div>
+                        <div class="access-item-text">
+                          <div class="access-item-name">Ask for approval</div>
+                          <div class="access-item-desc">Always ask to edit external files and use the internet</div>
+                        </div>
+                        <span class="access-item-check hidden">✓</span>
+                      </button>
+
+                      <!-- Option 2: Approve for me (Default) -->
+                      <button class="access-popup-item active" data-mode="auto" type="button" role="menuitem">
+                        <div class="access-item-icon">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="4 17 10 11 4 5"></polyline>
+                            <line x1="12" y1="19" x2="20" y2="19"></line>
+                          </svg>
+                        </div>
+                        <div class="access-item-text">
+                          <div class="access-item-name">Approve for me</div>
+                          <div class="access-item-desc">Only ask for actions detected as potentially unsafe</div>
+                        </div>
+                        <span class="access-item-check">✓</span>
+                      </button>
+
+                      <!-- Option 3: Full access -->
+                      <button class="access-popup-item" data-mode="full" type="button" role="menuitem">
+                        <div class="access-item-icon">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                          </svg>
+                        </div>
+                        <div class="access-item-text">
+                          <div class="access-item-name">Full access</div>
+                          <div class="access-item-desc">Unrestricted access to the internet and any file on your computer</div>
+                        </div>
+                        <span class="access-item-check hidden">✓</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="toolbar-right">
+                <!-- Custom Glassmorphic Model Selector Dropdown -->
+                <div class="custom-model-dropdown" id="model-dropdown">
+                  <button class="model-dropdown-trigger" id="model-dropdown-trigger" type="button">
+                    <span class="model-trigger-sparkle">✦</span>
+                    <span class="model-trigger-label" id="current-model-label">Sparx 3.9 Flash</span>
+                    <svg class="model-trigger-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+
+                  <div class="model-dropdown-menu hidden" id="model-dropdown-menu">
+                    <div class="model-dropdown-header">Sparx Workstation Engines</div>
+                    <div class="model-option active" data-model="sparx-3.9-flash">
+                      <div class="model-option-info">
+                        <span class="model-option-name">Sparx 3.9 Flash</span>
+                        <span class="model-option-desc">Flagship open-weights reasoning model (Recommended)</span>
+                      </div>
+                      <span class="model-check-icon">✓</span>
+                    </div>
+                    <div class="model-option" data-model="sparx-3.8-pro">
+                      <div class="model-option-info">
+                        <span class="model-option-name">Sparx 3.8 Pro</span>
+                        <span class="model-option-desc">High-efficiency versatile pro model</span>
+                      </div>
+                      <span class="model-check-icon">✓</span>
+                    </div>
+
+                    <div class="model-dropdown-header">Google Gemini Engines</div>
+                    <div class="model-option" data-model="gemini-3.8-flash">
+                      <div class="model-option-info">
+                        <span class="model-option-name">Gemini 3.8 Flash</span>
+                        <span class="model-option-desc">Fast, intelligent reasoning</span>
+                      </div>
+                      <span class="model-check-icon">✓</span>
+                    </div>
+                    <div class="model-option" data-model="gemini-2.5-flash">
+                      <div class="model-option-info">
+                        <span class="model-option-name">Gemini 2.5 Flash</span>
+                        <span class="model-option-desc">Lightweight high-speed token generation</span>
+                      </div>
+                      <span class="model-check-icon">✓</span>
+                    </div>
+                    <div class="model-option" data-model="gemini-1.5-pro">
+                      <div class="model-option-info">
+                        <span class="model-option-name">Gemini 1.5 Pro</span>
+                        <span class="model-option-desc">Complex multi-file architectural analysis</span>
+                      </div>
+                      <span class="model-check-icon">✓</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="voice-mic-btn" id="btn-voice-record" type="button" title="Voice dictation (Talk instead of typing)">
+                  <svg class="icon-mic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                  </svg>
+                  <svg class="icon-mic-stop" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+                    <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+                  </svg>
+                  <span class="mic-pulse-ring"></span>
+                </button>
+
+                <button class="submit-circle-btn" id="btn-send-message" title="Send (Enter)">
+                  <svg class="icon-send" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                    <polyline points="5 12 12 5 19 12"></polyline>
+                  </svg>
+                  <svg class="icon-stop" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+                    <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ========================================================================
+         3. FULL IDE WORKSPACE STAGE (Monaco Editor, Docked Terminal, Docked AI Copilot)
+         ======================================================================== -->
+    <section class="ide-workspace-stage hidden" id="ide-workspace-stage">
+
+      <!-- Left IDE Sidebar (Explorer, Search, Git) -->
+      <aside class="ide-sidebar-pane" id="ide-sidebar-pane">
+        <!-- Sidebar Navigation Tabs -->
+        <div class="ide-sidebar-nav">
+          <button class="ide-nav-tab active" id="tab-nav-explorer" data-pane="explorer" title="Explorer (Ctrl+Shift+E)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Explorer</span>
+          </button>
+          <button class="ide-nav-tab" id="tab-nav-search" data-pane="search" title="Global Search (Ctrl+Shift+F)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>Search</span>
+          </button>
+          <button class="ide-nav-tab" id="tab-nav-git" data-pane="git" title="Source Control (Ctrl+Shift+G)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="18" r="3"></circle>
+              <circle cx="6" cy="6" r="3"></circle>
+              <path d="M18 9a9 9 0 0 1-9 9"></path>
+              <line x1="6" y1="9" x2="6" y2="21"></line>
+            </svg>
+            <span>Git</span>
+          </button>
+        </div>
+
+        <!-- 1. Explorer View Pane -->
+        <div class="sidebar-view-pane" id="sidebar-view-explorer">
+          <div class="explorer-pane-header">
+            <span class="explorer-workspace-title" id="explorer-workspace-name">NO FOLDER OPEN</span>
+            <div class="explorer-actions">
+              <button class="ide-action-icon-btn" id="btn-new-file" title="New File">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <line x1="12" y1="18" x2="12" y2="12"></line>
+                  <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+              </button>
+              <button class="ide-action-icon-btn" id="btn-new-folder" title="New Folder">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  <line x1="12" y1="11" x2="12" y2="17"></line>
+                  <line x1="9" y1="14" x2="15" y2="14"></line>
+                </svg>
+              </button>
+              <button class="ide-action-icon-btn" id="btn-refresh-explorer" title="Refresh Explorer">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+              </button>
+              <button class="ide-action-icon-btn" id="btn-explorer-open-folder" title="Open Folder">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="explorer-tree-container" id="explorer-tree-container"></div>
+        </div>
+
+        <!-- 2. Global Search View Pane (Ctrl+Shift+F) -->
+        <div class="sidebar-view-pane hidden" id="sidebar-view-search">
+          <div class="explorer-pane-header">
+            <span class="explorer-workspace-title">SEARCH WORKSPACE</span>
+          </div>
+          <div class="search-input-box-wrap">
+            <div class="search-input-inner">
+              <input type="text" id="global-search-input" placeholder="Search (Enter to search)..." autocomplete="off" />
+              <div class="search-opt-toggles">
+                <button class="search-opt-btn" id="btn-search-opt-case" title="Match Case (Alt+C)">Aa</button>
+                <button class="search-opt-btn" id="btn-search-opt-word" title="Match Whole Word (Alt+W)">\b</button>
+                <button class="search-opt-btn" id="btn-search-opt-regex" title="Use Regular Expression (Alt+R)">.*</button>
+              </div>
+            </div>
+            <div class="search-summary-row" id="search-summary-row"></div>
+          </div>
+          <div class="search-results-list" id="search-results-list"></div>
+        </div>
+
+        <!-- 3. Git Source Control View Pane -->
+        <div class="sidebar-view-pane hidden" id="sidebar-view-git">
+          <div class="git-pane-header">
+            <div class="git-branch-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="6" y1="3" x2="6" y2="15"></line>
+                <circle cx="18" cy="6" r="3"></circle>
+                <circle cx="6" cy="18" r="3"></circle>
+                <path d="M18 9a9 9 0 0 1-9 9"></path>
+              </svg>
+              <span id="git-branch-name">main</span>
+            </div>
+          </div>
+          <div class="git-commit-box">
+            <textarea id="git-commit-msg" class="git-commit-input" placeholder="Message (Ctrl+Enter to commit)"></textarea>
+            <button class="btn-git-commit" id="btn-git-commit" type="button">Commit Changes</button>
+          </div>
+          <div class="git-files-header">Changes</div>
+          <div class="git-files-list" id="git-files-list"></div>
+        </div>
+      </aside>
+
+      <!-- Center Editor Column -->
+      <div class="ide-editor-column">
+        <!-- Multi-file Tab Bar -->
+        <div class="ide-tab-bar" id="ide-tab-bar">
+          <div class="ide-tabs-list" id="ide-tabs-list"></div>
+          <div class="ide-tab-bar-actions">
+            <button class="ide-tool-btn btn-return-to-chat" id="btn-return-to-chat" title="Return to Main Chat (Ctrl+Shift+C)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>Return to Chat</span>
+            </button>
+            <button class="ide-tool-btn" id="btn-quick-open-file" title="Quick Open (Ctrl+P)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
+            <button class="ide-tool-btn" id="btn-toggle-terminal" title="Terminal (Ctrl+`)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+              </svg>
+            </button>
+            <button class="ide-tool-btn active-copilot" id="btn-toggle-copilot-dock" title="Toggle Docked Sparx AI (Ctrl+L)">
+              <span class="copilot-sparkle">✦</span>
+              <span>Copilot</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Inline Diff Review Banner (P1 Requirement) -->
+        <div class="ide-diff-review-banner hidden" id="ide-diff-review-banner">
+          <div class="diff-banner-left">
+            <span class="diff-indicator-dot"></span>
+            <span class="diff-banner-title" id="diff-banner-title">AI Modification Proposal</span>
+            <span class="diff-banner-stats" id="diff-banner-stats"></span>
+          </div>
+          <div class="diff-banner-actions">
+            <button class="btn-diff-reject" id="btn-diff-reject-banner" type="button">Reject (Esc)</button>
+            <button class="btn-diff-accept" id="btn-diff-accept-banner" type="button">✓ Accept & Apply</button>
+          </div>
+        </div>
+
+        <!-- Monaco Code Editor Stage -->
+        <div class="monaco-editor-stage" id="monaco-editor-stage">
+          <div class="monaco-editor-container" id="monaco-editor-container"></div>
+          
+          <!-- Empty Editor State -->
+          <div class="ide-empty-editor" id="ide-empty-editor">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <p>No file is currently open</p>
+            <div class="ide-empty-shortcuts">
+              <button class="btn-open-workspace" id="btn-open-workspace" type="button">Open Folder</button>
+              <span class="empty-shortcut-hint">Press <kbd>Ctrl+P</kbd> to quick open file</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Docked Bottom Terminal (xterm.js with Cascadia Code & crisp typography) -->
+        <div class="ide-terminal-dock" id="ide-terminal-dock">
+          <div class="ide-terminal-header">
+            <div class="ide-terminal-tab-title">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+              </svg>
+              <span>PowerShell</span>
+              <span class="term-status-pill">Active</span>
+            </div>
+            <div class="ide-terminal-actions">
+              <button class="ide-terminal-btn" id="btn-clear-terminal" title="Clear Terminal (Ctrl+K)">Clear</button>
+              <button class="ide-terminal-btn" id="btn-close-terminal" title="Close Terminal">✕</button>
+            </div>
+          </div>
+          <div class="ide-terminal-body" id="xterm-terminal-container"></div>
+        </div>
+      </div>
+
+      <!-- Right Docked AI Chat Pane (P1 Requirement: Side-by-Side Real-Time Coding) -->
+      <aside class="ide-docked-chat-pane" id="ide-docked-chat-pane">
+        <div class="docked-chat-header">
+          <div class="docked-chat-title">
+            <span class="docked-ai-sparkle">✦</span>
+            <span>Sparx Copilot</span>
+            <span class="docked-model-tag" id="docked-model-tag">3.9 Flash</span>
+          </div>
+          <div class="docked-chat-header-actions">
+            <button class="docked-header-btn" id="btn-docked-new-chat" title="New Topic">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            <button class="docked-header-btn" id="btn-docked-collapse" title="Collapse Dock (Ctrl+L)">✕</button>
+          </div>
+        </div>
+
+        <!-- Docked Transcript -->
+        <div class="docked-chat-transcript" id="docked-chat-transcript">
+          <div class="docked-welcome-card" id="docked-welcome-card">
+            <div class="docked-welcome-icon">✦</div>
+            <div class="docked-welcome-title">Coding with Sparx</div>
+            <p class="docked-welcome-desc">Ask questions, generate functions, refactor code, or fix errors in real-time alongside your editor.</p>
+            <div class="docked-quick-prompts">
+              <button class="docked-prompt-chip" data-prompt="Explain what the open file does and how it is structured">Explain open file</button>
+              <button class="docked-prompt-chip" data-prompt="Review the open file for bugs, security issues, and edge cases">Review for bugs</button>
+              <button class="docked-prompt-chip" data-prompt="Suggest clean refactorings and optimizations for this file">Refactor & optimize</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Docked Input Composer -->
+        <div class="docked-chat-composer">
+          <!-- Active file context pill -->
+          <div class="docked-context-row">
+            <span class="docked-file-pill" id="docked-file-context-pill">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              </svg>
+              <span id="docked-active-file-label">No file selected</span>
+            </span>
+          </div>
+          <div class="docked-composer-row">
+            <textarea id="docked-chat-textarea" rows="1" placeholder="Ask Sparx or request edits..."></textarea>
+            <button class="voice-mic-btn docked-mic" id="btn-docked-voice" type="button" title="Voice dictation">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+              </svg>
+            </button>
+            <button class="docked-send-btn" id="btn-docked-send" title="Send (Enter)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="19" x2="12" y2="5"></line>
+                <polyline points="5 12 12 5 19 12"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+    </section>
+
+    <!-- Quick File Switcher Modal (Ctrl+P) -->
+    <div class="quick-file-modal-overlay hidden" id="quick-file-switcher-modal">
+      <div class="quick-file-backdrop" id="quick-file-backdrop"></div>
+      <div class="quick-file-dialog">
+        <div class="quick-file-search-row">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="quick-file-input" placeholder="Type name to open file (↑↓ navigate, Enter open, Esc exit)..." autocomplete="off" />
+        </div>
+        <div class="quick-file-results" id="quick-file-results"></div>
+      </div>
+    </div>
+
+    <!-- ========================================================================
+         DESTINATION VIEWS CONTAINER (Workspaces, Tasks, Library, Plugins, Connectors)
+         ======================================================================== -->
+    <div class="destination-views-container hidden" id="destination-views-container">
+
+      <!-- 1. Workspaces Destination View -->
+      <div class="destination-pane hidden" id="dest-pane-workspace">
+        <div class="dest-top-bar">
+          <button class="btn-dest-back" data-action="back-to-chat" title="Back to chat (Esc)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back to chat</span>
+          </button>
+          <div class="dest-divider-v"></div>
+          <div class="dest-header-info">
+            <h2 class="dest-header-title">Workspaces</h2>
+            <span class="dest-pill-badge badge-active">1 Root Active</span>
+          </div>
+        </div>
+
+        <div class="dest-scroll-body">
+          <div class="dest-content-cluster">
+            
+            <div class="dest-section-block">
+              <h3 class="dest-section-title">Active Workspace Root</h3>
+              <div class="dest-card-surface">
+                <div class="dest-card-header-row">
+                  <div class="dest-entity-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                  </div>
+                  <div class="dest-entity-meta">
+                    <div class="dest-entity-name">Active Studio Workspace</div>
+                    <div class="dest-entity-path" id="workspace-dest-path">Local Workstation Project</div>
+                  </div>
+                  <span class="dest-status-tag">Connected</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="dest-section-block">
+              <h3 class="dest-section-title">Detected Subprojects</h3>
+              <div class="dest-grid-duo">
+                
+                <div class="dest-card-surface interactive-project-card" data-session-trigger="session-project-tactical-desktop">
+                  <div class="dest-project-top">
+                    <div class="dest-project-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                      </svg>
+                    </div>
+                    <span class="dest-project-tag">Electron Frontend</span>
+                  </div>
+                  <div class="dest-project-title">tactical-desktop</div>
+                  <div class="dest-project-desc">Desktop workstation UI shell, Google AI Studio SDK IPC streaming, and obsidian-violet interface.</div>
+                  <div class="dest-project-actions">
+                    <button class="btn-dest-action" data-session-target="session-project-tactical-desktop">Switch to Session</button>
+                  </div>
+                </div>
+
+                <div class="dest-card-surface interactive-project-card" data-session-trigger="session-project-core-engine">
+                  <div class="dest-project-top">
+                    <div class="dest-project-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                        <rect x="9" y="9" width="6" height="6"></rect>
+                        <line x1="9" y1="1" x2="9" y2="4"></line>
+                        <line x1="15" y1="1" x2="15" y2="4"></line>
+                        <line x1="9" y1="20" x2="9" y2="23"></line>
+                        <line x1="15" y1="20" x2="15" y2="23"></line>
+                      </svg>
+                    </div>
+                    <span class="dest-project-tag">Agent Engine</span>
+                  </div>
+                  <div class="dest-project-title">core-engine</div>
+                  <div class="dest-project-desc">Agent orchestration, tool invocation bus, and environment runtime integrations.</div>
+                  <div class="dest-project-actions">
+                    <button class="btn-dest-action" data-session-target="session-project-core-engine">Switch to Session</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="dest-section-block">
+              <h3 class="dest-section-title">Environment & Host Context</h3>
+              <div class="dest-card-surface">
+                <div class="dest-kv-row">
+                  <span class="dest-kv-label">Host OS</span>
+                  <span class="dest-kv-value">Windows (pwsh shell environment)</span>
+                </div>
+                <div class="dest-kv-row">
+                  <span class="dest-kv-label">Runtime Engine</span>
+                  <span class="dest-kv-value">Node.js 20.x · Electron 31.0.0</span>
+                </div>
+                <div class="dest-kv-row">
+                  <span class="dest-kv-label">Active AI Model</span>
+                  <span class="dest-kv-value">Gemini 3.8 Flash (Google AI Studio)</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Scheduled Tasks Destination View (Honest Empty State) -->
+      <div class="dest-pane hidden" id="dest-pane-scheduled-tasks">
+        <div class="dest-top-bar">
+          <button class="btn-dest-back" data-action="back-to-chat" title="Back to chat (Esc)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back to chat</span>
+          </button>
+          <div class="dest-divider-v"></div>
+          <div class="dest-header-info">
+            <h2 class="dest-header-title">Scheduled Tasks</h2>
+            <span class="dest-pill-badge badge-neutral">0 Active Triggers</span>
+          </div>
+        </div>
+
+        <div class="dest-scroll-body">
+          <div class="dest-content-cluster">
+
+            <div class="dest-empty-state-box">
+              <div class="dest-empty-icon">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                  <polyline points="12 14 12 17 14 17"></polyline>
+                </svg>
+              </div>
+              <h3 class="dest-empty-title">No background tasks scheduled</h3>
+              <p class="dest-empty-desc">
+                Scheduled background automations and recurring cron triggers will appear here when configured. You can initiate tasks, timers, and scheduled workflows directly in the chat composer using the scheduler tool or the slash command.
+              </p>
+              <div class="dest-command-chip">
+                <code>/schedule</code>
+              </div>
+            </div>
+
+            <div class="dest-section-block">
+              <h3 class="dest-section-title">Scheduler Capabilities</h3>
+              <div class="dest-card-surface">
+                <div class="dest-kv-row">
+                  <span class="dest-kv-label">One-Shot Timers</span>
+                  <span class="dest-kv-value">Countdown timers specified by duration in seconds (DurationSeconds)</span>
+                </div>
+                <div class="dest-kv-row">
+                  <span class="dest-kv-label">Recurring Crons</span>
+                  <span class="dest-kv-value">Standard 5-field cron expressions (e.g. 0 9 * * 1-5 for weekday syncs)</span>
+                </div>
+                <div class="dest-kv-row">
+                  <span class="dest-kv-label">Reactive Wakeups</span>
+                  <span class="dest-kv-value">Automatic notification delivery and timer cancellation on matching event triggers</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Library Destination View -->
+      <div class="dest-pane hidden" id="dest-pane-library">
+        <div class="dest-top-bar">
+          <button class="btn-dest-back" data-action="back-to-chat" title="Back to chat (Esc)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back to chat</span>
+          </button>
+          <div class="dest-divider-v"></div>
+          <div class="dest-header-info">
+            <h2 class="dest-header-title">Library & Reference</h2>
+            <span class="dest-pill-badge badge-active">Reference v1.0</span>
+          </div>
+        </div>
+
+        <div class="dest-scroll-body">
+          <div class="dest-content-cluster">
+
+            <div class="dest-section-block">
+              <h3 class="dest-section-title">Workstation Keyboard Shortcuts</h3>
+              <div class="dest-card-surface">
+                <div class="dest-shortcut-row">
+                  <span class="dest-shortcut-action">Send prompt message</span>
+                  <span class="dest-kbd">Enter</span>
+                </div>
+                <div class="dest-shortcut-row">
+                  <span class="dest-shortcut-action">Insert newline in prompt</span>
+                  <span class="dest-kbd">Shift + Enter</span>
+                </div>
+                <div class="dest-shortcut-row">
+                  <span class="dest-shortcut-action">Create new chat session</span>
+                  <span class="dest-kbd">Ctrl + N</span>
+                </div>
+                <div class="dest-shortcut-row">
+                  <span class="dest-shortcut-action">Toggle workspace sidebar</span>
+                  <span class="dest-kbd">Ctrl + B</span>
+                </div>
+                <div class="dest-shortcut-row">
+                  <span class="dest-shortcut-action">Open Settings</span>
+                  <span class="dest-kbd">Ctrl + ,</span>
+                </div>
+                <div class="dest-shortcut-row">
+                  <span class="dest-shortcut-action">Return to chat / Dismiss popups</span>
+                  <span class="dest-kbd">Esc</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="dest-section-block">
+              <h3 class="dest-section-title">Quick Markdown Formatting Guide</h3>
+              <div class="dest-card-surface">
+                <div class="dest-format-item">
+                  <span class="dest-format-syntax">`code`</span>
+                  <span class="dest-format-desc">Inline monospace code snippet</span>
+                </div>
+                <div class="dest-format-item">
+                  <span class="dest-format-syntax">```ts ... ```</span>
+                  <span class="dest-format-desc">Syntax-highlighted fenced code block</span>
+                </div>
+                <div class="dest-format-item">
+                  <span class="dest-format-syntax">\( E = mc^2 \)</span>
+                  <span class="dest-format-desc">Inline LaTeX math expression</span>
+                </div>
+                <div class="dest-format-item">
+                  <span class="dest-format-syntax">&gt; [!NOTE]</span>
+                  <span class="dest-format-desc">GitHub-style structured callout block</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="dest-section-block">
+              <h3 class="dest-section-title">Saved Prompt Snippets</h3>
+              <div class="dest-card-surface dest-empty-sub-card">
+                <div class="dest-empty-sub-text">No custom prompt snippets saved yet. Reusable engineering templates and prompt presets will be listed here.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Plugins Destination View (ChatGPT-Style Neutral Customization Workstation) -->
+      <div class="dest-pane dest-pane-plugins-standalone hidden" id="dest-pane-plugins">
+        <div class="plugins-page-layout">
+          
+          <!-- Compact Left Navigation Column (Customize) -->
+          <aside class="plugins-nav-col">
+            <div class="plugins-nav-header">
+              <button class="btn-dest-back-standalone" data-action="back-to-chat" title="Back to chat (Esc)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Back to chat</span>
+              </button>
+            </div>
+
+            <div class="plugins-nav-subhead-row">
+              <span class="plugins-nav-heading">Customize</span>
+              <button class="plugins-nav-search-btn" id="btn-plugins-focus-search" title="Focus search">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
+            </div>
+
+            <div class="plugins-nav-links">
+              <button class="plugins-nav-item active" data-plugins-tab="plugins" id="tab-btn-plugins">
+                <svg class="plugins-nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"></path>
+                </svg>
+                <span>Plugins</span>
+              </button>
+              <button class="plugins-nav-item" data-plugins-tab="skills" id="tab-btn-skills">
+                <svg class="plugins-nav-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+                <span>Skills</span>
+              </button>
+            </div>
+
+            <div class="plugins-nav-section-title">Installed</div>
+            <div class="plugins-installed-empty">No installed plugins</div>
+          </aside>
+
+          <!-- Spacious Main Content Area -->
+          <div class="plugins-main-area">
+            
+            <!-- Tab 1: Plugins Browse Tab -->
+            <div class="plugins-tab-content" id="plugins-view-pane">
+              <div class="plugins-main-header">
+                <div class="plugins-title-block">
+                  <h1 class="plugins-page-title">Plugins</h1>
+                  <p class="plugins-page-subtitle">Connect plugins to let Sparx work across your tools</p>
+                </div>
+
+                <div class="plugins-header-actions">
+                  <div class="plugins-search-box">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="plugins-search-input" placeholder="Search plugins" autocomplete="off" />
+                  </div>
+
+                  <button class="plugins-icon-action" id="btn-plugins-refresh" title="Refresh">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="23 4 23 10 17 10"></polyline>
+                      <polyline points="1 20 1 14 7 14"></polyline>
+                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                  </button>
+
+                  <button class="plugins-icon-action" id="btn-plugins-settings" title="Settings">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="3"></circle>
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                  </button>
+
+                  <div class="plugins-add-dropdown-wrap" id="plugins-add-dropdown-wrap">
+                    <button class="plugins-add-btn" id="btn-plugins-add" aria-haspopup="true" aria-expanded="false" title="Add plugin or source">
+                      <span>Add</span>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                    <div class="plugins-add-menu hidden" id="plugins-add-menu" role="menu">
+                      <button class="plugins-add-menu-item" id="btn-menu-create-plugin" role="menuitem" tabindex="0">
+                        <svg class="plugins-menu-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 20h9"></path>
+                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                        <span>Create plugin</span>
+                      </button>
+                      <button class="plugins-add-menu-item" id="btn-menu-add-marketplace" role="menuitem" tabindex="0">
+                        <svg class="plugins-menu-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                          <line x1="3" y1="6" x2="21" y2="6"></line>
+                          <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        <span>Add a marketplace</span>
+                      </button>
+                      <button class="plugins-add-menu-item" id="btn-menu-upload-archive" role="menuitem" tabindex="0">
+                        <svg class="plugins-menu-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="17 8 12 3 7 8"></polyline>
+                          <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <span>Upload plugin archive</span>
+                      </button>
+                      <button class="plugins-add-menu-item" id="btn-menu-custom-mcp" role="menuitem" tabindex="0">
+                        <svg class="plugins-menu-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                          <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                          <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                          <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                        </svg>
+                        <span>Add custom MCP server</span>
+                      </button>
+                    </div>
+                  </div>
+                  <input type="file" id="input-plugin-archive" accept=".zip,.tar.gz,.tgz" style="display:none;" />
+                </div>
+              </div>
+
+              <!-- Filter Pills: Public / Personal -->
+              <div class="plugins-filters-row">
+                <button class="plugins-filter-pill active" data-filter="public" id="filter-btn-public">Public</button>
+                <button class="plugins-filter-pill" data-filter="personal" id="filter-btn-personal">Personal</button>
+              </div>
+
+              <!-- Container for Public Plugins -->
+              <div class="plugins-public-container" id="plugins-public-container">
+                <!-- Companion Banner Card -->
+                <div class="plugins-banner-card" id="plugins-companion-banner">
+                <div class="banner-left">
+                  <div class="banner-icon-box" title="Microsoft Edge Extension">
+                    <svg width="22" height="22" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <radialGradient id="edge-a"><stop offset=".8" stop-color="#115599"/><stop offset="1" stop-color="#114488"/></radialGradient>
+                        <radialGradient id="edge-b" cy=".7" r=".7"><stop offset=".8" stop-color="#1188dd"/><stop offset="1" stop-color="#0077aa"/></radialGradient>
+                        <radialGradient id="edge-c" cx=".1" cy=".2" r="1"><stop offset=".4" stop-color="#33ccee"/><stop offset="1" stop-color="#33cc55"/></radialGradient>
+                        <radialGradient id="edge-d" cx=".9"><stop offset="0" stop-color="#66ee77"/><stop offset="1" stop-color="#66ee77" stop-opacity="0"/></radialGradient>
+                      </defs>
+                      <path d="m233 214s-25 12-25 42a133 112 0 00202 94 6 6 0 019 7C316 514 90 454 187 237" fill="url(#edge-a)"/>
+                      <path d="m300 153H94a192 192 0 00220 286 116 120.3-2 01-74-228 48 49 0 0164 41" fill="url(#edge-b)"/>
+                      <path d="M64 253c4-110 186-138 233-31 26 70-34 65 3 88 71 30 159-7 147-102C400 3 75 16 64 253" fill="url(#edge-c)"/>
+                      <path d="m242 58c251 14 262 290 86 248" fill="url(#edge-d)"/>
+                    </svg>
+                  </div>
+                  <div class="banner-text">
+                    <div class="banner-title">Use Sparx while you browse</div>
+                    <div class="banner-desc">Install the extension to bring Sparx into your browser.</div>
+                  </div>
+                </div>
+                <div class="banner-right">
+                  <button class="btn-banner-install" id="btn-banner-install">Install</button>
+                  <button class="btn-banner-close" id="btn-banner-close" title="Dismiss">×</button>
+                </div>
+              </div>
+
+              <!-- Section: Popular > -->
+              <div class="plugins-category-block" data-section="popular">
+                <div class="plugins-category-heading">
+                  <span>Popular</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </div>
+
+                <div class="plugins-grid-cards">
+                  <!-- Gmail -->
+                  <div class="plugin-card" data-name="Gmail" data-desc="Read and manage Gmail">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar gmail-avatar" title="Gmail">
+                        <svg width="20" height="15" viewBox="52 42 88 66" xmlns="http://www.w3.org/2000/svg">
+                          <path fill="#4285f4" d="M58 108h14V74L52 59v43c0 3.32 2.69 6 6 6"/>
+                          <path fill="#34a853" d="M120 108h14c3.32 0 6-2.69 6-6V59l-20 15"/>
+                          <path fill="#fbbc04" d="M120 48v26l20-15v-8c0-7.42-8.47-11.65-14.4-7.2"/>
+                          <path fill="#ea4335" d="M72 74V48l24 18 24-18v26L96 92"/>
+                          <path fill="#c5221f" d="M52 51v8l20 15V48l-5.6-4.2c-5.94-4.45-14.4-.22-14.4 7.2"/>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">Gmail</div>
+                        <div class="plugin-desc">Read and manage Gmail</div>
+                      </div>
+                    </div>
+                    <button class="plugin-action-btn" title="Add integration">+</button>
+                  </div>
+
+                  <!-- Google Drive -->
+                  <div class="plugin-card" data-name="Google Drive" data-desc="Drive, Docs, Sheets or Slides">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar drive-avatar" title="Google Drive">
+                        <svg width="19" height="17" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg">
+                          <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+                          <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/>
+                          <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/>
+                          <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+                          <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+                          <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">Google Drive</div>
+                        <div class="plugin-desc">Drive, Docs, Sheets or Slides</div>
+                      </div>
+                    </div>
+                    <button class="plugin-action-btn" title="Add integration">+</button>
+                  </div>
+
+                  <!-- Health -->
+                  <div class="plugin-card" data-name="Health" data-desc="Explore your health data in Sparx">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar health-avatar" title="Apple Health">
+                        <svg width="22" height="22" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                          <defs>
+                            <linearGradient id="apple-health-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                              <stop offset="0%" stop-color="#FF5873" />
+                              <stop offset="100%" stop-color="#FF2D55" />
+                            </linearGradient>
+                          </defs>
+                          <rect width="32" height="32" rx="7.5" fill="#FFFFFF"/>
+                          <path fill="url(#apple-health-grad)" d="M16 8.5c-2.48-2.62-6.51-2.72-9.11-.24-2.73 2.6-2.73 6.88 0 9.49L16 27.22l9.11-9.51c2.73-2.6 2.73-6.88 0-9.49-2.61-2.49-6.63-2.38-9.11.28z"/>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">Health</div>
+                        <div class="plugin-desc">Explore your health data in Sparx</div>
+                      </div>
+                    </div>
+                    <button class="plugin-action-btn" title="Add integration">+</button>
+                  </div>
+
+                  <!-- GitHub -->
+                  <div class="plugin-card" data-name="GitHub" data-desc="Triage PRs, issues, CI, and publish flows">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar github-avatar" title="GitHub">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">GitHub</div>
+                        <div class="plugin-desc">Triage PRs, issues, CI, and publish flows</div>
+                      </div>
+                    </div>
+                    <button class="plugin-action-btn" title="Add integration">+</button>
+                  </div>
+
+                  <!-- Supabase -->
+                  <div class="plugin-card" data-name="Supabase" data-desc="Manage and query databases">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar supabase-avatar" title="Supabase">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#3ECF8E" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11.9 1.036c-.015-.986-1.26-1.41-1.874-.637L.764 12.05C-.33 13.427.65 15.455 2.409 15.455h9.579l.113 7.51c.014.985 1.259 1.408 1.873.636l9.262-11.653c1.093-1.375.113-3.403-1.645-3.403h-9.642z"/>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">Supabase</div>
+                        <div class="plugin-desc">Manage and query databases</div>
+                      </div>
+                    </div>
+                    <button class="plugin-action-btn" title="Add integration">+</button>
+                  </div>
+
+                  <!-- Outlook Email -->
+                  <div class="plugin-card" data-name="Outlook Email" data-desc="Triage Outlook inboxes">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar outlook-avatar" title="Microsoft Outlook">
+                        <svg width="20" height="20" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="231" height="270" x="168" y="107" fill="#0055aa" rx="14"/>
+                          <path fill="#113366" d="M398 247v23l15-8s0-7-5-9l-10-6zm-230 43v70h77v-70h-77z"/>
+                          <path fill="#1177dd" d="M168 150v70h77v-70h-77zm77 70v70h77v-70h-77zm77 70v70h77v-70h-77z"/>
+                          <path fill="#33aaee" d="M245 150v70h77v-70h-77zm77 70v70h77v-70h-77z"/>
+                          <path fill="#55ccff" d="M322 150h77v70h-77z"/>
+                          <path fill="#1199ee" d="M413 261 282 336s121 73 124 71c5-3 7-11 7-18V261Z"/>
+                          <path fill="#22aaee" d="M160 266c-4 3-6 7-6 12v117c0 8 6 14 14 14h230c4 0 5 0 8-2"/>
+                          <rect width="172" height="172" x="70" y="172" fill="#0078d4" rx="16"/>
+                          <path fill="#ffffff" d="M155 230c14 0 22 11 22 29s-9 28-23 28c-11 0-22-10-22-28 0-15 7-29 23-29Zm-1 75c26 0 44-18 44-47 0-25-16-46-43-46-28 0-44 20-44 48 0 27 20 45 43 45Z"/>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">Outlook Email</div>
+                        <div class="plugin-desc">Triage Outlook inboxes</div>
+                      </div>
+                    </div>
+                    <button class="plugin-action-btn" title="Add integration">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section: New & Noteworthy > -->
+              <div class="plugins-category-block" data-section="new-and-noteworthy">
+                <div class="plugins-category-heading">
+                  <span>New &amp; Noteworthy</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </div>
+
+                <div class="plugins-grid-cards">
+                  <!-- Hevy -->
+                  <div class="plugin-card" data-name="Hevy" data-desc="Interact with your Hevy data">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar hevy-avatar" title="Hevy">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M6.76 2.489c1.473 0 2.672 1.16 2.716 2.607q.002 1.622.001 3.244c0 .572-.416 1.2-1.045 1.4-.63.202-1.013-.431-1.044-.975q-.002-1.794-.001-3.587a.624.624 0 0 0-.71-.615c-.375.047-.704.105-1.048.159l-.32.058q-1.33.253-2.122.584c-.338.142-.584.287-.737.423-.096.085-.133.141-.14.177-.041.167-.044.286-.069.449-.047.45-.057.749-.083 1.176l-.018.453c-.041 1.41-.049 2.343-.049 3.648.007 1.219.019 2.056.047 3.192.016.69.044 1.229.074 1.913q.02.348.046.696c.013.218.038.384.058.588q.025.026.053.05c.137.116.377.252.716.39q.495.203 1.212.39c.344.095.68.161 1.001.234.497.104.88.165 1.36.248a.626.626 0 0 0 .72-.512c.008-.033.006-.067.009-.1v-2.091a5.57 5.57 0 0 1 2.688-4.76l2.693-1.559a3.51 3.51 0 0 0 1.759-2.926c.005-.734.002-1.468.002-2.202 0-1.485 1.216-2.69 2.717-2.69q.22 0 .438.036c.506.08.85.148 1.323.236.268.052.478.102.744.16.139.032.271.065.415.1l.264.07c2.073.56 3.168 1.302 3.322 2.444.022.16.031.285.048.437q.023.28.043.56c.034.503.049.91.073 1.418.023.553.032.982.047 1.527l.019.914c.012.75.015 1.337.018 2.082l-.003.941q-.006.635-.015 1.27-.01.506-.026 1.012c-.011.387-.028.681-.044 1.053q-.015.263-.033.524c-.01.153-.026.305-.039.457-.014.167-.036.297-.056.462q-.02.138-.052.273c-.297 1.233-1.592 2.017-3.886 2.553-.243.058-.515.11-.733.156-.293.059-.52.094-.796.143q-.341.055-.682.104c-1.486.213-2.864-.807-3.078-2.277a3 3 0 0 1-.025-.256c-.007-1.09-.003-2.18-.003-3.269 0-.571.506-1.273 1.045-1.4s1.012.432 1.043.976c.004 1.188.002 2.376.002 3.564.003.38.341.67.717.614.335-.045.572-.09.872-.138.284-.048.5-.096.776-.149.249-.05.437-.102.679-.158.183-.046.322-.088.491-.135.116-.033.23-.072.344-.108.102-.034.201-.073.302-.109q.13-.051.258-.107c.073-.032.143-.07.214-.105.079-.039.134-.082.208-.127q.19-.137.219-.252c.091-.44.106-.946.134-1.327.09-1.976.081-3.96.064-5.744-.013-.934-.031-1.647-.058-2.548l-.031-.783c-.018-.403-.04-.715-.062-1.089-.01-.165-.029-.329-.043-.493l-.015-.128-.047-.044c-.136-.116-.375-.251-.713-.39q-.765-.313-2.063-.59c-.58-.124-1.01-.193-1.518-.282a.625.625 0 0 0-.726.564c-.005.713-.002 1.427-.002 2.14a5.57 5.57 0 0 1-2.689 4.759q-1.344.783-2.692 1.559a3.51 3.51 0 0 0-1.76 2.927v2.201q0 .217-.037.435c-.242 1.465-1.64 2.46-3.12 2.22-.366-.058-.646-.112-1.004-.176-.284-.052-.501-.101-.766-.155-.33-.068-.666-.16-.966-.234C1.52 20.31.421 19.57.255 18.434c-.038-.263-.047-.454-.075-.718-.033-.407-.047-.72-.07-1.12-.03-.593-.044-1.076-.063-1.677-.025-.877-.032-1.546-.043-2.391l-.003-.495L0 11.65l.002-.85c.004-.806.016-1.426.035-2.214.008-.305.022-.61.033-.916.011-.305.034-.61.052-.915.015-.24.037-.423.057-.653.013-.123.033-.246.049-.369.01-.077.029-.152.043-.228.272-1.18 1.41-1.955 3.4-2.48.249-.07.443-.106.679-.163.195-.043.391-.079.587-.118q.232-.043.466-.082c.24-.04.424-.065.654-.101l.342-.047q.18-.024.36-.024"/>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">Hevy</div>
+                        <div class="plugin-desc">Interact with your Hevy data</div>
+                      </div>
+                    </div>
+                    <button class="plugin-action-btn" title="Add integration">+</button>
+                  </div>
+
+                  <!-- Tripsy -->
+                  <div class="plugin-card" data-name="Tripsy" data-desc="Plan and organize your trips">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar tripsy-avatar avatar-full-bleed" title="Tripsy">
+                        <img src="assets/logos/tripsy.png" alt="Tripsy" width="32" height="32">
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">Tripsy</div>
+                        <div class="plugin-desc">Plan and organize your trips</div>
+                      </div>
+                    </div>
+                    <button class="plugin-action-btn" title="Add integration">+</button>
+                  </div>
+
+                  <!-- Sonos -->
+                  <div class="plugin-card" data-name="Sonos" data-desc="Control your Sonos system">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar sonos-avatar" title="Sonos">
+                        <svg width="22" height="18" viewBox="0 0 24 24" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg">
+                          <path d="m12.988 12.36l-2.813-2.634v4.429h.837V11.7l2.813 2.633V9.905h-.837zM6.464 9.665A2.3 2.3 0 0 0 4.13 12c0 1.257 1.077 2.334 2.334 2.334A2.3 2.3 0 0 0 8.798 12a2.3 2.3 0 0 0-2.334-2.334m0 3.83A1.482 1.482 0 0 1 4.968 12c0-.838.658-1.496 1.496-1.496S7.96 11.162 7.96 12s-.658 1.496-1.496 1.496M2.694 12c-.24-.18-.54-.3-.958-.419-.838-.24-.838-.479-.838-.598 0-.24.299-.48.718-.48.36 0 .658.18.778.24l.06.06.658-.479-.06-.06s-.538-.598-1.436-.598c-.419 0-.838.12-1.137.359-.3.24-.479.598-.479.958s.18.718.479.957c.24.18.538.3.957.42.838.239.838.478.838.598 0 .239-.299.478-.718.478-.359 0-.658-.18-.778-.239l-.06-.06-.658.479.06.06s.538.598 1.436.598c.42 0 .838-.12 1.137-.359.3-.24.48-.598.48-.957 0-.36-.18-.659-.48-.958m14.843-2.334A2.3 2.3 0 0 0 15.202 12a2.337 2.337 0 0 0 2.334 2.334A2.3 2.3 0 0 0 19.87 12a2.337 2.337 0 0 0-2.334-2.334m0 3.83A1.482 1.482 0 0 1 16.04 12c0-.838.658-1.496 1.496-1.496s1.496.658 1.496 1.496-.718 1.496-1.496 1.496m3.77-1.556c.24.18.54.3.958.42.838.239.838.478.838.598 0 .239-.299.478-.718.478-.36 0-.658-.18-.778-.239h-.06l-.658.479.06.06s.538.598 1.436.598c.419 0 .838-.12 1.137-.359s.479-.598.479-.958-.18-.718-.479-.957c-.24-.18-.538-.3-.957-.42-.838-.239-.838-.478-.838-.598 0-.239.299-.478.718-.478.359 0 .658.18.778.239l.06.06.658-.479-.06-.06s-.538-.598-1.436-.598c-.42 0-.838.12-1.137.359-.3.24-.48.598-.48.957-.059.36.12.659.48.898"/>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">Sonos</div>
+                        <div class="plugin-desc">Control your Sonos system</div>
+                      </div>
+                    </div>
+                    <button class="plugin-action-btn" title="Add integration">+</button>
+                  </div>
+
+                  <!-- Canva -->
+                  <div class="plugin-card" data-name="Canva" data-desc="Create, review, edit designs">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar canva-avatar avatar-full-bleed" title="Canva">
+                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <defs>
+                            <linearGradient id="canva-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stop-color="#00C4CC" />
+                              <stop offset="100%" stop-color="#7D2AE8" />
+                            </linearGradient>
+                          </defs>
+                          <circle cx="12" cy="12" r="12" fill="url(#canva-grad)"/>
+                          <path fill="#FFFFFF" d="M6.962 7.68c.754 0 1.337.549 1.405 1.2.069.583-.171 1.097-.822 1.406-.343.171-.48.172-.549.069-.034-.069 0-.137.069-.206.617-.514.617-.926.548-1.508-.034-.378-.308-.618-.583-.618-1.2 0-2.914 2.674-2.674 4.629.103.754.549 1.646 1.509 1.646.308 0 .65-.103.96-.24.5-.264.799-.47 1.097-.8-.073-.885.704-2.046 1.851-2.046.515 0 .926.205.96.583.068.514-.377.582-.514.582s-.378-.034-.378-.17c-.034-.138.309-.07.275-.378-.035-.206-.24-.274-.446-.274-.72 0-1.131.994-1.029 1.611.035.275.172.549.447.549.205 0 .514-.31.617-.755.068-.308.343-.514.583-.514.102 0 .17.034.205.171v.138c-.034.137-.137.548-.102.651 0 .069.034.171.17.171.092 0 .436-.18.777-.459.117-.59.253-1.298.253-1.357.034-.24.137-.48.617-.48.103 0 .171.034.205.171v.138l-.136.617c.445-.583 1.097-.994 1.508-.994.172 0 .309.102.309.274 0 .103 0 .274-.069.446-.137.377-.309.96-.412 1.474 0 .137.035.274.207.274.171 0 .685-.206 1.096-.754l.007-.004c-.002-.068-.007-.134-.007-.202 0-.411.035-.754.104-.994.068-.274.411-.514.617-.514.103 0 .205.069.205.171 0 .035 0 .103-.034.137-.137.446-.24.857-.24 1.269 0 .24.034.582.102.788 0 .034.035.069.07.069.068 0 .548-.445.89-1.028-.308-.206-.48-.549-.48-.96 0-.72.446-1.097.858-1.097.343 0 .617.24.617.72 0 .308-.103.65-.274.96h.102a.77.77 0 0 0 .584-.24.293.293 0 0 1 .134-.117c.335-.425.83-.74 1.41-.74.48 0 .924.205.959.582.068.515-.378.618-.515.618l-.002-.002c-.138 0-.377-.035-.377-.172 0-.137.309-.068.274-.376-.034-.206-.24-.275-.446-.275-.686 0-1.13.891-1.028 1.611.034.275.171.583.445.583.206 0 .515-.308.652-.754.068-.274.343-.514.583-.514.103 0 .17.034.205.171 0 .069 0 .206-.137.652-.17.308-.171.48-.137.617.034.274.171.48.309.583.034.034.068.102.068.102 0 .069-.034.138-.137.138-.034 0-.068 0-.103-.035-.514-.205-.72-.548-.789-.891-.205.24-.445.377-.72.377-.445 0-.89-.411-.96-.926a1.609 1.609 0 0 1 .075-.649c-.203.13-.422.203-.623.203h-.17c-.447.652-.927 1.098-1.27 1.303a.896.896 0 0 1-.377.104c-.068 0-.171-.035-.205-.104-.095-.152-.156-.392-.193-.667-.481.527-1.145.805-1.453.805-.343 0-.548-.206-.582-.55v-.376c.102-.754.377-1.2.377-1.337a.074.074 0 0 0-.069-.07c-.24 0-1.028.824-1.166 1.373l-.103.445c-.068.309-.377.515-.582.515-.103 0-.172-.035-.206-.172v-.137l.046-.233c-.435.31-.87.508-1.075.508-.308 0-.48-.172-.514-.412-.206.274-.445.412-.754.412-.352 0-.696-.24-.862-.593-.244.275-.523.553-.852.764-.48.309-1.028.549-1.68.549-.582 0-1.097-.309-1.371-.583-.412-.377-.651-.96-.686-1.509-.205-1.68.823-3.84 2.4-4.8.378-.205.755-.343 1.132-.343zm9.77 3.291c-.104 0-.172.172-.172.343 0 .274.137.583.309.755a1.74 1.74 0 0 0 .102-.583c0-.343-.137-.515-.24-.515z"/>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">Canva</div>
+                        <div class="plugin-desc">Create, review, edit designs</div>
+                      </div>
+                    </div>
+                    <button class="plugin-action-btn" title="Add integration">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section: Active Runtime Tools & MCP > -->
+              <div class="plugins-category-block" data-section="runtime-tools">
+                <div class="plugins-category-heading">
+                  <span>Active Runtime Tools &amp; MCP</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </div>
+
+                <div class="plugins-grid-cards">
+                  <div class="plugin-card" data-name="roblox-studio" data-desc="25 registered Luau and scene automation tools">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar roblox-avatar" title="Roblox Studio">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#00A2FF" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M 13.936 15.356 L 1.826 12.112 L 0 18.93 L 18.928 24 L 21.608 14.01 L 14.79 12.18 L 13.936 15.356 Z M 5.072 0 L 2.394 9.992 L 9.21 11.822 L 10.064 8.644 L 22.174 11.89 L 24 5.072 L 5.072 0 Z"/>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">roblox-studio</div>
+                        <div class="plugin-desc">25 registered Luau, scene inspection &amp; automation tools</div>
+                      </div>
+                    </div>
+                    <span class="plugin-status-badge">Connected</span>
+                  </div>
+
+                  <div class="plugin-card" data-name="Workspace Filesystem" data-desc="Native Electron IPC file read, edit, and indexing">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar fs-avatar" title="Workspace Filesystem">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path>
+                          <polyline points="8 13 10 15 12 13"></polyline>
+                          <line x1="10" y1="9" x2="10" y2="15"></line>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">Workspace Filesystem</div>
+                        <div class="plugin-desc">Native Electron IPC file read, edit, and project indexing</div>
+                      </div>
+                    </div>
+                    <span class="plugin-status-badge">Connected</span>
+                  </div>
+                </div>
+              </div>
+
+              </div>
+
+              <!-- Container for Personal Plugins (Custom & Uploaded) -->
+              <div class="plugins-personal-container hidden" id="plugins-personal-container">
+                <div class="plugins-personal-header">
+                  <span class="personal-count" id="personal-plugins-count">0 plugins installed</span>
+                </div>
+                <div class="plugins-grid-cards" id="personal-plugins-grid">
+                  <!-- Dynamically populated personal plugins -->
+                </div>
+                <div class="plugins-empty-personal" id="plugins-empty-personal">
+                  <div class="empty-icon-wrap">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 20h9"></path>
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                  </div>
+                  <div class="empty-title">No Personal Plugins Yet</div>
+                  <div class="empty-desc">Create your own plugin, connect a marketplace, or upload a plugin archive to get started.</div>
+                  <button class="btn-create-plugin-cta" id="btn-empty-create-plugin">Create Plugin</button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Tab 2: Skills Browse Tab -->
+            <div class="plugins-tab-content hidden" id="skills-view-pane">
+              <div class="plugins-main-header">
+                <div class="plugins-title-block">
+                  <h1 class="plugins-page-title">Skills</h1>
+                  <p class="plugins-page-subtitle">Built-in autonomous agent skills and procedural extensions</p>
+                </div>
+              </div>
+
+              <div class="plugins-category-block">
+                <div class="plugins-category-heading">
+                  <span>Built-in Sparx Skills</span>
+                </div>
+
+                <div class="plugins-grid-cards">
+                  <div class="plugin-card" data-name="automation">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar skill-avatar" title="Automation">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">automation</div>
+                        <div class="plugin-desc">Cron automation pipeline and scheduled countdown triggers</div>
+                      </div>
+                    </div>
+                    <span class="plugin-status-badge">Built-in</span>
+                  </div>
+
+                  <div class="plugin-card" data-name="generative_ui">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar skill-avatar" title="Generative UI">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="3" y1="9" x2="21" y2="9"></line>
+                          <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">generative_ui</div>
+                        <div class="plugin-desc">Interactive inline HTML widgets, charts, and visualizations</div>
+                      </div>
+                    </div>
+                    <span class="plugin-status-badge">Built-in</span>
+                  </div>
+
+                  <div class="plugin-card" data-name="antigravity-guide">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar skill-avatar" title="Antigravity Guide">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">antigravity-guide</div>
+                        <div class="plugin-desc">Workstation architecture, SDK hooks, and system reference</div>
+                      </div>
+                    </div>
+                    <span class="plugin-status-badge">Built-in</span>
+                  </div>
+
+                  <div class="plugin-card" data-name="ui-plugin-navigation">
+                    <div class="plugin-card-left">
+                      <div class="plugin-avatar skill-avatar" title="UI Plugin Navigation">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="9" y1="3" x2="9" y2="21"></line>
+                        </svg>
+                      </div>
+                      <div class="plugin-meta">
+                        <div class="plugin-title">ui-plugin-navigation</div>
+                        <div class="plugin-desc">Side panel discovery and dynamic routing controls</div>
+                      </div>
+                    </div>
+                    <span class="plugin-status-badge">Built-in</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 5. Connectors Destination View -->
+      <div class="dest-pane hidden" id="dest-pane-connectors">
+        <div class="dest-top-bar">
+          <button class="btn-dest-back" data-action="back-to-chat" title="Back to chat (Esc)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back to chat</span>
+          </button>
+          <div class="dest-divider-v"></div>
+          <div class="dest-header-info">
+            <h2 class="dest-header-title">Connectors</h2>
+            <span class="dest-pill-badge badge-active">2 Online · 1 Unconfigured</span>
+          </div>
+        </div>
+
+        <div class="dest-scroll-body">
+          <div class="dest-content-cluster">
+
+            <div class="dest-section-block">
+              <h3 class="dest-section-title">External AI Services</h3>
+              <div class="dest-card-surface">
+                <div class="dest-connector-row">
+                  <div class="dest-connector-icon icon-sparkle">✦</div>
+                  <div class="dest-connector-meta">
+                    <div class="dest-connector-title">Google Gemini API</div>
+                    <div class="dest-connector-desc">Active LLM reasoning engine streaming via Google AI Studio API key.</div>
+                    <div class="dest-connector-sub">Model: <strong>Gemini 3.8 Flash</strong> · Protocol: REST / SSE Stream</div>
+                  </div>
+                  <div class="dest-status-tag status-green">Online</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dest-section-block">
+              <h3 class="dest-section-title">Host Runtime Environment</h3>
+              <div class="dest-card-surface">
+                <div class="dest-connector-row">
+                  <div class="dest-connector-icon icon-host">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                      <line x1="8" y1="21" x2="16" y2="21"></line>
+                      <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                  </div>
+                  <div class="dest-connector-meta">
+                    <div class="dest-connector-title">Local Electron Node Runtime</div>
+                    <div class="dest-connector-desc">Main process IPC bridge for filesystem access, session persistence, and native window controls.</div>
+                    <div class="dest-connector-sub">Platform: <strong>win32-x64</strong> · Shell: <strong>pwsh</strong></div>
+                  </div>
+                  <div class="dest-status-tag status-green">Active</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dest-section-block">
+              <h3 class="dest-section-title">External Webhooks &amp; Services</h3>
+              <div class="dest-card-surface">
+                <div class="dest-connector-row">
+                  <div class="dest-connector-icon icon-neutral">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="2" y1="12" x2="22" y2="12"></line>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                  </div>
+                  <div class="dest-connector-meta">
+                    <div class="dest-connector-title">Custom Webhook Dispatcher</div>
+                    <div class="dest-connector-desc">No external webhooks configured for deployment alerts or automated git hooks.</div>
+                  </div>
+                  <button class="btn-dest-link" id="btn-goto-settings-integrations">Configure</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================
+         DEDICATED FULL-SCREEN SETTINGS VIEW (Multi-Page Configuration)
+         ======================================================================== -->
+    <div class="settings-full-view hidden" id="settings-view-page">
+      <!-- Settings Left Sidebar -->
+      <aside class="settings-v2-sidebar">
+        <div class="settings-sidebar-header">
+          <button class="settings-back-btn" id="btn-settings-back" title="Back to chat (Esc)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <span class="settings-header-title">Settings</span>
+        </div>
+
+        <div class="settings-search-box">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="settings-search-input" placeholder="Search settings" />
+        </div>
+
+        <div class="settings-nav-sections" role="tablist" aria-label="Settings sections" aria-orientation="vertical">
+          <div class="settings-nav-group-title">Personal</div>
+          <div class="settings-nav-item active" data-v2-tab="appearance"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg><span>Appearance</span></div>
+          <div class="settings-nav-item" data-v2-tab="chat"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg><span>Chat</span></div>
+          <div class="settings-nav-item" data-v2-tab="models"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect></svg><span>Models</span></div>
+          <div class="settings-nav-item" data-v2-tab="notifications"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg><span>Notifications</span></div>
+
+          <div class="settings-nav-group-title" style="margin-top: 14px;">Workspace</div>
+          <div class="settings-nav-item" data-v2-tab="files"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg><span>Files &amp; workspaces</span></div>
+          <div class="settings-nav-item" data-v2-tab="tools"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"></path></svg><span>Tools &amp; integrations</span></div>
+
+          <div class="settings-nav-group-title" style="margin-top: 14px;">Data &amp; app</div>
+          <div class="settings-nav-item" data-v2-tab="privacy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>Privacy &amp; data</span></div>
+          <div class="settings-nav-item" data-v2-tab="keybindings"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line></svg><span>Keyboard shortcuts</span></div>
+          <div class="settings-nav-item" data-v2-tab="usage"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg><span>Usage</span></div>
+          <div class="settings-nav-item" data-v2-tab="about"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><span>About</span></div>
+        </div>
+
+        <div class="settings-sidebar-bottom">
+          <div class="settings-user-chip">
+            <div class="popup-avatar-mini">SO</div>
+            <div class="popup-user-meta">
+              <span class="popup-user-name">Sparx Operator</span>
+              <span class="popup-user-tier">Studio Pro</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Settings Right Content Area (Each tab has its own dedicated page) -->
+      <div class="settings-v2-content">
+        <div class="settings-content-inner">
+          
+          <!-- ================================================================
+               APPEARANCE
+               ================================================================ -->
+          <div class="settings-content-pane" id="settings-pane-appearance" role="tabpanel">
+            <h1 class="settings-pane-title">Appearance &amp; Themes</h1>
+
+            <!-- 1. Color Palette / Theme -->
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Interface Color Scheme</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-theme">Color theme</label>
+                    <span class="field-desc">Choose your visual aesthetic and ambient lighting mood.</span>
+                  </div>
+                  <select class="settings-select-pill" id="set-theme" data-setting="theme">
+                    <option value="obsidian-violet">Obsidian Violet (Signature)</option>
+                    <option value="midnight-oled">Midnight OLED (True Pure Black)</option>
+                    <option value="halloween-spooky">Halloween Spooky (Pumpkin &amp; Cauldron) 🎃</option>
+                    <option value="cyber-emerald">Cyber Emerald (Matrix Neon)</option>
+                    <option value="electric-cyan">Electric Cyan (Subzero Tech)</option>
+                    <option value="sunset-coral">Sunset Coral (Twilight Glow)</option>
+                    <option value="nordic-frost">Nordic Frost (Arctic Blue)</option>
+                    <option value="synthwave-84">Synthwave '84 (Neon Magenta)</option>
+                    <option value="solar-amber">Solar Amber (Luminous Gold)</option>
+                    <option value="dracula-vampire">Dracula Vampire (Gothic Slate)</option>
+                  </select>
+                </div>
+
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-accent">Accent color</label>
+                    <span class="field-desc">Highlights, glowing rings, active buttons, and focus borders.</span>
+                  </div>
+                  <select class="settings-select-pill" id="set-accent" data-setting="accent">
+                    <option value="violet">Sparx Violet (#8B5CF6)</option>
+                    <option value="pumpkin">Halloween Pumpkin (#FF7518) 🎃</option>
+                    <option value="cyan">Subzero Cyan (#06B6D4)</option>
+                    <option value="emerald">Vivid Emerald (#10B981)</option>
+                    <option value="coral">Sunset Coral (#F43F5E)</option>
+                    <option value="amber">Solar Amber (#F59E0B)</option>
+                    <option value="magenta">Neon Magenta (#FF2A6D)</option>
+                    <option value="frost">Arctic Frost (#88C0D0)</option>
+                    <option value="monochrome">Pure Monochrome (#FFFFFF)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Typography -->
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Typography &amp; Fonts</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-font">Font family</label>
+                    <span class="field-desc">Select the font used for the interface and code snippets.</span>
+                  </div>
+                  <select class="settings-select-pill" id="set-font" data-setting="font">
+                    <option value="default">OpenAI Modern Sans (Default)</option>
+                    <option value="mono">JetBrains Mono / Fira Code (Monospace)</option>
+                    <option value="system">Native Operating System (Segoe UI)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Display & Layout -->
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Display &amp; Layout</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-fontSize">Message text size</label>
+                    <span class="field-desc">Text size of messages in the conversation.</span>
+                  </div>
+                  <select class="settings-select-pill" id="set-fontSize" data-setting="fontSize">
+                    <option value="small">Small</option>
+                    <option value="medium">Default</option>
+                    <option value="large">Large</option>
+                  </select>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-density">Conversation density</label>
+                    <span class="field-desc">Compact reduces the spacing between paragraphs and messages.</span>
+                  </div>
+                  <select class="settings-select-pill" id="set-density" data-setting="density">
+                    <option value="comfortable">Comfortable</option>
+                    <option value="compact">Compact</option>
+                  </select>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-wrapCode">Wrap long code lines</label>
+                    <span class="field-desc">When off, code blocks scroll horizontally instead.</span>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="set-wrapCode" data-setting="wrapCode" /><span class="toggle-slider"></span></label>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-reduceMotion">Motion</label>
+                    <span class="field-desc">Respect system motion or reduce all animations.</span>
+                  </div>
+                  <select class="settings-select-pill" id="set-reduceMotion" data-setting="reduceMotion">
+                    <option value="system">Follow system</option>
+                    <option value="always">Reduce</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               CHAT
+               ================================================================ -->
+          <div class="settings-content-pane hidden" id="settings-pane-chat" role="tabpanel">
+            <h1 class="settings-pane-title">Chat</h1>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Composer</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-enterToSend">Send message with</label>
+                    <span class="field-desc">Shift+Enter always inserts a new line.</span>
+                  </div>
+                  <select class="settings-select-pill" id="set-enterToSend" data-setting="enterToSend">
+                    <option value="enter">Enter</option>
+                    <option value="ctrl-enter">Ctrl+Enter (Enter adds a new line)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Replies</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-autoScroll">Scroll while a reply is generating</label>
+                    <span class="field-desc">Keeps the newest text in view.</span>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="set-autoScroll" data-setting="autoScroll" /><span class="toggle-slider"></span></label>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-showTimestamps">Show message times</label>
+                    <span class="field-desc">Shows the time next to each assistant reply.</span>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="set-showTimestamps" data-setting="showTimestamps" /><span class="toggle-slider"></span></label>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-showToolDetails">Show tool details</label>
+                    <span class="field-desc">Shows the collapsible summary of files read and directories scanned. Search sources and errors are always shown.</span>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="set-showToolDetails" data-setting="showToolDetails" /><span class="toggle-slider"></span></label>
+                </div>
+              </div>
+            </div>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Conversations</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-autoNameChats">Name new chats from the first message</label>
+                    <span class="field-desc">Chats you rename yourself always keep your name.</span>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="set-autoNameChats" data-setting="autoNameChats" /><span class="toggle-slider"></span></label>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-confirmDelete">Confirm before deleting a conversation</label>
+                    <span class="field-desc">Deleting a conversation cannot be undone.</span>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="set-confirmDelete" data-setting="confirmDelete" /><span class="toggle-slider"></span></label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Memory & Personalization -->
+            <div class="settings-card-group" id="settings-group-memory">
+              <h2 class="settings-group-heading">🧠 Memory &amp; Personalization</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-persistentMemory">Enable Persistent Memory</label>
+                    <span class="field-desc">Remember stable coding styles and operator preferences across conversations.</span>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="set-persistentMemory" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="settings-field-row" style="flex-direction: column; align-items: stretch; gap: 8px;">
+                  <div class="field-info">
+                    <span class="field-title">Learned Operator Preferences</span>
+                    <span class="field-desc">Preferences explicitly expressed in chat or added manually.</span>
+                  </div>
+                  <div id="memory-items-container" class="memory-items-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; padding: 4px 0;">
+                    <!-- Dynamically populated memory rows -->
+                  </div>
+                  <div class="memory-add-bar" style="display: flex; gap: 8px; margin-top: 6px;">
+                    <input type="text" id="input-new-memory" class="settings-input-text" placeholder="Add custom preference (e.g. Always write comments in TypeScript)" style="flex: 1; padding: 6px 10px; font-size: 13px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: inherit;" />
+                    <button class="settings-action-btn" id="btn-add-memory" type="button">Add</button>
+                    <button class="settings-action-btn danger" id="btn-clear-memories" type="button">Clear All</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               MODELS
+               ================================================================ -->
+          <div class="settings-content-pane hidden" id="settings-pane-models" role="tabpanel">
+            <h1 class="settings-pane-title">Models</h1>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Model</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-defaultModel">Default model</label>
+                    <span class="field-desc">Used for new messages. You can also switch from the model menu in the composer; both stay in sync.</span>
+                  </div>
+                  <select class="settings-select-pill" id="set-defaultModel" data-setting="defaultModel">
+                    <option value="sparx-3.9-flash">Sparx 3.9 Flash (Recommended)</option>
+                    <option value="sparx-3.8-pro">Sparx 3.8 Pro</option>
+                    <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
+                    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                  </select>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-webGrounding">Live search grounding</label>
+                    <span class="field-desc">Enables web retrieval and real sources when an API key is connected.</span>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="set-webGrounding" data-setting="webGrounding" /><span class="toggle-slider"></span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               NOTIFICATIONS
+               ================================================================ -->
+          <div class="settings-content-pane hidden" id="settings-pane-notifications" role="tabpanel">
+            <h1 class="settings-pane-title">Notifications</h1>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Desktop notifications</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-notifyOnComplete">Reply finished</label>
+                    <span class="field-desc">Show a system notification when a reply finishes while the app is not focused.</span>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="set-notifyOnComplete" data-setting="notifyOnComplete" /><span class="toggle-slider"></span></label>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-notifyOnError">Reply failed</label>
+                    <span class="field-desc">Show a system notification when a reply fails while the app is not focused.</span>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="set-notifyOnError" data-setting="notifyOnError" /><span class="toggle-slider"></span></label>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Test notification</span>
+                    <span class="field-desc" id="notify-test-status">Sends a sample notification to check your system allows them.</span>
+                  </div>
+                  <button class="settings-action-btn" id="btn-test-notification" type="button">Send test</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               FILES & WORKSPACES
+               ================================================================ -->
+          <div class="settings-content-pane hidden" id="settings-pane-files" role="tabpanel">
+            <h1 class="settings-pane-title">Files &amp; workspaces</h1>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Workspace folder</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Folder the assistant can read</span>
+                    <span class="field-desc">Used by the "read &lt;file&gt;" and "list files" tools. Only files inside this folder (or the app folder) are read.</span>
+                    <span class="path-chip" id="workspace-path-chip" style="margin-top: 6px; word-break: break-all;">Loading…</span>
+                  </div>
+                  <div class="field-action-group" style="gap: 8px;">
+                    <button class="settings-action-btn" id="btn-change-folder" type="button">Choose folder…</button>
+                    <button class="settings-action-btn" id="btn-reset-folder" type="button">Use default</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Projects</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-newChatsInProject">Add new chats to active project</label>
+                    <span class="field-desc">When off, new chats appear under Recents instead.</span>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="set-newChatsInProject" data-setting="newChatsInProject" /><span class="toggle-slider"></span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               TOOLS & INTEGRATIONS
+               ================================================================ -->
+          <div class="settings-content-pane hidden" id="settings-pane-tools" role="tabpanel">
+            <h1 class="settings-pane-title">Tools &amp; integrations</h1>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Built-in tools</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-toolFiles">Workspace file tools</label>
+                    <span class="field-desc">Allow reading files and listing the workspace folder from chat.</span>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="set-toolFiles" data-setting="toolFiles" /><span class="toggle-slider"></span></label>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <label class="field-title" for="set-toolWebSearch">Web search tool</label>
+                    <span class="field-desc">Allow "search web for …" requests. The search query is sent to DuckDuckGo.</span>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" id="set-toolWebSearch" data-setting="toolWebSearch" /><span class="toggle-slider"></span></label>
+                </div>
+              </div>
+            </div>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Plugins, connectors &amp; MCP</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Entries saved in this app</span>
+                    <span class="field-desc" id="tools-registered-summary">Loading…</span>
+                  </div>
+                  <button class="settings-action-btn" id="btn-open-plugins-page" type="button">Open Plugins</button>
+                </div>
+              </div>
+              <p class="settings-note">Plugins, marketplaces and MCP servers you add are saved so you can manage them, but this version of Sparx does not launch MCP servers or call plugins from chat yet.</p>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               PRIVACY & DATA
+               ================================================================ -->
+          <div class="settings-content-pane hidden" id="settings-pane-privacy" role="tabpanel">
+            <h1 class="settings-pane-title">Privacy &amp; data</h1>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Where your data is kept</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Conversations</span>
+                    <span class="field-desc">Saved unencrypted in this app's local storage on this computer. They are not synced anywhere. <span id="privacy-chat-count">0 conversations</span> saved.</span>
+                  </div>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Settings and API key</span>
+                    <span class="field-desc">Saved as plain text in <code>tactical-config.json</code> in the app data folder. <span id="privacy-config-path"></span></span>
+                  </div>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">What leaves this computer</span>
+                    <span class="field-desc">With an API key connected, your messages are processed securely by the active AI inference engine. Web searches query DuckDuckGo for live sources. Nothing is sent otherwise.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Manage data</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Export conversations</span>
+                    <span class="field-desc">Download all saved conversations as a JSON file.</span>
+                  </div>
+                  <button class="settings-action-btn" id="btn-export-chats" type="button">Export</button>
+                </div>
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Delete all conversations</span>
+                    <span class="field-desc">Removes every saved conversation from this app's local storage. This cannot be undone.</span>
+                  </div>
+                  <button class="settings-action-btn danger" id="btn-delete-all-chats" type="button">Delete all</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Microphone & Voice Dictation Permission Group -->
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Microphone &amp; Voice Permissions</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Windows Microphone Access</span>
+                    <span class="field-desc">Control whether Sparx is authorized to access your microphone from Windows for speech-to-text dictation.</span>
+                  </div>
+                  <div class="settings-field-ctrl" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="status-badge" id="mic-perm-status-badge" style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.08);">Checking...</span>
+                    <button class="settings-action-btn" id="btn-request-mic-perm" type="button">Request Permission</button>
+                    <button class="settings-action-btn danger" id="btn-revoke-mic-perm" type="button">Revoke</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               PAGE 4: KEYBOARD SHORTCUTS
+               ================================================================ -->
+          <div class="settings-content-pane hidden" id="settings-pane-keybindings">
+            <h1 class="settings-pane-title">Keyboard Shortcuts</h1>
+
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Workstation Keybindings</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Send prompt query</span>
+                    <span class="field-desc">Dispatch prompt to streaming AI model</span>
+                  </div>
+                  <span class="kb-key-badge">Enter</span>
+                </div>
+
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Insert newline in prompt</span>
+                    <span class="field-desc">Add line break without dispatching prompt</span>
+                  </div>
+                  <span class="kb-key-badge">Shift + Enter</span>
+                </div>
+
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Toggle workspace sidebar</span>
+                    <span class="field-desc">Expand or collapse project sidebar</span>
+                  </div>
+                  <span class="kb-key-badge">Ctrl + B</span>
+                </div>
+
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Open settings view</span>
+                    <span class="field-desc">Switch directly to full-screen settings</span>
+                  </div>
+                  <span class="kb-key-badge">Ctrl + ,</span>
+                </div>
+
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">New chat session</span>
+                    <span class="field-desc">Reset conversation and return to centered hero</span>
+                  </div>
+                  <span class="kb-key-badge">Ctrl + Shift + O</span>
+                </div>
+
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Close view / Return to chat</span>
+                    <span class="field-desc">Dismiss settings, dropdowns, or active popups</span>
+                  </div>
+                  <span class="kb-key-badge">Esc</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               PAGE 5: USAGE & BILLING
+               ================================================================ -->
+          <div class="settings-content-pane hidden" id="settings-pane-usage">
+            <h1 class="settings-pane-title">Usage</h1>
+
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Resource Consumption</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Monthly query allowance</span>
+                    <span class="field-desc">Requests remaining for the current billing cycle</span>
+                  </div>
+                  <div class="field-action-group">
+                    <span class="path-chip" id="settings-usage-allowance-text">150 / 150 remaining</span>
+                  </div>
+                </div>
+
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Context window utilization</span>
+                    <span class="field-desc">Active token window capacity per prompt (1,048,576 tokens max)</span>
+                  </div>
+                  <div class="field-action-group">
+                    <span class="path-chip" id="settings-usage-token-text">0.1% allocated</span>
+                  </div>
+                </div>
+
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Session history cache</span>
+                    <span class="field-desc">Locally stored transcript threads in browser database</span>
+                  </div>
+                  <div class="field-action-group">
+                    <button class="settings-action-btn danger" id="btn-settings-clear-cache">Clear Cache</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               ABOUT
+               ================================================================ -->
+          <div class="settings-content-pane hidden" id="settings-pane-about" role="tabpanel">
+            <h1 class="settings-pane-title">About</h1>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Sparx</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row"><div class="field-info"><span class="field-title">Version</span></div><span class="path-chip" id="about-version">…</span></div>
+                <div class="settings-field-row"><div class="field-info"><span class="field-title">Electron</span></div><span class="path-chip" id="about-electron">…</span></div>
+                <div class="settings-field-row"><div class="field-info"><span class="field-title">Platform</span></div><span class="path-chip" id="about-platform">…</span></div>
+              </div>
+            </div>
+            <div class="settings-card-group">
+              <h2 class="settings-group-heading">Settings</h2>
+              <div class="settings-card-box">
+                <div class="settings-field-row">
+                  <div class="field-info">
+                    <span class="field-title">Restore default settings</span>
+                    <span class="field-desc">Resets every option in Settings. Your conversations, API key and saved plugins are not changed.</span>
+                  </div>
+                  <button class="settings-action-btn danger" id="btn-restore-defaults" type="button">Restore defaults</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tactical Modals Overlay -->
+  <div class="tactical-modal-overlay hidden" id="tactical-modal-overlay">
+
+    <!-- Modal 0: Installing update (1-to-1 Replica of Native Desktop Updater) -->
+    <div class="tactical-modal-box sparx-update-card hidden" id="modal-app-update" role="dialog" aria-modal="true" aria-labelledby="title-app-update">
+      <h3 class="update-card-title" id="title-app-update">Installing update</h3>
+      <div class="update-card-subtitle" id="subtitle-app-update">Sparx will restart when installation finishes.</div>
+      <div class="update-card-progress-row">
+        <div class="update-card-track">
+          <div class="update-card-fill" id="update-progress-bar"></div>
+        </div>
+        <div class="update-card-status" id="update-progress-label">Preparing...</div>
+      </div>
+    </div>
+    
+    <!-- Modal 1: Create Plugin -->
+    <div class="tactical-modal-box hidden" id="modal-create-plugin" role="dialog" aria-modal="true" aria-labelledby="title-create-plugin">
+      <div class="tactical-modal-header">
+        <div class="tactical-modal-title" id="title-create-plugin">Create plugin</div>
+        <button class="tactical-modal-close" data-modal-close="true" title="Close">×</button>
+      </div>
+      <div class="tactical-modal-body">
+        <p class="tactical-modal-desc">Scaffold a new plugin manifest to register custom tools, agents, or prompts.</p>
+        <div class="modal-form-group">
+          <label for="input-create-plugin-name">Plugin name</label>
+          <input type="text" id="input-create-plugin-name" class="modal-text-input" placeholder="e.g. Jira Tracker" autocomplete="off" />
+        </div>
+        <div class="modal-form-group">
+          <label for="input-create-plugin-desc">Description</label>
+          <input type="text" id="input-create-plugin-desc" class="modal-text-input" placeholder="Triage PRs, tasks, and project workflows" autocomplete="off" />
+        </div>
+        <div class="modal-form-group">
+          <label for="select-create-plugin-cat">Category</label>
+          <select id="select-create-plugin-cat" class="modal-select-input">
+            <option value="Developer Tools">Developer Tools</option>
+            <option value="Productivity">Productivity</option>
+            <option value="Data & Analytics">Data & Analytics</option>
+            <option value="Automation">Automation</option>
+          </select>
+        </div>
+      </div>
+      <div class="tactical-modal-footer">
+        <button class="btn-modal-cancel" data-modal-close="true">Cancel</button>
+        <button class="btn-modal-primary" id="btn-submit-create-plugin">Create plugin</button>
+      </div>
+    </div>
+
+    <!-- Modal 2: Add Marketplace -->
+    <div class="tactical-modal-box hidden" id="modal-add-marketplace" role="dialog" aria-modal="true" aria-labelledby="title-add-marketplace">
+      <div class="tactical-modal-header">
+        <div class="tactical-modal-title" id="title-add-marketplace">Add a marketplace</div>
+        <button class="tactical-modal-close" data-modal-close="true" title="Close">×</button>
+      </div>
+      <div class="tactical-modal-body">
+        <p class="tactical-modal-desc">Connect an external plugin marketplace registry or private organization feed.</p>
+        <div class="modal-form-group">
+          <label for="input-marketplace-name">Marketplace name</label>
+          <input type="text" id="input-marketplace-name" class="modal-text-input" placeholder="e.g. Community Hub" autocomplete="off" />
+        </div>
+        <div class="modal-form-group">
+          <label for="input-marketplace-url">Registry URL</label>
+          <input type="url" id="input-marketplace-url" class="modal-text-input" placeholder="https://registry.tacticalstudio.dev/v1" autocomplete="off" />
+        </div>
+      </div>
+      <div class="tactical-modal-footer">
+        <button class="btn-modal-cancel" data-modal-close="true">Cancel</button>
+        <button class="btn-modal-primary" id="btn-submit-add-marketplace">Connect marketplace</button>
+      </div>
+    </div>
+
+    <!-- Modal 3: Add Custom MCP Server -->
+    <div class="tactical-modal-box hidden" id="modal-add-mcp" role="dialog" aria-modal="true" aria-labelledby="title-add-mcp">
+      <div class="tactical-modal-header">
+        <div class="tactical-modal-title" id="title-add-mcp">Add custom MCP server</div>
+        <button class="tactical-modal-close" data-modal-close="true" title="Close">×</button>
+      </div>
+      <div class="tactical-modal-body">
+        <p class="tactical-modal-desc">Register a Model Context Protocol server via stdio, SSE, or streamable HTTP.</p>
+        <div class="modal-form-group">
+          <label for="input-mcp-name">Server name</label>
+          <input type="text" id="input-mcp-name" class="modal-text-input" placeholder="e.g. postgres-inspector" autocomplete="off" />
+        </div>
+        <div class="modal-form-group">
+          <label for="select-mcp-transport">Transport type</label>
+          <select id="select-mcp-transport" class="modal-select-input">
+            <option value="stdio">stdio (Local Subprocess)</option>
+            <option value="sse">SSE (Server-Sent Events)</option>
+            <option value="http">Streamable HTTP</option>
+          </select>
+        </div>
+        <div class="modal-form-group">
+          <label for="input-mcp-command">Command or URL</label>
+          <input type="text" id="input-mcp-command" class="modal-text-input" placeholder="npx -y @modelcontextprotocol/server-postgres" autocomplete="off" />
+        </div>
+        <div class="modal-form-group">
+          <label for="input-mcp-args">Arguments / Connection string (Optional)</label>
+          <input type="text" id="input-mcp-args" class="modal-text-input" placeholder="postgresql://user:pass@localhost:5432/dbname" autocomplete="off" />
+        </div>
+      </div>
+      <div class="tactical-modal-footer">
+        <button class="btn-modal-cancel" data-modal-close="true">Cancel</button>
+        <button class="btn-modal-primary" id="btn-submit-add-mcp">Save MCP server</button>
+      </div>
+    </div>
+
+    <!-- Modal 4: Rename Conversation -->
+    <div class="tactical-modal-box hidden" id="modal-rename-session" role="dialog" aria-modal="true" aria-labelledby="title-rename-session">
+      <div class="tactical-modal-header">
+        <div class="tactical-modal-title" id="title-rename-session">Rename conversation</div>
+        <button class="tactical-modal-close" data-modal-close="true" title="Close">×</button>
+      </div>
+      <div class="tactical-modal-body">
+        <div class="modal-form-group">
+          <label for="input-rename-session-title">Conversation name</label>
+          <input type="text" id="input-rename-session-title" class="modal-text-input" placeholder="Enter new conversation name" autocomplete="off" />
+        </div>
+      </div>
+      <div class="tactical-modal-footer">
+        <button class="btn-modal-cancel" data-modal-close="true">Cancel</button>
+        <button class="btn-modal-primary" id="btn-submit-rename-session">Save</button>
+      </div>
+    </div>
+
+    <!-- Modal 5: Access & Approvals Governance -->
+    <div class="tactical-modal-box hidden modal-access-box" id="modal-access-approvals" role="dialog" aria-modal="true" aria-labelledby="title-access-approvals">
+      <div class="tactical-modal-header">
+        <div class="tactical-modal-title" id="title-access-approvals">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:8px; vertical-align:text-bottom;">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          Access & Approvals
+        </div>
+        <button class="tactical-modal-close" data-modal-close="true" title="Close">×</button>
+      </div>
+      <div class="tactical-modal-body">
+        <p class="tactical-modal-desc">
+          Manage autonomous workstation execution policies, terminal permissions, and computer control supervision.
+        </p>
+
+        <!-- Capabilities Group -->
+        <div class="approvals-section-title">Autonomous Capabilities</div>
+        <div class="approvals-caps-grid">
+          <div class="approval-cap-card">
+            <div class="cap-card-info">
+              <div class="cap-card-title">Terminal & Command Execution</div>
+              <div class="cap-card-desc">Run build scripts, linters, package managers, and tests strictly inside the workspace root.</div>
+            </div>
+            <label class="tactical-switch" for="switch-cap-terminal">
+              <input type="checkbox" id="switch-cap-terminal">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <div class="approval-cap-card">
+            <div class="cap-card-info">
+              <div class="cap-card-title">Computer Use (Screen & Desktop Control)</div>
+              <div class="cap-card-desc">Allow Sparx to view display frames and simulate basic mouse clicks and keystrokes under supervision.</div>
+            </div>
+            <label class="tactical-switch" for="switch-cap-computer">
+              <input type="checkbox" id="switch-cap-computer">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Computer Use Session Manager (Shown when Computer Use is Enabled) -->
+        <div class="computer-session-control-box hidden" id="box-computer-session-controls">
+          <div class="session-box-header">
+            <div class="session-box-title-row">
+              <span class="session-status-badge inactive" id="badge-computer-session-status">Session Stopped</span>
+              <span class="session-time-pill hidden" id="pill-computer-session-time">00:00</span>
+            </div>
+            <span class="session-subnote">Zero disk storage: display frames are processed strictly in volatile memory.</span>
+          </div>
+          <div class="session-action-btns">
+            <button class="btn-session-action btn-start-session" id="btn-toggle-computer-session" type="button">Start Computer Session</button>
+            <button class="btn-session-action btn-pause-session hidden" id="btn-pause-computer-session" type="button">Pause Control</button>
+          </div>
+        </div>
+
+        <!-- Approval Policy: Exactly 3 Modes -->
+        <div class="approvals-section-title" style="margin-top: 18px;">Approval Policy</div>
+        <div class="approval-modes-group">
+          <label class="approval-mode-card selected" for="radio-mode-ask" id="label-mode-ask">
+            <input type="radio" name="access-approval-mode" id="radio-mode-ask" value="ask" checked>
+            <div class="mode-card-content">
+              <div class="mode-card-name">Ask for approval <span class="mode-default-tag">Default</span></div>
+              <div class="mode-card-desc">Prompts you with an interactive in-chat card before executing every command or simulated desktop action. Maximum operator oversight.</div>
+            </div>
+          </label>
+
+          <label class="approval-mode-card" for="radio-mode-auto" id="label-mode-auto">
+            <input type="radio" name="access-approval-mode" id="radio-mode-auto" value="auto">
+            <div class="mode-card-content">
+              <div class="mode-card-name">Approve for me</div>
+              <div class="mode-card-desc">Automatically runs routine, low-risk workspace actions (e.g. <code>git status</code>, unit tests, scans). Prompts for destructive, external, or high-risk actions.</div>
+            </div>
+          </label>
+
+          <label class="approval-mode-card" for="radio-mode-full" id="label-mode-full">
+            <input type="radio" name="access-approval-mode" id="radio-mode-full" value="full">
+            <div class="mode-card-content">
+              <div class="mode-card-name">Full access</div>
+              <div class="mode-card-desc">Broad autonomous execution within granted capabilities. Hard safety boundaries remain active; prompts for admin or irreversible actions.</div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Universal Anti-Cheat & Exploit Policy -->
+        <div class="anti-cheat-policy-banner">
+          <div class="banner-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+            </svg>
+          </div>
+          <div class="banner-text">
+            <span class="banner-title">Universal Anti-Cheat & Fair-Play Guard Enforced</span>
+            <p>Developing, executing, or automating game cheats, competitive bots, aimbots, memory injection, and anti-cheat tampering is strictly prohibited and hard-blocked at the kernel level across code generation, terminal, and screen control.</p>
+          </div>
+        </div>
+      </div>
+      <div class="tactical-modal-footer" style="justify-content: space-between;">
+        <button class="btn-modal-revoke-all" id="btn-modal-revoke-all" type="button" title="Immediately terminate all running processes and screen sessions">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+          Revoke All Access
+        </button>
+        <button class="btn-modal-primary" data-modal-close="true" type="button">Done</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container" role="status" aria-live="polite"></div>
+  <div class="sr-only" id="sr-announcer" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Hidden Native File Input Fallback -->
+  <input type="file" multiple id="native-file-picker" style="display:none;" />
+
+  <script src="./node_modules/diff/dist/diff.min.js"></script>
+  <script src="./node_modules/xterm/lib/xterm.js"></script>
+  <script src="./node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
+  <script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
+  <script src="./node_modules/marked/lib/marked.umd.js"></script>
+  <script src="renderer.js"></script>
+  <script src="ideRenderer.js"></script>
+</body>
+</html>
