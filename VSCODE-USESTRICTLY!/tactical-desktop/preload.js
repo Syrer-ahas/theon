@@ -155,6 +155,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAbout: () => ipcRenderer.invoke('app:get-about'),
 
   // In-App Auto-Update & Publishing API
+  getAppVersion: () => ipcRenderer.invoke('app:get-version'),
   checkForUpdates: () => ipcRenderer.invoke('app:check-for-updates'),
   downloadUpdate: () => ipcRenderer.invoke('app:download-update'),
   applyUpdate: () => ipcRenderer.invoke('app:apply-update'),

@@ -6246,3 +6246,77 @@ input:checked + .toggle-slider:before {
   }
 }
 
+/* App Version Indicators */
+.rail-version-label {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  color: #71717a;
+  text-align: center;
+  margin-top: 4px;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: color 0.15s ease;
+  user-select: none;
+}
+
+.rail-version-label:hover {
+  color: #38bdf8;
+}
+
+.app-bottom-version-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 11px;
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: #71717a;
+  user-select: none;
+}
+
+.app-version-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: #a1a1aa;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.app-version-badge:hover {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.3);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.app-version-sep {
+  color: #3f3f46;
+  font-size: 10px;
+}
+
+.app-version-status {
+  color: #10b981;
+  font-size: 11px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.app-version-status::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+

@@ -1,12 +1,12 @@
 {
   "version": "1.0.4",
   "previousVersion": "1.0.3",
-  "releaseDate": "2026-10-28T19:30:21.177Z",
+  "releaseDate": "2026-10-28T19:41:03.726Z",
   "releaseNotes": "• Fixed ReShade library discovery bug for remote users (resolved \"The ReShade library was not found\")\n• Standalone preset generation with auto-detection for Steam, Epic Games, and Rockstar GTA V\n• Direct standalone .ini and .zip generation with drop-in instructions\n• Global OTA auto-updates with hot-swapping\n• Performance improvements and bug fixes",
   "asarFileName": "app.asar",
   "downloadUrl": "https://raw.githubusercontent.com/Syrer-ahas/theon/main/downloads/updates/app.asar",
   "fallbackUrl": "https://www.tacticalweb.online/downloads/updates/app.asar",
-  "sizeBytes": 61030094,
+  "sizeBytes": 61035062,
   "sizeMb": "58.2 MB",
-  "sha256": "11ba8aa96b8038a63e2055990559f091737f3eb46d1178693017506cfcd1c963"
+  "sha256": "829798f3409b1134ca19b0d5f40fbd4a3cb432bf002b2452e2e4b86d8b44f0fd"
 }

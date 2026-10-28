@@ -4560,8 +4560,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     const iconSpinning = btnRailUpdate.querySelector('.update-icon-spinning');
     const updateProgressBar = document.getElementById('update-progress-bar');
     const updateProgressLabel = document.getElementById('update-progress-label');
+    const titleAppUpdate = document.getElementById('title-app-update');
+    const subtitleAppUpdate = document.getElementById('subtitle-app-update');
+    const railVersionLabel = document.getElementById('rail-version-label');
+    const chatVersionLabel = document.getElementById('chat-version-label');
+    const chatVersionStatus = document.getElementById('chat-version-status');
 
     let isUpdating = false;
+
+    function updateVersionDisplays(version, isUpToDate = true) {
+      const vText = version ? (version.startsWith('v') ? version : `v${version}`) : 'v1.0.4';
+      if (railVersionLabel) {
+        railVersionLabel.textContent = vText;
+        railVersionLabel.title = `Sparx ${vText} (Click to check updates)`;
+      }
+      if (chatVersionLabel) {
+        chatVersionLabel.textContent = `Sparx ${vText}`;
+      }
+      if (chatVersionStatus) {
+        chatVersionStatus.textContent = isUpToDate ? 'Up to date' : 'Update available';
+        chatVersionStatus.style.color = isUpToDate ? '#10b981' : '#38bdf8';
+      }
+    }
 
     function setSpinning(spinning) {
       if (iconDefault) iconDefault.classList.toggle('hidden', spinning);
@@ -4573,12 +4593,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       setSpinning(true);
       try {
         const res = await window.electronAPI.checkForUpdates();
+        const currentVer = res?.currentVersion || '1.0.4';
         if (res && res.updateAvailable) {
           if (updateBadgeDot) updateBadgeDot.classList.remove('hidden');
           if (railUpdateTooltip) railUpdateTooltip.textContent = `Install Update (v${res.latestVersion})`;
+          updateVersionDisplays(currentVer, false);
         } else {
           if (updateBadgeDot) updateBadgeDot.classList.add('hidden');
           if (railUpdateTooltip) railUpdateTooltip.textContent = `Sparx Up to Date`;
+          updateVersionDisplays(currentVer, true);
         }
         return res;
       } catch (err) {
@@ -4592,11 +4615,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (isUpdating) return;
       isUpdating = true;
 
-      // 1-to-1 Replica Modal: open immediately
-      openTacticalModal(modalAppUpdate);
+      // Reset modal text cleanly before opening
+      if (titleAppUpdate) titleAppUpdate.textContent = 'Checking for updates...';
+      if (subtitleAppUpdate) subtitleAppUpdate.textContent = 'Connecting to global update servers...';
+      if (updateProgressBar) updateProgressBar.style.width = '25%';
+      if (updateProgressLabel) updateProgressLabel.textContent = 'Checking...';
 
-      if (updateProgressBar) updateProgressBar.style.width = '20%';
-      if (updateProgressLabel) updateProgressLabel.textContent = 'Preparing...';
+      // Open Modal
+      openTacticalModal(modalAppUpdate);
 
       // Check for available updates
       let check = null;
@@ -4604,21 +4630,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         check = await window.electronAPI.checkForUpdates();
       } catch (e) {}
 
+      const currentVer = check?.currentVersion || '1.0.4';
+
       if (!check || !check.updateAvailable) {
-        if (updateProgressLabel) updateProgressLabel.textContent = 'Up to date';
+        // App is already completely up to date! Show clear, unambiguous status
+        updateVersionDisplays(currentVer, true);
+        if (titleAppUpdate) titleAppUpdate.textContent = 'Sparx is Up to Date';
+        if (subtitleAppUpdate) subtitleAppUpdate.textContent = `You are running the latest version (v${currentVer}). No action required.`;
         if (updateProgressBar) updateProgressBar.style.width = '100%';
+        if (updateProgressLabel) updateProgressLabel.textContent = `v${currentVer}`;
+
         setTimeout(() => {
           closeAllModals();
           isUpdating = false;
-        }, 1200);
+        }, 1800);
         return;
       }
 
-      // Small pause to show the native "Preparing..." phase
-      await new Promise((r) => setTimeout(r, 650));
-
+      // Update IS available!
+      const targetVer = check.latestVersion || '1.0.4';
+      updateVersionDisplays(currentVer, false);
+      if (titleAppUpdate) titleAppUpdate.textContent = `Installing update (v${targetVer})`;
+      if (subtitleAppUpdate) subtitleAppUpdate.textContent = 'Sparx will restart when installation finishes.';
       if (updateProgressBar) updateProgressBar.style.width = '35%';
       if (updateProgressLabel) updateProgressLabel.textContent = 'Downloading...';
+
+      // Small pause for smooth visual transition
+      await new Promise((r) => setTimeout(r, 450));
 
       try {
         await window.electronAPI.downloadUpdate();
@@ -4627,7 +4665,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (updateProgressBar) updateProgressBar.style.width = '96%';
         if (updateProgressLabel) updateProgressLabel.textContent = 'Installing...';
 
-        await new Promise((r) => setTimeout(r, 800));
+        await new Promise((r) => setTimeout(r, 650));
 
         // Relaunching phase
         if (updateProgressBar) updateProgressBar.style.width = '100%';
@@ -4637,8 +4675,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         await window.electronAPI.applyUpdate();
       } catch (err) {
         console.error('[Updater] Auto-update failed:', err);
+        if (titleAppUpdate) titleAppUpdate.textContent = 'Update failed';
+        if (subtitleAppUpdate) subtitleAppUpdate.textContent = err.message || 'Could not download update.';
         if (updateProgressLabel) updateProgressLabel.textContent = 'Failed';
-        showToast(`Update error: ${err.message}`);
         setTimeout(() => {
           closeAllModals();
           isUpdating = false;
@@ -4646,11 +4685,25 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-    // Direct one-click auto update trigger
+    // Direct click auto update triggers
     btnRailUpdate.addEventListener('click', (e) => {
       e.stopPropagation();
       startAutoUpdate();
     });
+
+    if (railVersionLabel) {
+      railVersionLabel.addEventListener('click', (e) => {
+        e.stopPropagation();
+        startAutoUpdate();
+      });
+    }
+
+    if (chatVersionLabel) {
+      chatVersionLabel.addEventListener('click', (e) => {
+        e.stopPropagation();
+        startAutoUpdate();
+      });
+    }
 
     // Progress events from backend
     if (window.electronAPI && typeof window.electronAPI.onUpdateProgress === 'function') {
@@ -4679,8 +4732,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
-    // Startup check after 2 seconds
-    setTimeout(() => checkUpdates(true), 2000);
+    // Initial fetch of live app version to populate labels immediately
+    if (window.electronAPI && typeof window.electronAPI.getAppVersion === 'function') {
+      window.electronAPI.getAppVersion().then((v) => {
+        if (v) updateVersionDisplays(v, true);
+      }).catch(() => {});
+    }
+
+    // Startup check after 1.5 seconds
+    setTimeout(() => checkUpdates(true), 1500);
   }
 
   // --------------------------------------------------------------------------

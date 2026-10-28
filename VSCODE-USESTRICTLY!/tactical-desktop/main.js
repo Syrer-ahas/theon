@@ -1429,6 +1429,10 @@ ipcMain.handle('app:get-about', () => ({
 }));
 
 // In-App Auto-Update & Publishing IPC Handlers
+ipcMain.handle('app:get-version', () => {
+  return updateService.getAppVersion();
+});
+
 ipcMain.handle('app:check-for-updates', async () => {
   return await updateService.checkForUpdates();
 });
