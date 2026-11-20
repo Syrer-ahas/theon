@@ -1,12 +1,12 @@
 {
-  "version": "1.0.9",
-  "previousVersion": "1.0.8",
-  "releaseDate": "2026-11-20T15:27:34.967Z",
-  "releaseNotes": "• Fixed switchMode(\"ide\") so Sparx opens directly into the clean studio IDE workspace\n• Live AI Reasoning & Tool Execution Trace, Checkpoints (Restore), and Stop Streaming\n• Live Frontend Preview pane (Desktop/Mobile toggle, auto-reload on save)\n• Floating Ctrl+K Inline Edit, Monaco Diff Editor, Command Palette (Ctrl+Shift+P)\n• Context Window meter, @ file mentions, breadcrumbs, status bar, and split-pane resizers",
+  "version": "1.0.5",
+  "previousVersion": "1.0.4",
+  "releaseDate": "2026-10-28T19:53:48.902Z",
+  "releaseNotes": "• Gemini fallback API key with strict gemini-2.0-flash free tier support\n• Intelligent multi-key rate-limit rotation across all Groq & Gemini fallbacks\n• Fixed ReShade library discovery bug for remote users (resolved \"The ReShade library was not found\")\n• Dynamic update button auto-hiding when up to date\n• Bottom application version & status indicator\n• Standalone preset generation with drop-in instructions\n• Global OTA auto-updates with hot-swapping",
   "asarFileName": "app.asar",
   "downloadUrl": "https://raw.githubusercontent.com/Syrer-ahas/theon/main/downloads/updates/app.asar",
   "fallbackUrl": "https://www.tacticalweb.online/downloads/updates/app.asar",
-  "sizeBytes": 61016618,
+  "sizeBytes": 61039307,
   "sizeMb": "58.2 MB",
-  "sha256": "422e25ed96ac5d0867272ba9f6fa0c5943fd35c5d526efbd36a2099c32fe9c46"
+  "sha256": "3df18e4db542e29c97605d277738978e6b9db9f7995fbd32357e7e9b624296a8"
 }

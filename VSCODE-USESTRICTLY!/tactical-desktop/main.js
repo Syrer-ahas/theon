@@ -5741,8 +5741,13 @@ ipcMain.on('chat:send-message', async (_event, payload = {}) => {
   let modeSystemDirective = '';
   if (mode === 'work') {
     modeSystemDirective =
-      "\n\n[WORK MODE ACTIVE]:\n" +
-      "You are operating autonomously inside the user's IDE workspace. Inspect relevant files first, make clean surgical edits using your tools, verify your changes by running checks or tests, and explain what you changed concisely and directly without boilerplate headers or filler.";
+      "\n\n[WORK MODE ACTIVE — AUTONOMOUS WORKSTATION ENGINEER]:\n" +
+      "You are in WORK MODE. Your task is to perform concrete workstation engineering, not casual chit-chat.\n" +
+      "Follow this three-stage execution pattern:\n" +
+      "1. [PLAN & IMPACT]: Analyze the requested changes, affected files, and dependencies.\n" +
+      "2. [IMPLEMENTATION]: Provide exact code patches, drop-in implementations, or workspace command recipes.\n" +
+      "3. [VERIFICATION]: Explain how to test, build, and verify the changes inside the workspace.\n" +
+      "Be decisive, precise, and deliver production-grade code.";
   }
 
   // Helper: stream reasoning with Google Gemini with automatic key rotation and strict gemini-2.0-flash enforcement

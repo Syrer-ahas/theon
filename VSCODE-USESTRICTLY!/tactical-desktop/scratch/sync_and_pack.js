@@ -10,35 +10,12 @@ const updatesAsar = path.resolve(__dirname, '..', '..', 'downloads', 'updates', 
 const updateJsonPath = path.resolve(__dirname, '..', '..', 'downloads', 'updates', 'update.json');
 const tempAsar = 'C:\\Users\\alkhi\\AppData\\Local\\Temp\\Sparx-fresh.asar';
 
-const TARGET_VERSION = '1.0.9';
-const desktopPkgPath = path.join(srcDir, 'package.json');
-if (fs.existsSync(desktopPkgPath)) {
-  const pkg = JSON.parse(fs.readFileSync(desktopPkgPath, 'utf8'));
-  pkg.version = TARGET_VERSION;
-  fs.writeFileSync(desktopPkgPath, JSON.stringify(pkg, null, 2), 'utf8');
-}
-const rootPkgPath = path.resolve(__dirname, '..', '..', 'package.json');
-if (fs.existsSync(rootPkgPath)) {
-  const pkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
-  pkg.version = TARGET_VERSION;
-  fs.writeFileSync(rootPkgPath, JSON.stringify(pkg, null, 2), 'utf8');
-}
-
 console.log('[1/6] Syncing files from workspace to staging dir...');
-if (!fs.existsSync(path.join(stagingDir, 'node_modules'))) {
-  fs.mkdirSync(stagingDir, { recursive: true });
-  if (fs.existsSync(destAsar)) {
-    console.log('  -> Extracting base app.asar into staging dir...');
-    execSync(`npx asar extract "${destAsar}" "${stagingDir}"`, { stdio: 'inherit' });
-  }
-}
 const filesToSync = [
   'style.css',
-  'ideStyle.css',
   'install_tactical.html',
   'main.js',
   'renderer.js',
-  'ideRenderer.js',
   'index.html',
   'updateService.js',
   'lspdfrService.js',
@@ -102,21 +79,23 @@ if (!fs.existsSync(updatesDir)) {
 fs.copyFileSync(tempAsar, updatesAsar);
 console.log(`  -> Updates Cache: ${updatesAsar} (${(fs.statSync(updatesAsar).size / 1024 / 1024).toFixed(1)} MB)`);
 
-console.log('[6/6] Updating update.json metadata to v1.0.9...');
+console.log('[6/6] Updating update.json metadata to v1.0.5...');
 const hash = crypto.createHash('sha256').update(fs.readFileSync(tempAsar)).digest('hex');
 const size = fs.statSync(tempAsar).size;
 const sizeMb = `${(size / 1024 / 1024).toFixed(1)} MB`;
 
 const manifest = {
-  version: '1.0.9',
-  previousVersion: '1.0.8',
+  version: '1.0.5',
+  previousVersion: '1.0.4',
   releaseDate: new Date().toISOString(),
   releaseNotes: [
-    '• Fixed switchMode("ide") so Sparx opens directly into the clean studio IDE workspace',
-    '• Live AI Reasoning & Tool Execution Trace, Checkpoints (Restore), and Stop Streaming',
-    '• Live Frontend Preview pane (Desktop/Mobile toggle, auto-reload on save)',
-    '• Floating Ctrl+K Inline Edit, Monaco Diff Editor, Command Palette (Ctrl+Shift+P)',
-    '• Context Window meter, @ file mentions, breadcrumbs, status bar, and split-pane resizers'
+    '• Gemini fallback API key with strict gemini-2.0-flash free tier support',
+    '• Intelligent multi-key rate-limit rotation across all Groq & Gemini fallbacks',
+    '• Fixed ReShade library discovery bug for remote users (resolved "The ReShade library was not found")',
+    '• Dynamic update button auto-hiding when up to date',
+    '• Bottom application version & status indicator',
+    '• Standalone preset generation with drop-in instructions',
+    '• Global OTA auto-updates with hot-swapping'
   ].join('\n'),
   asarFileName: 'app.asar',
   downloadUrl: 'https://raw.githubusercontent.com/Syrer-ahas/theon/main/downloads/updates/app.asar',
@@ -128,6 +107,22 @@ const manifest = {
 
 fs.writeFileSync(updateJsonPath, JSON.stringify(manifest, null, 2), 'utf8');
 console.log(`  -> Updated update.json (version: ${manifest.version}, hash: ${hash.slice(0, 8)}..., size: ${sizeMb})`);
-console.log(`  -> Package versions synced at v${TARGET_VERSION}`);
+
+// Update package.json version to 1.0.5
+const desktopPkgPath = path.join(srcDir, 'package.json');
+if (fs.existsSync(desktopPkgPath)) {
+  const pkg = JSON.parse(fs.readFileSync(desktopPkgPath, 'utf8'));
+  pkg.version = '1.0.5';
+  fs.writeFileSync(desktopPkgPath, JSON.stringify(pkg, null, 2), 'utf8');
+  console.log('  -> Updated tactical-desktop/package.json to v1.0.5');
+}
+
+const rootPkgPath = path.resolve(__dirname, '..', '..', 'package.json');
+if (fs.existsSync(rootPkgPath)) {
+  const pkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
+  pkg.version = '1.0.5';
+  fs.writeFileSync(rootPkgPath, JSON.stringify(pkg, null, 2), 'utf8');
+  console.log('  -> Updated root package.json to v1.0.5');
+}
 
 console.log('\n[SUCCESS] Sync, pack, and installation completed cleanly!');

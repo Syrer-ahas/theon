@@ -13,7 +13,6 @@
   // --------------------------------------------------------------------------
   let monacoInstance = null;
   let activeEditor = null;
-  let activeDiffEditor = null;
   let activeTerminal = null;
   let activeTerminalId = null;
   let terminalFitAddon = null;
@@ -36,15 +35,9 @@
     regex: false
   };
 
-  // Docked AI Assistant State
+  // Docked AI Copilot Chat State
   let dockedMessages = [];
   let isDockedStreaming = false;
-  let includeActiveFileInContext = true;
-  let attachedContextFiles = []; // Array of { path, relativePath, name, content }
-  let activeSelectionContext = null; // { startLine, endLine, text }
-  const CONTEXT_LIMIT_TOKENS = 128000;
-  let mentionSelectedIndex = 0;
-  let mentionFilteredFiles = [];
 
   // Active Pending Diff State
   let pendingDiffData = null; // { tabId, originalText, proposedText }
@@ -103,30 +96,30 @@
       window.require(['vs/editor/editor.main'], function (monaco) {
         monacoInstance = monaco;
 
-        // Define Sparx Clean Studio Theme (Zed / GitHub Dark / Claude inspired)
+        // Define Sparx Dark Obsidian OLED Theme
         monaco.editor.defineTheme('sparx-dark', {
           base: 'vs-dark',
           inherit: true,
           rules: [
-            { background: '0c0c0e' },
-            { token: 'comment', foreground: '6e7681', fontStyle: 'italic' },
-            { token: 'keyword', foreground: 'ff7b72' },
-            { token: 'identifier', foreground: 'e4e4e7' },
-            { token: 'string', foreground: 'a5d6ff' },
-            { token: 'number', foreground: '79c0ff' },
-            { token: 'type', foreground: 'ffa657' }
+            { background: '070709' },
+            { token: 'comment', foreground: '62626b', fontStyle: 'italic' },
+            { token: 'keyword', foreground: '38bdf8', fontStyle: 'bold' },
+            { token: 'identifier', foreground: 'f4f4f5' },
+            { token: 'string', foreground: 'a7f3d0' },
+            { token: 'number', foreground: 'fbbf24' },
+            { token: 'type', foreground: 'c084fc' }
           ],
           colors: {
-            'editor.background': '#0c0c0e',
-            'editor.foreground': '#e4e4e7',
-            'editorCursor.foreground': '#f4f4f5',
-            'editor.lineHighlightBackground': '#141418',
-            'editorLineNumber.foreground': '#4b4b55',
+            'editor.background': '#070709',
+            'editor.foreground': '#f4f4f5',
+            'editorCursor.foreground': '#38bdf8',
+            'editor.lineHighlightBackground': '#0d0d12',
+            'editorLineNumber.foreground': '#3f3f46',
             'editorLineNumber.activeForeground': '#a1a1aa',
-            'editor.selectionBackground': '#262630',
-            'editor.inactiveSelectionBackground': '#1a1a22',
-            'editorWidget.background': '#141418',
-            'editorWidget.border': 'rgba(255,255,255,0.09)'
+            'editor.selectionBackground': '#1e293b',
+            'editor.inactiveSelectionBackground': '#0f172a',
+            'editorWidget.background': '#0d0d10',
+            'editorWidget.border': 'rgba(255,255,255,0.08)'
           }
         });
 
@@ -145,40 +138,6 @@
           cursorSmoothCaretAnimation: 'on',
           bracketPairColorization: { enabled: true },
           padding: { top: 12, bottom: 12 }
-        });
-
-        // Live Cursor Position -> Status Bar
-        activeEditor.onDidChangeCursorPosition((e) => {
-          const posEl = document.getElementById('status-cursor-pos');
-          if (posEl && e.position) {
-            posEl.textContent = `Ln ${e.position.lineNumber}, Col ${e.position.column}`;
-          }
-        });
-
-        // Live Selection -> Assistant Context Chip
-        activeEditor.onDidChangeCursorSelection((e) => {
-          const model = activeEditor.getModel();
-          const selPill = document.getElementById('docked-selection-pill');
-          const selLabel = document.getElementById('docked-selection-label');
-          if (!model || !e.selection || e.selection.isEmpty()) {
-            activeSelectionContext = null;
-            if (selPill) selPill.classList.add('hidden');
-          } else {
-            const selectedText = model.getValueInRange(e.selection);
-            if (selectedText && selectedText.trim().length > 0) {
-              const startLine = e.selection.startLineNumber;
-              const endLine = e.selection.endLineNumber;
-              activeSelectionContext = { startLine, endLine, text: selectedText };
-              const activeTab = openTabs.find(t => t.id === activeTabId);
-              const fname = activeTab ? activeTab.name : 'selection';
-              if (selLabel) selLabel.textContent = `${fname}:${startLine}-${endLine}`;
-              if (selPill) selPill.classList.remove('hidden');
-            } else {
-              activeSelectionContext = null;
-              if (selPill) selPill.classList.add('hidden');
-            }
-          }
-          updateContextWindowMeter();
         });
 
         // Setup Save Shortcut (Ctrl+S) inside Monaco
@@ -327,9 +286,6 @@
       if (tabEl) {
         tabEl.classList.toggle('dirty', isDirty);
       }
-      if (tab.id === activeTabId) {
-        updateBreadcrumbsAndStatus(tab);
-      }
     }
   }
 
@@ -347,9 +303,7 @@
       if (typeof window.showToast === 'function') {
         window.showToast(`Saved ${tab.name}`);
       }
-      updateBreadcrumbsAndStatus(tab);
       refreshGitStatus();
-      window.dispatchEvent(new CustomEvent('sparx:file-saved'));
     }
   }
 
@@ -378,171 +332,13 @@
 
   function updateDockedContextLabel() {
     const label = document.getElementById('docked-active-file-label');
-    const pill = document.getElementById('docked-file-context-pill');
+    if (!label) return;
     const activeTab = openTabs.find(t => t.id === activeTabId);
-
-    if (label) {
-      label.textContent = activeTab ? (activeTab.relativePath || activeTab.name) : 'No file';
+    if (activeTab) {
+      label.textContent = activeTab.relativePath || activeTab.name;
+    } else {
+      label.textContent = 'No file open in editor';
     }
-    if (pill) {
-      pill.classList.toggle('excluded', !includeActiveFileInContext || !activeTab);
-    }
-
-    updateBreadcrumbsAndStatus(activeTab);
-    updateContextWindowMeter();
-  }
-
-  function updateBreadcrumbsAndStatus(activeTab) {
-    const bcPath = document.getElementById('ide-breadcrumbs-path');
-    const saveState = document.getElementById('ide-save-state');
-    const langEl = document.getElementById('status-language');
-
-    if (bcPath) {
-      if (!activeTab) {
-        bcPath.innerHTML = '<span class="breadcrumb-muted">No file open</span>';
-      } else {
-        const rel = activeTab.relativePath || activeTab.name;
-        const parts = rel.split(/[\\/]/).filter(Boolean);
-        bcPath.innerHTML = parts.map((seg, i) => {
-          const isLast = i === parts.length - 1;
-          return `<span class="breadcrumb-segment ${isLast ? 'current' : ''}">${escapeHTML(seg)}</span>` +
-                 (isLast ? '' : '<span class="breadcrumb-sep">›</span>');
-        }).join('');
-      }
-    }
-
-    if (saveState) {
-      if (!activeTab) {
-        saveState.textContent = '';
-        saveState.classList.remove('dirty');
-      } else if (activeTab.dirty) {
-        saveState.textContent = 'Unsaved changes';
-        saveState.classList.add('dirty');
-      } else {
-        saveState.textContent = 'Saved';
-        saveState.classList.remove('dirty');
-      }
-    }
-
-    if (langEl) {
-      if (!activeTab) {
-        langEl.textContent = 'Plain Text';
-      } else {
-        const lang = getLanguageForExt(activeTab.extension || '');
-        langEl.textContent = lang.charAt(0).toUpperCase() + lang.slice(1);
-      }
-    }
-  }
-
-  function estimateTokens(str) {
-    if (!str) return 0;
-    return Math.ceil(String(str).length / 4);
-  }
-
-  function formatCompactTokens(n) {
-    if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-    return String(n);
-  }
-
-  function updateContextWindowMeter() {
-    const sysTokens = 450; // Base IDE system prompt
-    let activeTokens = 0;
-    const activeTab = openTabs.find(t => t.id === activeTabId);
-    if (activeTab && includeActiveFileInContext) {
-      const code = activeTab.model ? activeTab.model.getValue() : activeTab.content;
-      activeTokens += estimateTokens(code);
-    }
-    if (activeSelectionContext && activeSelectionContext.text) {
-      activeTokens += estimateTokens(activeSelectionContext.text);
-    }
-
-    let attachedTokens = 0;
-    attachedContextFiles.forEach(f => {
-      attachedTokens += estimateTokens(f.content || '');
-    });
-
-    let historyTokens = 0;
-    dockedMessages.forEach(m => {
-      historyTokens += estimateTokens(m.content || '');
-    });
-
-    const totalTokens = sysTokens + activeTokens + attachedTokens + historyTokens;
-    const pct = Math.min(100, Math.round((totalTokens / CONTEXT_LIMIT_TOKENS) * 100));
-
-    // Update SVG Ring & Footer Label
-    const ringFill = document.getElementById('ctx-ring-fill');
-    const pctLabel = document.getElementById('ide-context-pct-label');
-    if (ringFill) {
-      const circumference = 43.98;
-      const offset = circumference - (pct / 100) * circumference;
-      ringFill.style.strokeDashoffset = String(offset);
-      ringFill.style.stroke = pct > 80 ? '#f85149' : (pct > 55 ? '#e3b341' : '#d97757');
-    }
-    if (pctLabel) pctLabel.textContent = `${pct}%`;
-
-    // Update Status Bar Context Indicator
-    const statusCtx = document.getElementById('status-context-label');
-    if (statusCtx) {
-      statusCtx.textContent = `${formatCompactTokens(totalTokens)} / 128k ctx`;
-    }
-
-    // Update Context Popover Breakdown
-    const popPct = document.getElementById('context-pop-pct');
-    const popBar = document.getElementById('context-pop-bar-fill');
-    const popTotal = document.getElementById('context-pop-total');
-    const elSys = document.getElementById('ctx-tokens-system');
-    const elAct = document.getElementById('ctx-tokens-active');
-    const elAtt = document.getElementById('ctx-tokens-attached');
-    const elHis = document.getElementById('ctx-tokens-history');
-
-    if (popPct) popPct.textContent = `${pct}%`;
-    if (popBar) {
-      popBar.style.width = `${pct}%`;
-      popBar.className = 'context-pop-bar-fill' + (pct > 80 ? ' high' : (pct > 55 ? ' warn' : ''));
-    }
-    if (popTotal) popTotal.textContent = `${totalTokens.toLocaleString()} / ${CONTEXT_LIMIT_TOKENS.toLocaleString()} tokens`;
-    if (elSys) elSys.textContent = formatCompactTokens(sysTokens);
-    if (elAct) elAct.textContent = formatCompactTokens(activeTokens);
-    if (elAtt) elAtt.textContent = formatCompactTokens(attachedTokens);
-    if (elHis) elHis.textContent = formatCompactTokens(historyTokens);
-  }
-
-  function renderAttachedContextChips() {
-    const container = document.getElementById('docked-extra-chips');
-    if (!container) return;
-    container.innerHTML = '';
-    attachedContextFiles.forEach((f, idx) => {
-      const chip = document.createElement('span');
-      chip.className = 'docked-extra-chip';
-      chip.title = f.relativePath || f.path;
-      chip.innerHTML = `<span>@${escapeHTML(f.name)}</span><button class="ctx-pill-toggle" type="button" title="Remove">×</button>`;
-      chip.querySelector('.ctx-pill-toggle').addEventListener('click', () => {
-        attachedContextFiles.splice(idx, 1);
-        renderAttachedContextChips();
-        updateContextWindowMeter();
-      });
-      container.appendChild(chip);
-    });
-  }
-
-  async function attachFileToContext(fileEntry) {
-    if (!fileEntry || !fileEntry.path) return;
-    if (attachedContextFiles.some(f => f.path === fileEntry.path)) return;
-    let content = '';
-    if (window.electronAPI && window.electronAPI.ideReadFile) {
-      try {
-        const res = await window.electronAPI.ideReadFile(fileEntry.path);
-        if (res && res.success) content = res.content || '';
-      } catch (e) {}
-    }
-    attachedContextFiles.push({
-      path: fileEntry.path,
-      relativePath: fileEntry.relativePath || fileEntry.name,
-      name: fileEntry.name,
-      content
-    });
-    renderAttachedContextChips();
-    updateContextWindowMeter();
   }
 
   // --------------------------------------------------------------------------
@@ -604,30 +400,6 @@
     targetTab.model.setValue(newCode);
     markTabDirty(targetTab.id, true);
 
-    // Render real Monaco Diff Editor if available
-    const edContainer = document.getElementById('monaco-editor-container');
-    const diffContainer = document.getElementById('monaco-diff-container');
-    if (monacoInstance && diffContainer && edContainer) {
-      edContainer.classList.add('hidden');
-      diffContainer.classList.remove('hidden');
-      if (!activeDiffEditor) {
-        activeDiffEditor = monacoInstance.editor.createDiffEditor(diffContainer, {
-          theme: 'sparx-dark',
-          automaticLayout: true,
-          readOnly: true,
-          renderSideBySide: true,
-          fontFamily: "'Cascadia Code', 'Cascadia Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace",
-          fontSize: 13,
-          lineHeight: 20
-        });
-      }
-      const lang = getLanguageForExt(targetTab.extension || '');
-      const origModel = monacoInstance.editor.createModel(currentText, lang);
-      const modModel = monacoInstance.editor.createModel(newCode, lang);
-      activeDiffEditor.setModel({ original: origModel, modified: modModel });
-      pendingDiffData.diffModels = { origModel, modModel };
-    }
-
     // Show Diff Review Banner at top of editor
     const banner = document.getElementById('ide-diff-review-banner');
     const bannerTitle = document.getElementById('diff-banner-title');
@@ -635,33 +407,17 @@
 
     if (banner) {
       banner.classList.remove('hidden');
-      if (bannerTitle) bannerTitle.textContent = `Reviewing Diff: ${targetTab.name}`;
+      if (bannerTitle) bannerTitle.textContent = `AI Changes: ${targetTab.name}`;
       if (bannerStats) bannerStats.textContent = `~${diffCount} lines changed`;
     }
 
     if (typeof window.showToast === 'function') {
-      window.showToast('Review diff and Accept or Reject.');
+      window.showToast('AI changes loaded in buffer. Review and Accept or Reject.');
     }
-  }
-
-  function closeDiffView() {
-    const edContainer = document.getElementById('monaco-editor-container');
-    const diffContainer = document.getElementById('monaco-diff-container');
-    if (diffContainer) diffContainer.classList.add('hidden');
-    if (edContainer) edContainer.classList.remove('hidden');
-    if (activeDiffEditor) {
-      try { activeDiffEditor.setModel(null); } catch (e) {}
-    }
-    if (pendingDiffData && pendingDiffData.diffModels) {
-      try { pendingDiffData.diffModels.origModel.dispose(); } catch (e) {}
-      try { pendingDiffData.diffModels.modModel.dispose(); } catch (e) {}
-    }
-    if (activeEditor) activeEditor.layout();
   }
 
   function acceptPendingDiff() {
     if (!pendingDiffData) return;
-    closeDiffView();
     const banner = document.getElementById('ide-diff-review-banner');
     if (banner) banner.classList.add('hidden');
 
@@ -669,13 +425,12 @@
     pendingDiffData = null;
 
     if (typeof window.showToast === 'function') {
-      window.showToast('Changes accepted and saved.');
+      window.showToast('✓ Changes accepted and saved to file.');
     }
   }
 
   function rejectPendingDiff() {
     if (!pendingDiffData) return;
-    closeDiffView();
     const tab = openTabs.find(t => t.id === pendingDiffData.tabId);
     if (tab && tab.model) {
       tab.model.setValue(pendingDiffData.originalText);
@@ -859,258 +614,83 @@
     }
   }
 
-  function stopDockedStreaming() {
-    if (!isDockedStreaming) return;
-    isDockedStreaming = false;
-    if (window.electronAPI && typeof window.electronAPI.cancelChat === 'function') {
-      window.electronAPI.cancelChat();
-    }
-    const sendBtn = document.getElementById('btn-docked-send');
-    if (sendBtn) {
-      sendBtn.classList.remove('streaming');
-      sendBtn.title = 'Send (Enter)';
-      sendBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>';
-    }
-  }
-
-  function restoreCheckpoint(snapshot) {
-    if (!Array.isArray(snapshot) || snapshot.length === 0) return;
-    let restoredCount = 0;
-    snapshot.forEach(item => {
-      const tab = openTabs.find(t => t.path === item.path);
-      if (tab && tab.model) {
-        tab.model.setValue(item.content);
-        markTabDirty(tab.id, item.content !== tab.originalContent);
-        restoredCount++;
-      }
-    });
-    if (typeof window.showToast === 'function') {
-      window.showToast(`Restored checkpoint (${restoredCount} file${restoredCount === 1 ? '' : 's'}).`);
-    }
-  }
-
-  async function handleSendDockedMessage(overridePrompt = null) {
+  async function handleSendDockedMessage() {
     const textarea = document.getElementById('docked-chat-textarea');
     const transcript = document.getElementById('docked-chat-transcript');
     const welcomeCard = document.getElementById('docked-welcome-card');
-    const modeSelect = document.getElementById('ide-agent-mode-select');
-    const modelSelect = document.getElementById('ide-model-select');
-    if (!transcript) return;
+    if (!textarea || !transcript || isDockedStreaming) return;
 
-    if (isDockedStreaming) {
-      stopDockedStreaming();
-      return;
-    }
-
-    const text = (typeof overridePrompt === 'string' ? overridePrompt : (textarea ? textarea.value : '')).trim();
+    const text = textarea.value.trim();
     if (!text) return;
 
-    if (!overridePrompt && textarea) {
-      textarea.value = '';
-      textarea.style.height = 'auto';
-    }
+    textarea.value = '';
+    textarea.style.height = 'auto';
 
     if (welcomeCard) welcomeCard.style.display = 'none';
-
-    const agentMode = modeSelect ? modeSelect.value : 'agent';
-    const selectedModel = modelSelect ? modelSelect.value : 'gemini-4-hydrogen';
-
-    // Capture checkpoint of open tabs before this AI turn
-    const turnCheckpoint = openTabs.map(t => ({
-      path: t.path,
-      content: t.model ? t.model.getValue() : t.content
-    }));
-
-    // Collect context badges for display
-    const contextTags = [];
-    const activeTab = openTabs.find(t => t.id === activeTabId);
-    if (activeTab && includeActiveFileInContext) {
-      contextTags.push(activeTab.name);
-    }
-    if (activeSelectionContext) {
-      contextTags.push(`L${activeSelectionContext.startLine}-${activeSelectionContext.endLine}`);
-    }
-    attachedContextFiles.forEach(f => contextTags.push(`@${f.name}`));
 
     // 1. Append User Bubble
     const userMsg = { role: 'user', content: text };
     dockedMessages.push(userMsg);
-    appendDockedBubble('user', text, contextTags);
-    updateContextWindowMeter();
+    appendDockedBubble('user', text);
 
-    // 2. Build full multi-file + selection + workspace context block
-    const contextBlocks = [];
-    if (currentWorkspaceTree && currentWorkspaceTree.name) {
-      const openNames = openTabs.map(t => t.relativePath || t.name).join(', ');
-      contextBlocks.push(`[Workspace: ${currentWorkspaceTree.name}${openNames ? ` | Open tabs: ${openNames}` : ''}]`);
-    }
-    if (activeTab && includeActiveFileInContext) {
+    // 2. Gather active file context
+    const activeTab = openTabs.find(t => t.id === activeTabId);
+    let contextualUserPrompt = text;
+    if (activeTab) {
       const code = activeTab.model ? activeTab.model.getValue() : activeTab.content;
-      contextBlocks.push(`[Active File: ${activeTab.relativePath || activeTab.name}]\n\`\`\`${(activeTab.extension || '').replace('.', '')}\n${code}\n\`\`\``);
+      contextualUserPrompt = `${text}\n\n[Active File Context: ${activeTab.relativePath || activeTab.name}]\n\`\`\`${activeTab.extension.replace('.', '')}\n${code}\n\`\`\``;
     }
-    if (activeSelectionContext && activeSelectionContext.text) {
-      contextBlocks.push(`[Selected Lines ${activeSelectionContext.startLine}-${activeSelectionContext.endLine}]\n\`\`\`\n${activeSelectionContext.text}\n\`\`\``);
-    }
-    attachedContextFiles.forEach(f => {
-      contextBlocks.push(`[Attached File: ${f.relativePath || f.name}]\n\`\`\`\n${f.content || ''}\n\`\`\``);
-    });
 
-    const contextualUserPrompt = contextBlocks.length > 0
-      ? `${text}\n\n${contextBlocks.join('\n\n')}`
-      : text;
-
-    const modeDirectives = {
-      agent: 'Mode: AGENT. Inspect relevant files first, make clean surgical edits or provide complete fenced code blocks, and verify changes.',
-      ask: 'Mode: ASK (Read-Only). Answer questions clearly and concisely based on the provided code context without modifying files.',
-      plan: 'Mode: PLAN. Produce a crisp, actionable architectural and implementation plan before writing any code.'
-    };
-
-    const systemPrompt = `You are Sparx, an authentic, senior AI software engineer embedded in the IDE. ${modeDirectives[agentMode] || modeDirectives.agent} Provide clean, idiomatic, production-ready code using markdown code blocks. Be direct, practical, and free of filler.`;
-
-    // Build message payload preserving conversation history
-    const historyWindow = dockedMessages.slice(-16, -1).map(m => ({ role: m.role, content: m.content }));
-    const payloadMessages = [
-      { role: 'system', content: systemPrompt },
-      ...historyWindow,
-      { role: 'user', content: contextualUserPrompt }
-    ];
-
-    // 3. Create Assistant Live Bubble with Trace & Checkpoint
+    // 3. Create Assistant Live Bubble
     isDockedStreaming = true;
-    const sendBtn = document.getElementById('btn-docked-send');
-    if (sendBtn) {
-      sendBtn.classList.add('streaming');
-      sendBtn.title = 'Stop generating';
-      sendBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><rect x="2" y="2" width="8" height="8" rx="1.5"/></svg>';
-    }
-
-    const assistantHandle = appendDockedBubble('assistant', 'Thinking...', [], turnCheckpoint);
-    const assistantBubble = assistantHandle.contentEl;
-    const traceDetails = assistantHandle.traceDetails;
-    const traceSummary = assistantHandle.traceSummary;
-    const traceSteps = assistantHandle.traceSteps;
-    const traceReasoning = assistantHandle.traceReasoning;
-
+    const assistantBubble = appendDockedBubble('assistant', 'Thinking...');
     let assistantText = '';
-    let reasoningText = '';
-    let stepCount = 0;
 
-    const addTraceStep = (label) => {
-      if (!traceDetails || !traceSteps) return;
-      traceDetails.classList.remove('hidden');
-      stepCount++;
-      const stepEl = document.createElement('div');
-      stepEl.className = 'docked-trace-step';
-      stepEl.textContent = `• ${label}`;
-      traceSteps.appendChild(stepEl);
-      if (traceSummary) traceSummary.textContent = `Working (${stepCount} step${stepCount === 1 ? '' : 's'})`;
-    };
-
-    const unsubStatus = window.electronAPI.onChatStatus ? window.electronAPI.onChatStatus((st) => {
-      if (!isDockedStreaming || !st) return;
-      if (st.details) addTraceStep(st.details);
-    }) : null;
-
-    const unsubTool = window.electronAPI.onToolResult ? window.electronAPI.onToolResult((res) => {
-      if (!isDockedStreaming || !res) return;
-      addTraceStep(`Tool: ${res.tool || 'action'} completed`);
-    }) : null;
-
-    const unsubReasoning = window.electronAPI.onReasoningChunk ? window.electronAPI.onReasoningChunk((chunk) => {
-      if (!isDockedStreaming) return;
-      const rTxt = (chunk && chunk.text) || (typeof chunk === 'string' ? chunk : '');
-      if (rTxt && traceDetails && traceReasoning) {
-        traceDetails.classList.remove('hidden');
-        reasoningText += rTxt;
-        traceReasoning.textContent = reasoningText;
-        if (traceSummary && stepCount === 0) traceSummary.textContent = 'Reasoning';
-      }
-    }) : null;
-
+    // Stream handlers
     const unsubChunk = window.electronAPI.onStreamChunk((chunk) => {
       if (!isDockedStreaming) return;
-      const chunkStr = (chunk && chunk.text) || (typeof chunk === 'string' ? chunk : '');
-      assistantText += chunkStr;
+      const text = (chunk && chunk.text) || (typeof chunk === 'string' ? chunk : '');
+      assistantText += text;
       renderDockedAssistantContent(assistantBubble, assistantText);
       transcript.scrollTop = transcript.scrollHeight;
     });
 
-    const cleanupListeners = () => {
-      if (unsubChunk) unsubChunk();
-      if (unsubEnd) unsubEnd();
-      if (unsubStatus) unsubStatus();
-      if (unsubTool) unsubTool();
-      if (unsubReasoning) unsubReasoning();
-    };
-
     const unsubEnd = window.electronAPI.onStreamEnd((data) => {
       isDockedStreaming = false;
-      cleanupListeners();
-      if (sendBtn) {
-        sendBtn.classList.remove('streaming');
-        sendBtn.title = 'Send (Enter)';
-        sendBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>';
-      }
-      if (traceSummary && (stepCount > 0 || reasoningText)) {
-        traceSummary.textContent = stepCount > 0 ? `Completed ${stepCount} step${stepCount === 1 ? '' : 's'}` : 'Thought process';
-      }
+      if (unsubChunk) unsubChunk();
+      if (unsubEnd) unsubEnd();
       const finalTxt = (data && data.fullText) || assistantText || 'Done.';
       renderDockedAssistantContent(assistantBubble, finalTxt);
       dockedMessages.push({ role: 'assistant', content: finalTxt });
-      updateContextWindowMeter();
     });
 
     // Send to backend
     window.electronAPI.sendMessage({
-      messages: payloadMessages,
-      model: selectedModel,
-      mode: agentMode === 'agent' ? 'work' : 'ide'
+      messages: [
+        { role: 'system', content: 'You are Sparx, a world-class coding AI assistant embedded in the IDE. Provide concise, clean, production-ready code. Whenever providing code modifications or snippets, use markdown code blocks. Keep conversation calm, unbothered, and concise; respond to casual slang, banter, or unclear non-action messages with a short, natural redirect.' },
+        { role: 'user', content: contextualUserPrompt }
+      ],
+      model: 'sparx-3.9-flash',
+      mode: 'ide'
     });
   }
 
-  function appendDockedBubble(role, content, contextTags = [], checkpointSnapshot = null) {
+  function appendDockedBubble(role, content) {
     const transcript = document.getElementById('docked-chat-transcript');
     if (!transcript) return null;
 
-    const tagsHtml = (role === 'user' && Array.isArray(contextTags) && contextTags.length > 0)
-      ? `<div class="docked-msg-context-tags">${contextTags.map(t => `<span class="docked-msg-ctx-badge">${escapeHTML(t)}</span>`).join('')}</div>`
-      : '';
-
     const msgEl = document.createElement('div');
     msgEl.className = `docked-msg ${role}`;
-
-    const hasRestore = role === 'assistant' && Array.isArray(checkpointSnapshot) && checkpointSnapshot.length > 0;
-
     msgEl.innerHTML = `
-      <div class="docked-msg-header-row">
-        <div class="docked-msg-role">${role === 'user' ? 'You' : 'Sparx'}</div>
-        ${hasRestore ? '<button class="docked-restore-btn" type="button" title="Restore open files to before this turn">↺ Restore</button>' : ''}
+      <div class="docked-msg-role">
+        ${role === 'user' ? 'You' : '<span style="color:#38bdf8;">✦ Sparx</span>'}
       </div>
-      ${tagsHtml}
-      ${role === 'assistant' ? '<details class="docked-trace-details hidden"><summary class="docked-trace-summary">Thinking</summary><div class="docked-trace-steps"></div><div class="docked-trace-reasoning"></div></details>' : ''}
       <div class="docked-msg-content">${escapeHTML(content)}</div>
     `;
 
-    if (hasRestore) {
-      const restoreBtn = msgEl.querySelector('.docked-restore-btn');
-      if (restoreBtn) {
-        restoreBtn.addEventListener('click', () => restoreCheckpoint(checkpointSnapshot));
-      }
-    }
-
     transcript.appendChild(msgEl);
     transcript.scrollTop = transcript.scrollHeight;
-
-    if (role === 'user') {
-      return msgEl.querySelector('.docked-msg-content');
-    }
-    return {
-      contentEl: msgEl.querySelector('.docked-msg-content'),
-      traceDetails: msgEl.querySelector('.docked-trace-details'),
-      traceSummary: msgEl.querySelector('.docked-trace-summary'),
-      traceSteps: msgEl.querySelector('.docked-trace-steps'),
-      traceReasoning: msgEl.querySelector('.docked-trace-reasoning')
-    };
+    return msgEl.querySelector('.docked-msg-content');
   }
 
   function renderDockedAssistantContent(container, markdownText) {
@@ -1259,10 +839,9 @@
     currentGitInfo = git;
 
     const branchEl = document.getElementById('git-branch-name');
-    const statusBranchEl = document.getElementById('status-git-branch');
-    const branchText = git && git.branch ? git.branch : 'main';
-    if (branchEl) branchEl.textContent = git && git.branch ? git.branch : 'No Git Repo';
-    if (statusBranchEl) statusBranchEl.textContent = branchText;
+    if (branchEl) {
+      branchEl.textContent = git && git.branch ? git.branch : 'No Git Repo';
+    }
 
     const list = document.getElementById('git-files-list');
     if (!list) return;
@@ -1398,33 +977,19 @@
   // 10. View & Mode Switching (Sparx Chat Mode)
   // --------------------------------------------------------------------------
   function switchMode(mode) {
-    const nextMode = mode === 'ide' ? 'ide' : 'chat';
-    currentMode = nextMode;
+    currentMode = 'chat';
     const shell = document.getElementById('app-shell');
     const stage = document.getElementById('ide-workspace-stage');
     const btnChat = document.getElementById('btn-mode-chat');
     const btnIde = document.getElementById('btn-mode-ide');
-    const chatSidebar = document.getElementById('sidebar-panel');
 
     if (!shell) return;
 
-    if (nextMode === 'ide') {
-      shell.classList.remove('mode-chat');
-      shell.classList.add('mode-ide');
-      if (stage) stage.classList.remove('hidden');
-      if (chatSidebar) chatSidebar.classList.add('hidden');
-      if (btnIde) btnIde.classList.add('active');
-      if (btnChat) btnChat.classList.remove('active');
-      if (activeEditor) setTimeout(() => activeEditor.layout(), 60);
-      if (terminalFitAddon && activeTerminal) setTimeout(() => terminalFitAddon.fit(), 80);
-    } else {
-      shell.classList.remove('mode-ide');
-      shell.classList.add('mode-chat');
-      if (stage) stage.classList.add('hidden');
-      if (chatSidebar) chatSidebar.classList.remove('hidden');
-      if (btnIde) btnIde.classList.remove('active');
-      if (btnChat) btnChat.classList.add('active');
-    }
+    shell.classList.remove('mode-ide');
+    shell.classList.add('mode-chat');
+    if (stage) stage.classList.add('hidden');
+    if (btnIde) btnIde.classList.remove('active');
+    if (btnChat) btnChat.classList.add('active');
   }
 
   function switchSidebarTab(tabName) {
@@ -1521,251 +1086,24 @@
     const dockedTextarea = document.getElementById('docked-chat-textarea');
     const btnDockedVoice = document.getElementById('btn-docked-voice');
 
-    function resetDockedThread() {
-      dockedMessages = [];
-      attachedContextFiles = [];
-      renderAttachedContextChips();
-      const transcript = document.getElementById('docked-chat-transcript');
-      const welcomeCard = document.getElementById('docked-welcome-card');
-      if (transcript) transcript.innerHTML = '';
-      if (welcomeCard && transcript) {
-        transcript.appendChild(welcomeCard);
-        welcomeCard.style.display = 'block';
-      }
-      updateContextWindowMeter();
-    }
-
-    function compactDockedThread() {
-      if (dockedMessages.length <= 4) {
-        if (typeof window.showToast === 'function') window.showToast('Context is already compact.');
-        return;
-      }
-      const kept = dockedMessages.slice(-4);
-      const droppedCount = dockedMessages.length - kept.length;
-      dockedMessages = [
-        { role: 'assistant', content: `[Compacted ${droppedCount} earlier messages to free context window]` },
-        ...kept
-      ];
-      updateContextWindowMeter();
-      if (typeof window.showToast === 'function') {
-        window.showToast(`Compacted ${droppedCount} messages.`);
-      }
-    }
-
     if (btnToggleCopilot) btnToggleCopilot.addEventListener('click', toggleCopilotDock);
     if (btnDockedCollapse) btnDockedCollapse.addEventListener('click', toggleCopilotDock);
-    if (btnDockedNewChat) btnDockedNewChat.addEventListener('click', resetDockedThread);
-
-    // Context Window Popover & Controls
-    const ctxPopover = document.getElementById('ide-context-popover');
-    const btnCtxMeter = document.getElementById('btn-ide-context-meter');
-    const btnStatusCtx = document.getElementById('status-context-btn');
-    const btnCtxCompact = document.getElementById('btn-ctx-compact');
-    const btnDockedCompact = document.getElementById('btn-docked-compact');
-    const btnCtxClear = document.getElementById('btn-ctx-clear');
-
-    const toggleCtxPopover = (e) => {
-      e.stopPropagation();
-      if (!ctxPopover) return;
-      updateContextWindowMeter();
-      ctxPopover.classList.toggle('hidden');
-    };
-    if (btnCtxMeter) btnCtxMeter.addEventListener('click', toggleCtxPopover);
-    if (btnStatusCtx) btnStatusCtx.addEventListener('click', toggleCtxPopover);
-    if (btnCtxCompact) btnCtxCompact.addEventListener('click', () => { compactDockedThread(); if (ctxPopover) ctxPopover.classList.add('hidden'); });
-    if (btnDockedCompact) btnDockedCompact.addEventListener('click', compactDockedThread);
-    if (btnCtxClear) btnCtxClear.addEventListener('click', () => { resetDockedThread(); if (ctxPopover) ctxPopover.classList.add('hidden'); });
-
-    document.addEventListener('click', (e) => {
-      if (ctxPopover && !ctxPopover.classList.contains('hidden')) {
-        if (!ctxPopover.contains(e.target) && e.target !== btnCtxMeter && e.target !== btnStatusCtx) {
-          ctxPopover.classList.add('hidden');
-        }
-      }
-    });
-
-    // Toggle active file inclusion
-    const btnToggleActiveFileCtx = document.getElementById('btn-toggle-active-file-ctx');
-    if (btnToggleActiveFileCtx) {
-      btnToggleActiveFileCtx.addEventListener('click', (e) => {
-        e.stopPropagation();
-        includeActiveFileInContext = !includeActiveFileInContext;
-        updateDockedContextLabel();
-      });
-    }
-
-    // @ Mention File Picker
-    const mentionPopup = document.getElementById('ide-mention-popup');
-    const mentionList = document.getElementById('ide-mention-list');
-    const btnAddContext = document.getElementById('btn-docked-add-context');
-
-    async function openMentionPopup(query = '') {
-      if (!mentionPopup || !mentionList) return;
-      if (quickFilesCache.length === 0 && window.electronAPI && window.electronAPI.ideListAllFiles) {
-        try {
-          const res = await window.electronAPI.ideListAllFiles();
-          if (res && res.success && Array.isArray(res.files)) {
-            quickFilesCache = res.files;
-          }
-        } catch (e) {}
-      }
-      const q = query.trim().toLowerCase();
-      mentionFilteredFiles = quickFilesCache
-        .filter(f => !q || (f.name && f.name.toLowerCase().includes(q)) || (f.relativePath && f.relativePath.toLowerCase().includes(q)))
-        .slice(0, 12);
-
-      mentionList.innerHTML = '';
-      if (mentionFilteredFiles.length === 0) {
-        mentionList.innerHTML = '<div class="ide-mention-item" style="color:#71717a;">No matching files</div>';
-      } else {
-        if (mentionSelectedIndex >= mentionFilteredFiles.length) mentionSelectedIndex = 0;
-        mentionFilteredFiles.forEach((f, idx) => {
-          const item = document.createElement('div');
-          item.className = `ide-mention-item ${idx === mentionSelectedIndex ? 'selected' : ''}`;
-          item.innerHTML = `<span>${escapeHTML(f.name)}</span><span class="ide-mention-path">${escapeHTML(f.relativePath || '')}</span>`;
-          item.addEventListener('click', () => {
-            attachFileToContext(f);
-            if (dockedTextarea) {
-              dockedTextarea.value = dockedTextarea.value.replace(/@[^\s]*$/, '');
-              dockedTextarea.focus();
-            }
-            mentionPopup.classList.add('hidden');
-          });
-          mentionList.appendChild(item);
-        });
-      }
-      mentionPopup.classList.remove('hidden');
-    }
-
-    if (btnAddContext) {
-      btnAddContext.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (mentionPopup && !mentionPopup.classList.contains('hidden')) {
-          mentionPopup.classList.add('hidden');
-        } else {
-          openMentionPopup('');
+    if (btnDockedNewChat) {
+      btnDockedNewChat.addEventListener('click', () => {
+        dockedMessages = [];
+        const transcript = document.getElementById('docked-chat-transcript');
+        const welcomeCard = document.getElementById('docked-welcome-card');
+        if (transcript) transcript.innerHTML = '';
+        if (welcomeCard) {
+          transcript.appendChild(welcomeCard);
+          welcomeCard.style.display = 'block';
         }
       });
     }
-
-    // Bottom Panel Tabs (Terminal, Problems, Output) + Maximize
-    function switchBottomPanelTab(tabName) {
-      document.querySelectorAll('.ide-panel-tab').forEach(b => {
-        b.classList.toggle('active', b.getAttribute('data-panel-tab') === tabName);
-      });
-      const termBody = document.getElementById('xterm-terminal-container');
-      const probPane = document.getElementById('ide-problems-pane');
-      const outPane = document.getElementById('ide-output-pane');
-      if (termBody) termBody.classList.toggle('hidden', tabName !== 'terminal');
-      if (probPane) probPane.classList.toggle('hidden', tabName !== 'problems');
-      if (outPane) outPane.classList.toggle('hidden', tabName !== 'output');
-      if (tabName === 'terminal' && terminalFitAddon && activeTerminal) {
-        setTimeout(() => terminalFitAddon.fit(), 40);
-      }
-    }
-
-    document.querySelectorAll('.ide-panel-tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const t = btn.getAttribute('data-panel-tab');
-        if (t) switchBottomPanelTab(t);
-      });
-    });
-
-    const btnMaxTerm = document.getElementById('btn-maximize-terminal');
-    if (btnMaxTerm) {
-      btnMaxTerm.addEventListener('click', () => {
-        const dock = document.getElementById('ide-terminal-dock');
-        if (dock) {
-          dock.classList.toggle('maximized');
-          if (terminalFitAddon && activeTerminal) setTimeout(() => terminalFitAddon.fit(), 60);
-          if (activeEditor) setTimeout(() => activeEditor.layout(), 60);
-        }
-      });
-    }
-
-    // Status Bar Action Buttons
-    const statusGitBtn = document.getElementById('status-git-branch-btn');
-    const statusProbBtn = document.getElementById('status-problems-btn');
-    const statusTermBtn = document.getElementById('status-terminal-btn');
-    if (statusGitBtn) statusGitBtn.addEventListener('click', () => switchSidebarTab('git'));
-    if (statusProbBtn) statusProbBtn.addEventListener('click', () => {
-      const dock = document.getElementById('ide-terminal-dock');
-      if (dock && dock.classList.contains('collapsed')) toggleTerminalDock();
-      switchBottomPanelTab('problems');
-    });
-    if (statusTermBtn) statusTermBtn.addEventListener('click', toggleTerminalDock);
-
-    // Split-Pane Drag Resizers
-    function setupResizer(resizerId, targetId, direction, invert = false, minSize = 160, maxSize = 600) {
-      const resizer = document.getElementById(resizerId);
-      const target = document.getElementById(targetId);
-      if (!resizer || !target) return;
-
-      resizer.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        resizer.classList.add('dragging');
-        const startPos = direction === 'v' ? e.clientX : e.clientY;
-        const startSize = direction === 'v' ? target.getBoundingClientRect().width : target.getBoundingClientRect().height;
-
-        const onMove = (moveEvent) => {
-          const delta = (direction === 'v' ? moveEvent.clientX : moveEvent.clientY) - startPos;
-          const next = Math.max(minSize, Math.min(maxSize, startSize + (invert ? -delta : delta)));
-          if (direction === 'v') {
-            target.style.width = `${next}px`;
-          } else {
-            target.style.height = `${next}px`;
-          }
-          if (activeEditor) activeEditor.layout();
-          if (terminalFitAddon && activeTerminal) terminalFitAddon.fit();
-        };
-
-        const onUp = () => {
-          resizer.classList.remove('dragging');
-          window.removeEventListener('mousemove', onMove);
-          window.removeEventListener('mouseup', onUp);
-        };
-
-        window.addEventListener('mousemove', onMove);
-        window.addEventListener('mouseup', onUp);
-      });
-    }
-
-    setupResizer('ide-resizer-sidebar', 'ide-sidebar-pane', 'v', false, 170, 460);
-    setupResizer('ide-resizer-copilot', 'ide-docked-chat-pane', 'v', true, 300, 620);
-    setupResizer('ide-resizer-terminal', 'ide-terminal-dock', 'h', true, 110, 560);
-
-    // Sync initial context meter
-    updateContextWindowMeter();
 
     if (btnDockedSend) btnDockedSend.addEventListener('click', handleSendDockedMessage);
     if (dockedTextarea) {
       dockedTextarea.addEventListener('keydown', (e) => {
-        if (mentionPopup && !mentionPopup.classList.contains('hidden')) {
-          if (e.key === 'Escape') {
-            e.preventDefault();
-            mentionPopup.classList.add('hidden');
-            return;
-          }
-          if (e.key === 'ArrowDown' && mentionFilteredFiles.length > 0) {
-            e.preventDefault();
-            mentionSelectedIndex = (mentionSelectedIndex + 1) % mentionFilteredFiles.length;
-            openMentionPopup(dockedTextarea.value.match(/@([^\s]*)$/)?.[1] || '');
-            return;
-          }
-          if (e.key === 'ArrowUp' && mentionFilteredFiles.length > 0) {
-            e.preventDefault();
-            mentionSelectedIndex = (mentionSelectedIndex - 1 + mentionFilteredFiles.length) % mentionFilteredFiles.length;
-            openMentionPopup(dockedTextarea.value.match(/@([^\s]*)$/)?.[1] || '');
-            return;
-          }
-          if (e.key === 'Enter' && !e.shiftKey && mentionFilteredFiles[mentionSelectedIndex]) {
-            e.preventDefault();
-            attachFileToContext(mentionFilteredFiles[mentionSelectedIndex]);
-            dockedTextarea.value = dockedTextarea.value.replace(/@[^\s]*$/, '');
-            mentionPopup.classList.add('hidden');
-            return;
-          }
-        }
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           handleSendDockedMessage();
@@ -1773,13 +1111,7 @@
       });
       dockedTextarea.addEventListener('input', () => {
         dockedTextarea.style.height = 'auto';
-        dockedTextarea.style.height = Math.min(dockedTextarea.scrollHeight, 140) + 'px';
-        const match = dockedTextarea.value.match(/@([^\s]*)$/);
-        if (match) {
-          openMentionPopup(match[1]);
-        } else if (mentionPopup) {
-          mentionPopup.classList.add('hidden');
-        }
+        dockedTextarea.style.height = Math.min(dockedTextarea.scrollHeight, 120) + 'px';
       });
     }
 
@@ -1927,274 +1259,13 @@
       });
     }
 
-    // Live Frontend Preview Pane
-    const previewPane = document.getElementById('ide-preview-pane');
-    const previewFrame = document.getElementById('ide-live-preview-frame');
-    const previewLabel = document.getElementById('ide-preview-label');
-    const btnTogglePreview = document.getElementById('btn-toggle-preview');
-    const btnPreviewDesktop = document.getElementById('btn-preview-desktop');
-    const btnPreviewMobile = document.getElementById('btn-preview-mobile');
-    const btnPreviewReload = document.getElementById('btn-preview-reload');
-    const btnPreviewClose = document.getElementById('btn-preview-close');
-
-    function refreshLivePreview() {
-      if (!previewFrame || !previewPane || previewPane.classList.contains('hidden')) return;
-      const activeTab = openTabs.find(t => t.id === activeTabId);
-      let htmlDoc = '';
-      if (activeTab) {
-        const val = activeTab.model ? activeTab.model.getValue() : (activeTab.content || '');
-        const ext = (activeTab.extension || '').toLowerCase();
-        if (ext === '.html' || ext === '.htm') {
-          htmlDoc = val;
-          if (previewLabel) previewLabel.textContent = activeTab.name;
-        } else if (ext === '.css') {
-          htmlDoc = `<!DOCTYPE html><html><head><style>${val}</style></head><body style="font-family:sans-serif;padding:24px;"><h2>CSS Preview (${escapeHTML(activeTab.name)})</h2><button>Sample Button</button><div class="card" style="margin-top:12px;padding:12px;border:1px solid #ccc;">Sample Container</div></body></html>`;
-          if (previewLabel) previewLabel.textContent = `CSS: ${activeTab.name}`;
-        } else {
-          // Search open HTML tab or workspace index.html
-          const htmlTab = openTabs.find(t => t.extension === '.html' || t.extension === '.htm');
-          if (htmlTab) {
-            htmlDoc = htmlTab.model ? htmlTab.model.getValue() : htmlTab.content;
-            if (previewLabel) previewLabel.textContent = htmlTab.name;
-          } else {
-            htmlDoc = `<!DOCTYPE html><html><body style="font-family:system-ui;background:#0c0c0e;color:#a1a1aa;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;"><div style="text-align:center;"><div style="font-size:14px;color:#f4f4f5;margin-bottom:6px;">Frontend Live Preview</div><div style="font-size:12px;">Open an <code>.html</code> or <code>.css</code> file to preview live changes.</div></div></body></html>`;
-            if (previewLabel) previewLabel.textContent = 'Live Preview';
-          }
-        }
-      } else {
-        htmlDoc = `<!DOCTYPE html><html><body style="font-family:system-ui;background:#0c0c0e;color:#a1a1aa;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;"><div style="font-size:12px;">Open an <code>.html</code> file to preview.</div></body></html>`;
-      }
-      previewFrame.srcdoc = htmlDoc;
-    }
-
-    function togglePreviewPane() {
-      if (!previewPane) return;
-      const willShow = previewPane.classList.contains('hidden');
-      previewPane.classList.toggle('hidden', !willShow);
-      if (btnTogglePreview) btnTogglePreview.classList.toggle('active-copilot', willShow);
-      if (willShow) refreshLivePreview();
-      if (activeEditor) setTimeout(() => activeEditor.layout(), 60);
-    }
-
-    if (btnTogglePreview) btnTogglePreview.addEventListener('click', togglePreviewPane);
-    window.addEventListener('sparx:file-saved', refreshLivePreview);
-    if (btnPreviewClose) btnPreviewClose.addEventListener('click', togglePreviewPane);
-    if (btnPreviewReload) btnPreviewReload.addEventListener('click', refreshLivePreview);
-    if (btnPreviewDesktop && btnPreviewMobile && previewFrame) {
-      btnPreviewDesktop.addEventListener('click', () => {
-        previewFrame.classList.remove('mobile');
-        btnPreviewDesktop.classList.add('active');
-        btnPreviewMobile.classList.remove('active');
-      });
-      btnPreviewMobile.addEventListener('click', () => {
-        previewFrame.classList.add('mobile');
-        btnPreviewMobile.classList.add('active');
-        btnPreviewDesktop.classList.remove('active');
-      });
-    }
-
-    // Ctrl+K Floating Inline Edit Bar
-    const inlineBar = document.getElementById('ide-inline-edit-bar');
-    const inlineInput = document.getElementById('inline-edit-input');
-    const inlineScope = document.getElementById('inline-edit-scope');
-    const btnInlineClose = document.getElementById('btn-inline-edit-close');
-    const btnInlineSubmit = document.getElementById('btn-inline-edit-submit');
-
-    function openInlineEditBar() {
-      const activeTab = openTabs.find(t => t.id === activeTabId);
-      if (!activeTab || !inlineBar) {
-        if (typeof window.showToast === 'function') window.showToast('Open a file first to use inline edit.');
-        return;
-      }
-      if (inlineScope) {
-        inlineScope.textContent = activeSelectionContext
-          ? `${activeTab.name}:${activeSelectionContext.startLine}-${activeSelectionContext.endLine}`
-          : activeTab.name;
-      }
-      inlineBar.classList.remove('hidden');
-      if (inlineInput) {
-        inlineInput.value = '';
-        inlineInput.focus();
-      }
-    }
-
-    function closeInlineEditBar() {
-      if (inlineBar) inlineBar.classList.add('hidden');
-      if (activeEditor) activeEditor.focus();
-    }
-
-    async function submitInlineEdit() {
-      const instruction = inlineInput ? inlineInput.value.trim() : '';
-      const activeTab = openTabs.find(t => t.id === activeTabId);
-      if (!instruction || !activeTab) return;
-      closeInlineEditBar();
-
-      const fullCode = activeTab.model ? activeTab.model.getValue() : activeTab.content;
-      const selectionNote = activeSelectionContext
-        ? `Focus on lines ${activeSelectionContext.startLine}-${activeSelectionContext.endLine}:\n\`\`\`\n${activeSelectionContext.text}\n\`\`\`\n`
-        : '';
-
-      const prompt = `Edit \`${activeTab.relativePath || activeTab.name}\`: ${instruction}\n\n${selectionNote}Return the complete updated file inside a single fenced code block so it can be diffed directly.`;
-
-      // Ensure assistant pane is visible so user sees the stream + Apply button
-      const chatPane = document.getElementById('ide-docked-chat-pane');
-      if (chatPane && chatPane.classList.contains('collapsed')) {
-        toggleCopilotDock();
-      }
-      handleSendDockedMessage(prompt);
-    }
-
-    if (btnInlineClose) btnInlineClose.addEventListener('click', closeInlineEditBar);
-    if (btnInlineSubmit) btnInlineSubmit.addEventListener('click', submitInlineEdit);
-    if (inlineInput) {
-      inlineInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          e.preventDefault();
-          closeInlineEditBar();
-        } else if (e.key === 'Enter') {
-          e.preventDefault();
-          submitInlineEdit();
-        }
-      });
-    }
-
-    // Explorer New File / New Folder / Refresh Actions
-    const btnNewFile = document.getElementById('btn-new-file');
-    const btnNewFolder = document.getElementById('btn-new-folder');
-    const btnRefreshExplorer = document.getElementById('btn-refresh-explorer');
-
-    if (btnRefreshExplorer) btnRefreshExplorer.addEventListener('click', loadWorkspaceTree);
-    if (btnNewFile) {
-      btnNewFile.addEventListener('click', async () => {
-        if (!currentWorkspaceTree || !currentWorkspaceTree.path) {
-          if (typeof window.showToast === 'function') window.showToast('Open a folder first.');
-          return;
-        }
-        const name = window.prompt('New file name (relative to workspace):');
-        if (!name || !name.trim()) return;
-        const target = `${currentWorkspaceTree.path}\\${name.trim().replace(/\//g, '\\')}`;
-        if (window.electronAPI && window.electronAPI.ideCreateFile) {
-          const res = await window.electronAPI.ideCreateFile(target);
-          if (res && res.success) {
-            await loadWorkspaceTree();
-            openFileInEditor(target);
-          }
-        }
-      });
-    }
-    if (btnNewFolder) {
-      btnNewFolder.addEventListener('click', async () => {
-        if (!currentWorkspaceTree || !currentWorkspaceTree.path) {
-          if (typeof window.showToast === 'function') window.showToast('Open a folder first.');
-          return;
-        }
-        const name = window.prompt('New folder name (relative to workspace):');
-        if (!name || !name.trim()) return;
-        const target = `${currentWorkspaceTree.path}\\${name.trim().replace(/\//g, '\\')}`;
-        if (window.electronAPI && window.electronAPI.ideCreateFolder) {
-          const res = await window.electronAPI.ideCreateFolder(target);
-          if (res && res.success) {
-            await loadWorkspaceTree();
-          }
-        }
-      });
-    }
-
-    // Command Palette (Ctrl+Shift+P / F1)
-    const cmdModal = document.getElementById('command-palette-modal');
-    const cmdBackdrop = document.getElementById('command-palette-backdrop');
-    const cmdInput = document.getElementById('command-palette-input');
-    const cmdResults = document.getElementById('command-palette-results');
-    let cmdSelectedIndex = 0;
-
-    const IDE_COMMANDS = [
-      { label: 'File: Quick Open', kbd: 'Ctrl+P', run: () => showQuickFileSwitcher() },
-      { label: 'File: Save Active File', kbd: 'Ctrl+S', run: () => saveActiveTab() },
-      { label: 'File: Open Folder...', kbd: 'Ctrl+O', run: () => handleSelectFolder() },
-      { label: 'View: Toggle Terminal', kbd: 'Ctrl+`', run: () => toggleTerminalDock() },
-      { label: 'View: Toggle Live Frontend Preview', kbd: '', run: () => togglePreviewPane() },
-      { label: 'View: Toggle AI Assistant', kbd: 'Ctrl+L', run: () => toggleCopilotDock() },
-      { label: 'Editor: Inline AI Edit', kbd: 'Ctrl+K', run: () => openInlineEditBar() },
-      { label: 'View: Explorer', kbd: 'Ctrl+Shift+E', run: () => { switchMode('ide'); switchSidebarTab('explorer'); } },
-      { label: 'View: Search Workspace', kbd: 'Ctrl+Shift+F', run: () => { switchMode('ide'); switchSidebarTab('search'); } },
-      { label: 'View: Source Control (Git)', kbd: 'Ctrl+Shift+G', run: () => { switchMode('ide'); switchSidebarTab('git'); } },
-      { label: 'View: Switch to Chat View', kbd: 'Ctrl+Shift+C', run: () => switchMode('chat') },
-      { label: 'Editor: Go to Line', kbd: 'Ctrl+G', run: () => { if (activeEditor) activeEditor.trigger('keyboard', 'editor.action.gotoLine', null); } },
-      { label: 'Assistant: Compact Context Window', kbd: '', run: () => compactDockedThread() },
-      { label: 'Assistant: Clear Thread', kbd: '', run: () => resetDockedThread() },
-      { label: 'Git: Refresh Status', kbd: '', run: () => refreshGitStatus() }
-    ];
-
-    function renderCommands(filter = '') {
-      if (!cmdResults) return;
-      const q = filter.trim().toLowerCase();
-      const filtered = IDE_COMMANDS.filter(c => !q || c.label.toLowerCase().includes(q));
-      cmdResults.innerHTML = '';
-      if (cmdSelectedIndex >= filtered.length) cmdSelectedIndex = 0;
-      filtered.forEach((cmd, idx) => {
-        const el = document.createElement('div');
-        el.className = `quick-file-item ${idx === cmdSelectedIndex ? 'selected' : ''}`;
-        el.innerHTML = `<span>${escapeHTML(cmd.label)}</span><span class="quick-file-path">${escapeHTML(cmd.kbd)}</span>`;
-        el.addEventListener('click', () => {
-          hideCommandPalette();
-          cmd.run();
-        });
-        cmdResults.appendChild(el);
-      });
-    }
-
-    function showCommandPalette() {
-      if (!cmdModal) return;
-      cmdSelectedIndex = 0;
-      cmdModal.classList.remove('hidden');
-      if (cmdInput) {
-        cmdInput.value = '';
-        cmdInput.focus();
-      }
-      renderCommands('');
-    }
-
-    function hideCommandPalette() {
-      if (cmdModal) cmdModal.classList.add('hidden');
-    }
-
-    if (cmdBackdrop) cmdBackdrop.addEventListener('click', hideCommandPalette);
-    if (cmdInput) {
-      cmdInput.addEventListener('input', (e) => {
-        cmdSelectedIndex = 0;
-        renderCommands(e.target.value);
-      });
-      cmdInput.addEventListener('keydown', (e) => {
-        const items = cmdResults ? cmdResults.querySelectorAll('.quick-file-item') : [];
-        if (e.key === 'Escape') {
-          hideCommandPalette();
-        } else if (e.key === 'ArrowDown' && items.length > 0) {
-          e.preventDefault();
-          cmdSelectedIndex = (cmdSelectedIndex + 1) % items.length;
-          renderCommands(cmdInput.value);
-        } else if (e.key === 'ArrowUp' && items.length > 0) {
-          e.preventDefault();
-          cmdSelectedIndex = (cmdSelectedIndex - 1 + items.length) % items.length;
-          renderCommands(cmdInput.value);
-        } else if (e.key === 'Enter' && items[cmdSelectedIndex]) {
-          e.preventDefault();
-          items[cmdSelectedIndex].click();
-        }
-      });
-    }
-
     // Global Keybindings:
-    // Ctrl+Shift+P / F1 -> Command Palette
     // Ctrl+` -> Toggle Terminal
     // Ctrl+S -> Save
     // Ctrl+P -> Quick Open File
     // Ctrl+Shift+F -> Global Search
-    // Ctrl+L -> Toggle Docked AI Assistant
+    // Ctrl+L -> Toggle Docked AI Copilot
     window.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') || e.key === 'F1') {
-        e.preventDefault();
-        showCommandPalette();
-      }
       if (e.ctrlKey && e.key === '`') {
         e.preventDefault();
         toggleTerminalDock();
@@ -2220,14 +1291,8 @@
         e.preventDefault();
         toggleCopilotDock();
       }
-      if (e.ctrlKey && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        openInlineEditBar();
-      }
       if (e.key === 'Escape') {
         hideQuickFileSwitcher();
-        hideCommandPalette();
-        closeInlineEditBar();
         if (pendingDiffData) {
           rejectPendingDiff();
         }
@@ -2248,13 +1313,7 @@
       if (activeEditor) {
         activeEditor.layout();
       }
-      if (activeDiffEditor) {
-        activeDiffEditor.layout();
-      }
     });
-
-    // Launch directly into IDE workspace by default
-    switchMode('ide');
   });
 
   // Expose Sparx IDE module to global scope
