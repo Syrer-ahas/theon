@@ -920,6 +920,14 @@
           <div class="ide-tab-bar" id="ide-tab-bar">
             <div class="ide-tabs-list" id="ide-tabs-list"></div>
             <div class="ide-tab-bar-actions">
+              <button class="ide-tool-btn" id="btn-toggle-preview" title="Toggle Live Frontend Preview">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+                <span>Preview</span>
+              </button>
               <button class="ide-tool-btn" id="btn-quick-open-file" title="Quick Open File (Ctrl+P)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                   <circle cx="11" cy="11" r="8"></circle>
@@ -966,28 +974,59 @@
             </div>
           </div>
 
-          <!-- Monaco Code Editor Stage -->
-          <div class="monaco-editor-stage" id="monaco-editor-stage">
-            <div class="monaco-editor-container" id="monaco-editor-container"></div>
-            <div class="monaco-editor-container hidden" id="monaco-diff-container"></div>
+          <!-- Editor + Live Preview Split Container -->
+          <div class="ide-editor-split-wrap">
+            <!-- Monaco Code Editor Stage -->
+            <div class="monaco-editor-stage" id="monaco-editor-stage">
+              <div class="monaco-editor-container" id="monaco-editor-container"></div>
+              <div class="monaco-editor-container hidden" id="monaco-diff-container"></div>
 
-            <!-- Empty Editor State -->
-            <div class="ide-empty-editor" id="ide-empty-editor">
-              <div class="ide-empty-mark">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
-                  <polyline points="16 18 22 12 16 6"></polyline>
-                  <polyline points="8 6 2 12 8 18"></polyline>
-                </svg>
-              </div>
-              <p class="ide-empty-title">No file open</p>
-              <div class="ide-empty-shortcuts">
-                <button class="btn-open-workspace" id="btn-open-workspace" type="button">Open Folder</button>
-                <div class="empty-kbd-grid">
-                  <div class="empty-kbd-row"><span>Quick Open</span><kbd>Ctrl+P</kbd></div>
-                  <div class="empty-kbd-row"><span>Toggle Assistant</span><kbd>Ctrl+L</kbd></div>
-                  <div class="empty-kbd-row"><span>Toggle Terminal</span><kbd>Ctrl+`</kbd></div>
-                  <div class="empty-kbd-row"><span>Search Workspace</span><kbd>Ctrl+Shift+F</kbd></div>
+              <!-- Ctrl+K Floating Inline Edit Bar -->
+              <div class="ide-inline-edit-bar hidden" id="ide-inline-edit-bar">
+                <div class="inline-edit-top">
+                  <span class="inline-edit-scope" id="inline-edit-scope">Inline Edit</span>
+                  <button class="inline-edit-close" id="btn-inline-edit-close" type="button" title="Cancel (Esc)">Esc</button>
                 </div>
+                <div class="inline-edit-input-row">
+                  <input type="text" id="inline-edit-input" placeholder="Describe the edit (e.g. refactor to async/await, add error handling)..." autocomplete="off" />
+                  <button class="inline-edit-submit" id="btn-inline-edit-submit" type="button">Apply</button>
+                </div>
+              </div>
+
+              <!-- Empty Editor State -->
+              <div class="ide-empty-editor" id="ide-empty-editor">
+                <div class="ide-empty-mark">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                  </svg>
+                </div>
+                <p class="ide-empty-title">No file open</p>
+                <div class="ide-empty-shortcuts">
+                  <button class="btn-open-workspace" id="btn-open-workspace" type="button">Open Folder</button>
+                  <div class="empty-kbd-grid">
+                    <div class="empty-kbd-row"><span>Quick Open</span><kbd>Ctrl+P</kbd></div>
+                    <div class="empty-kbd-row"><span>Inline AI Edit</span><kbd>Ctrl+K</kbd></div>
+                    <div class="empty-kbd-row"><span>Command Palette</span><kbd>Ctrl+Shift+P</kbd></div>
+                    <div class="empty-kbd-row"><span>Toggle Terminal</span><kbd>Ctrl+`</kbd></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Frontend Preview Pane -->
+            <div class="ide-preview-pane hidden" id="ide-preview-pane">
+              <div class="ide-preview-toolbar">
+                <div class="ide-preview-url" id="ide-preview-label">Live Preview</div>
+                <div class="ide-preview-controls">
+                  <button class="ide-preview-btn active" id="btn-preview-desktop" type="button" title="Desktop Width">Desktop</button>
+                  <button class="ide-preview-btn" id="btn-preview-mobile" type="button" title="Mobile Width (375px)">Mobile</button>
+                  <button class="ide-preview-btn" id="btn-preview-reload" type="button" title="Reload Preview">↻</button>
+                  <button class="ide-preview-btn" id="btn-preview-close" type="button" title="Close Preview">✕</button>
+                </div>
+              </div>
+              <div class="ide-preview-stage" id="ide-preview-stage">
+                <iframe class="ide-preview-frame" id="ide-live-preview-frame" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
               </div>
             </div>
           </div>

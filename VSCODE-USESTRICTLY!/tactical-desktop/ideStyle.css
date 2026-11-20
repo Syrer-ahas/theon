@@ -1893,3 +1893,256 @@ button.ide-status-item:hover {
   border-color: rgba(248, 81, 73, 0.45);
   color: #fca5a5;
 }
+
+
+/* ----------------------------------------------------------------------------
+   Editor + Live Frontend Preview Split
+   ---------------------------------------------------------------------------- */
+.ide-editor-split-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.ide-preview-pane {
+  width: 46%;
+  min-width: 300px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  background: #111114;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.ide-preview-pane.hidden {
+  display: none !important;
+}
+
+.ide-preview-toolbar {
+  height: 32px;
+  padding: 0 10px;
+  background: #141418;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ide-preview-url {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: #a1a1aa;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ide-preview-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ide-preview-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #8b8b95;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ide-preview-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f4f5;
+}
+
+.ide-preview-btn.active {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f4f4f5;
+}
+
+.ide-preview-stage {
+  flex: 1;
+  background: #18181b;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  overflow: auto;
+  padding: 0;
+}
+
+.ide-preview-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #ffffff;
+  transition: width 0.18s ease;
+}
+
+.ide-preview-frame.mobile {
+  width: 375px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ----------------------------------------------------------------------------
+   Ctrl+K Floating Inline Edit Bar
+   ---------------------------------------------------------------------------- */
+.ide-inline-edit-bar {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(520px, 90%);
+  background: #16161a;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9px;
+  padding: 8px 10px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ide-inline-edit-bar.hidden {
+  display: none !important;
+}
+
+.inline-edit-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #8b8b95;
+}
+
+.inline-edit-scope {
+  font-family: var(--font-mono);
+  color: #d4d4d8;
+}
+
+.inline-edit-close {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #8b8b95;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.inline-edit-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#inline-edit-input {
+  flex: 1;
+  background: #0c0c0e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 6px 9px;
+  color: #f4f4f5;
+  font-size: 12.5px;
+  outline: none;
+}
+
+#inline-edit-input:focus {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.inline-edit-submit {
+  background: #f4f4f5;
+  border: none;
+  color: #0c0c0e;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.inline-edit-submit:hover {
+  background: #ffffff;
+}
+
+/* ----------------------------------------------------------------------------
+   AI Reasoning Trace, Tool Steps & Checkpoint Restore
+   ---------------------------------------------------------------------------- */
+.docked-msg-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.docked-restore-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #8b8b95;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.docked-restore-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4f4f5;
+}
+
+.docked-trace-details {
+  background: #151519;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  padding: 5px 8px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: #a1a1aa;
+}
+
+.docked-trace-details summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: #8b8b95;
+  user-select: none;
+  outline: none;
+}
+
+.docked-trace-steps {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: #71717a;
+}
+
+.docked-trace-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.docked-trace-reasoning {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  color: #8b8b95;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  max-height: 160px;
+  overflow-y: auto;
+}

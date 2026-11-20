@@ -347,7 +347,9 @@
       if (typeof window.showToast === 'function') {
         window.showToast(`Saved ${tab.name}`);
       }
+      updateBreadcrumbsAndStatus(tab);
       refreshGitStatus();
+      window.dispatchEvent(new CustomEvent('sparx:file-saved'));
     }
   }
 
@@ -857,24 +859,67 @@
     }
   }
 
-  async function handleSendDockedMessage() {
+  function stopDockedStreaming() {
+    if (!isDockedStreaming) return;
+    isDockedStreaming = false;
+    if (window.electronAPI && typeof window.electronAPI.cancelChat === 'function') {
+      window.electronAPI.cancelChat();
+    }
+    const sendBtn = document.getElementById('btn-docked-send');
+    if (sendBtn) {
+      sendBtn.classList.remove('streaming');
+      sendBtn.title = 'Send (Enter)';
+      sendBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>';
+    }
+  }
+
+  function restoreCheckpoint(snapshot) {
+    if (!Array.isArray(snapshot) || snapshot.length === 0) return;
+    let restoredCount = 0;
+    snapshot.forEach(item => {
+      const tab = openTabs.find(t => t.path === item.path);
+      if (tab && tab.model) {
+        tab.model.setValue(item.content);
+        markTabDirty(tab.id, item.content !== tab.originalContent);
+        restoredCount++;
+      }
+    });
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Restored checkpoint (${restoredCount} file${restoredCount === 1 ? '' : 's'}).`);
+    }
+  }
+
+  async function handleSendDockedMessage(overridePrompt = null) {
     const textarea = document.getElementById('docked-chat-textarea');
     const transcript = document.getElementById('docked-chat-transcript');
     const welcomeCard = document.getElementById('docked-welcome-card');
     const modeSelect = document.getElementById('ide-agent-mode-select');
     const modelSelect = document.getElementById('ide-model-select');
-    if (!textarea || !transcript || isDockedStreaming) return;
+    if (!transcript) return;
 
-    const text = textarea.value.trim();
+    if (isDockedStreaming) {
+      stopDockedStreaming();
+      return;
+    }
+
+    const text = (typeof overridePrompt === 'string' ? overridePrompt : (textarea ? textarea.value : '')).trim();
     if (!text) return;
 
-    textarea.value = '';
-    textarea.style.height = 'auto';
+    if (!overridePrompt && textarea) {
+      textarea.value = '';
+      textarea.style.height = 'auto';
+    }
 
     if (welcomeCard) welcomeCard.style.display = 'none';
 
     const agentMode = modeSelect ? modeSelect.value : 'agent';
     const selectedModel = modelSelect ? modelSelect.value : 'gemini-4-hydrogen';
+
+    // Capture checkpoint of open tabs before this AI turn
+    const turnCheckpoint = openTabs.map(t => ({
+      path: t.path,
+      content: t.model ? t.model.getValue() : t.content
+    }));
 
     // Collect context badges for display
     const contextTags = [];
@@ -893,8 +938,12 @@
     appendDockedBubble('user', text, contextTags);
     updateContextWindowMeter();
 
-    // 2. Build full multi-file + selection context block
+    // 2. Build full multi-file + selection + workspace context block
     const contextBlocks = [];
+    if (currentWorkspaceTree && currentWorkspaceTree.name) {
+      const openNames = openTabs.map(t => t.relativePath || t.name).join(', ');
+      contextBlocks.push(`[Workspace: ${currentWorkspaceTree.name}${openNames ? ` | Open tabs: ${openNames}` : ''}]`);
+    }
     if (activeTab && includeActiveFileInContext) {
       const code = activeTab.model ? activeTab.model.getValue() : activeTab.content;
       contextBlocks.push(`[Active File: ${activeTab.relativePath || activeTab.name}]\n\`\`\`${(activeTab.extension || '').replace('.', '')}\n${code}\n\`\`\``);
@@ -911,12 +960,12 @@
       : text;
 
     const modeDirectives = {
-      agent: 'Mode: AGENT. You may inspect workspace files, propose complete code edits in fenced blocks, and run commands when needed.',
+      agent: 'Mode: AGENT. Inspect relevant files first, make clean surgical edits or provide complete fenced code blocks, and verify changes.',
       ask: 'Mode: ASK (Read-Only). Answer questions clearly and concisely based on the provided code context without modifying files.',
-      plan: 'Mode: PLAN. Produce a structured, step-by-step architectural & implementation plan before writing any code.'
+      plan: 'Mode: PLAN. Produce a crisp, actionable architectural and implementation plan before writing any code.'
     };
 
-    const systemPrompt = `You are Sparx, an authentic, senior AI software engineer embedded in the IDE. ${modeDirectives[agentMode] || modeDirectives.agent} Provide clean, accurate, production-ready code using markdown code blocks. Keep responses concise, direct, and free of filler.`;
+    const systemPrompt = `You are Sparx, an authentic, senior AI software engineer embedded in the IDE. ${modeDirectives[agentMode] || modeDirectives.agent} Provide clean, idiomatic, production-ready code using markdown code blocks. Be direct, practical, and free of filler.`;
 
     // Build message payload preserving conversation history
     const historyWindow = dockedMessages.slice(-16, -1).map(m => ({ role: m.role, content: m.content }));
@@ -926,15 +975,58 @@
       { role: 'user', content: contextualUserPrompt }
     ];
 
-    // 3. Create Assistant Live Bubble
+    // 3. Create Assistant Live Bubble with Trace & Checkpoint
     isDockedStreaming = true;
     const sendBtn = document.getElementById('btn-docked-send');
-    if (sendBtn) sendBtn.disabled = true;
+    if (sendBtn) {
+      sendBtn.classList.add('streaming');
+      sendBtn.title = 'Stop generating';
+      sendBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><rect x="2" y="2" width="8" height="8" rx="1.5"/></svg>';
+    }
 
-    const assistantBubble = appendDockedBubble('assistant', 'Thinking...');
+    const assistantHandle = appendDockedBubble('assistant', 'Thinking...', [], turnCheckpoint);
+    const assistantBubble = assistantHandle.contentEl;
+    const traceDetails = assistantHandle.traceDetails;
+    const traceSummary = assistantHandle.traceSummary;
+    const traceSteps = assistantHandle.traceSteps;
+    const traceReasoning = assistantHandle.traceReasoning;
+
     let assistantText = '';
+    let reasoningText = '';
+    let stepCount = 0;
 
-    // Stream handlers
+    const addTraceStep = (label) => {
+      if (!traceDetails || !traceSteps) return;
+      traceDetails.classList.remove('hidden');
+      stepCount++;
+      const stepEl = document.createElement('div');
+      stepEl.className = 'docked-trace-step';
+      stepEl.textContent = `• ${label}`;
+      traceSteps.appendChild(stepEl);
+      if (traceSummary) traceSummary.textContent = `Working (${stepCount} step${stepCount === 1 ? '' : 's'})`;
+    };
+
+    const unsubStatus = window.electronAPI.onChatStatus ? window.electronAPI.onChatStatus((st) => {
+      if (!isDockedStreaming || !st) return;
+      if (st.details) addTraceStep(st.details);
+    }) : null;
+
+    const unsubTool = window.electronAPI.onToolResult ? window.electronAPI.onToolResult((res) => {
+      if (!isDockedStreaming || !res) return;
+      addTraceStep(`Tool: ${res.tool || 'action'} completed`);
+    }) : null;
+
+    const unsubReasoning = window.electronAPI.onReasoningChunk ? window.electronAPI.onReasoningChunk((chunk) => {
+      if (!isDockedStreaming) return;
+      const rTxt = (chunk && chunk.text) || (typeof chunk === 'string' ? chunk : '');
+      if (rTxt && traceDetails && traceReasoning) {
+        traceDetails.classList.remove('hidden');
+        reasoningText += rTxt;
+        traceReasoning.textContent = reasoningText;
+        if (traceSummary && stepCount === 0) traceSummary.textContent = 'Reasoning';
+      }
+    }) : null;
+
     const unsubChunk = window.electronAPI.onStreamChunk((chunk) => {
       if (!isDockedStreaming) return;
       const chunkStr = (chunk && chunk.text) || (typeof chunk === 'string' ? chunk : '');
@@ -943,11 +1035,25 @@
       transcript.scrollTop = transcript.scrollHeight;
     });
 
-    const unsubEnd = window.electronAPI.onStreamEnd((data) => {
-      isDockedStreaming = false;
-      if (sendBtn) sendBtn.disabled = false;
+    const cleanupListeners = () => {
       if (unsubChunk) unsubChunk();
       if (unsubEnd) unsubEnd();
+      if (unsubStatus) unsubStatus();
+      if (unsubTool) unsubTool();
+      if (unsubReasoning) unsubReasoning();
+    };
+
+    const unsubEnd = window.electronAPI.onStreamEnd((data) => {
+      isDockedStreaming = false;
+      cleanupListeners();
+      if (sendBtn) {
+        sendBtn.classList.remove('streaming');
+        sendBtn.title = 'Send (Enter)';
+        sendBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>';
+      }
+      if (traceSummary && (stepCount > 0 || reasoningText)) {
+        traceSummary.textContent = stepCount > 0 ? `Completed ${stepCount} step${stepCount === 1 ? '' : 's'}` : 'Thought process';
+      }
       const finalTxt = (data && data.fullText) || assistantText || 'Done.';
       renderDockedAssistantContent(assistantBubble, finalTxt);
       dockedMessages.push({ role: 'assistant', content: finalTxt });
@@ -962,7 +1068,7 @@
     });
   }
 
-  function appendDockedBubble(role, content, contextTags = []) {
+  function appendDockedBubble(role, content, contextTags = [], checkpointSnapshot = null) {
     const transcript = document.getElementById('docked-chat-transcript');
     if (!transcript) return null;
 
@@ -972,17 +1078,39 @@
 
     const msgEl = document.createElement('div');
     msgEl.className = `docked-msg ${role}`;
+
+    const hasRestore = role === 'assistant' && Array.isArray(checkpointSnapshot) && checkpointSnapshot.length > 0;
+
     msgEl.innerHTML = `
-      <div class="docked-msg-role">
-        ${role === 'user' ? 'You' : 'Sparx'}
+      <div class="docked-msg-header-row">
+        <div class="docked-msg-role">${role === 'user' ? 'You' : 'Sparx'}</div>
+        ${hasRestore ? '<button class="docked-restore-btn" type="button" title="Restore open files to before this turn">↺ Restore</button>' : ''}
       </div>
       ${tagsHtml}
+      ${role === 'assistant' ? '<details class="docked-trace-details hidden"><summary class="docked-trace-summary">Thinking</summary><div class="docked-trace-steps"></div><div class="docked-trace-reasoning"></div></details>' : ''}
       <div class="docked-msg-content">${escapeHTML(content)}</div>
     `;
 
+    if (hasRestore) {
+      const restoreBtn = msgEl.querySelector('.docked-restore-btn');
+      if (restoreBtn) {
+        restoreBtn.addEventListener('click', () => restoreCheckpoint(checkpointSnapshot));
+      }
+    }
+
     transcript.appendChild(msgEl);
     transcript.scrollTop = transcript.scrollHeight;
-    return msgEl.querySelector('.docked-msg-content');
+
+    if (role === 'user') {
+      return msgEl.querySelector('.docked-msg-content');
+    }
+    return {
+      contentEl: msgEl.querySelector('.docked-msg-content'),
+      traceDetails: msgEl.querySelector('.docked-trace-details'),
+      traceSummary: msgEl.querySelector('.docked-trace-summary'),
+      traceSteps: msgEl.querySelector('.docked-trace-steps'),
+      traceReasoning: msgEl.querySelector('.docked-trace-reasoning')
+    };
   }
 
   function renderDockedAssistantContent(container, markdownText) {
@@ -1785,6 +1913,179 @@
       });
     }
 
+    // Live Frontend Preview Pane
+    const previewPane = document.getElementById('ide-preview-pane');
+    const previewFrame = document.getElementById('ide-live-preview-frame');
+    const previewLabel = document.getElementById('ide-preview-label');
+    const btnTogglePreview = document.getElementById('btn-toggle-preview');
+    const btnPreviewDesktop = document.getElementById('btn-preview-desktop');
+    const btnPreviewMobile = document.getElementById('btn-preview-mobile');
+    const btnPreviewReload = document.getElementById('btn-preview-reload');
+    const btnPreviewClose = document.getElementById('btn-preview-close');
+
+    function refreshLivePreview() {
+      if (!previewFrame || !previewPane || previewPane.classList.contains('hidden')) return;
+      const activeTab = openTabs.find(t => t.id === activeTabId);
+      let htmlDoc = '';
+      if (activeTab) {
+        const val = activeTab.model ? activeTab.model.getValue() : (activeTab.content || '');
+        const ext = (activeTab.extension || '').toLowerCase();
+        if (ext === '.html' || ext === '.htm') {
+          htmlDoc = val;
+          if (previewLabel) previewLabel.textContent = activeTab.name;
+        } else if (ext === '.css') {
+          htmlDoc = `<!DOCTYPE html><html><head><style>${val}</style></head><body style="font-family:sans-serif;padding:24px;"><h2>CSS Preview (${escapeHTML(activeTab.name)})</h2><button>Sample Button</button><div class="card" style="margin-top:12px;padding:12px;border:1px solid #ccc;">Sample Container</div></body></html>`;
+          if (previewLabel) previewLabel.textContent = `CSS: ${activeTab.name}`;
+        } else {
+          // Search open HTML tab or workspace index.html
+          const htmlTab = openTabs.find(t => t.extension === '.html' || t.extension === '.htm');
+          if (htmlTab) {
+            htmlDoc = htmlTab.model ? htmlTab.model.getValue() : htmlTab.content;
+            if (previewLabel) previewLabel.textContent = htmlTab.name;
+          } else {
+            htmlDoc = `<!DOCTYPE html><html><body style="font-family:system-ui;background:#0c0c0e;color:#a1a1aa;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;"><div style="text-align:center;"><div style="font-size:14px;color:#f4f4f5;margin-bottom:6px;">Frontend Live Preview</div><div style="font-size:12px;">Open an <code>.html</code> or <code>.css</code> file to preview live changes.</div></div></body></html>`;
+            if (previewLabel) previewLabel.textContent = 'Live Preview';
+          }
+        }
+      } else {
+        htmlDoc = `<!DOCTYPE html><html><body style="font-family:system-ui;background:#0c0c0e;color:#a1a1aa;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;"><div style="font-size:12px;">Open an <code>.html</code> file to preview.</div></body></html>`;
+      }
+      previewFrame.srcdoc = htmlDoc;
+    }
+
+    function togglePreviewPane() {
+      if (!previewPane) return;
+      const willShow = previewPane.classList.contains('hidden');
+      previewPane.classList.toggle('hidden', !willShow);
+      if (btnTogglePreview) btnTogglePreview.classList.toggle('active-copilot', willShow);
+      if (willShow) refreshLivePreview();
+      if (activeEditor) setTimeout(() => activeEditor.layout(), 60);
+    }
+
+    if (btnTogglePreview) btnTogglePreview.addEventListener('click', togglePreviewPane);
+    window.addEventListener('sparx:file-saved', refreshLivePreview);
+    if (btnPreviewClose) btnPreviewClose.addEventListener('click', togglePreviewPane);
+    if (btnPreviewReload) btnPreviewReload.addEventListener('click', refreshLivePreview);
+    if (btnPreviewDesktop && btnPreviewMobile && previewFrame) {
+      btnPreviewDesktop.addEventListener('click', () => {
+        previewFrame.classList.remove('mobile');
+        btnPreviewDesktop.classList.add('active');
+        btnPreviewMobile.classList.remove('active');
+      });
+      btnPreviewMobile.addEventListener('click', () => {
+        previewFrame.classList.add('mobile');
+        btnPreviewMobile.classList.add('active');
+        btnPreviewDesktop.classList.remove('active');
+      });
+    }
+
+    // Ctrl+K Floating Inline Edit Bar
+    const inlineBar = document.getElementById('ide-inline-edit-bar');
+    const inlineInput = document.getElementById('inline-edit-input');
+    const inlineScope = document.getElementById('inline-edit-scope');
+    const btnInlineClose = document.getElementById('btn-inline-edit-close');
+    const btnInlineSubmit = document.getElementById('btn-inline-edit-submit');
+
+    function openInlineEditBar() {
+      const activeTab = openTabs.find(t => t.id === activeTabId);
+      if (!activeTab || !inlineBar) {
+        if (typeof window.showToast === 'function') window.showToast('Open a file first to use inline edit.');
+        return;
+      }
+      if (inlineScope) {
+        inlineScope.textContent = activeSelectionContext
+          ? `${activeTab.name}:${activeSelectionContext.startLine}-${activeSelectionContext.endLine}`
+          : activeTab.name;
+      }
+      inlineBar.classList.remove('hidden');
+      if (inlineInput) {
+        inlineInput.value = '';
+        inlineInput.focus();
+      }
+    }
+
+    function closeInlineEditBar() {
+      if (inlineBar) inlineBar.classList.add('hidden');
+      if (activeEditor) activeEditor.focus();
+    }
+
+    async function submitInlineEdit() {
+      const instruction = inlineInput ? inlineInput.value.trim() : '';
+      const activeTab = openTabs.find(t => t.id === activeTabId);
+      if (!instruction || !activeTab) return;
+      closeInlineEditBar();
+
+      const fullCode = activeTab.model ? activeTab.model.getValue() : activeTab.content;
+      const selectionNote = activeSelectionContext
+        ? `Focus on lines ${activeSelectionContext.startLine}-${activeSelectionContext.endLine}:\n\`\`\`\n${activeSelectionContext.text}\n\`\`\`\n`
+        : '';
+
+      const prompt = `Edit \`${activeTab.relativePath || activeTab.name}\`: ${instruction}\n\n${selectionNote}Return the complete updated file inside a single fenced code block so it can be diffed directly.`;
+
+      // Ensure assistant pane is visible so user sees the stream + Apply button
+      const chatPane = document.getElementById('ide-docked-chat-pane');
+      if (chatPane && chatPane.classList.contains('collapsed')) {
+        toggleCopilotDock();
+      }
+      handleSendDockedMessage(prompt);
+    }
+
+    if (btnInlineClose) btnInlineClose.addEventListener('click', closeInlineEditBar);
+    if (btnInlineSubmit) btnInlineSubmit.addEventListener('click', submitInlineEdit);
+    if (inlineInput) {
+      inlineInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeInlineEditBar();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          submitInlineEdit();
+        }
+      });
+    }
+
+    // Explorer New File / New Folder / Refresh Actions
+    const btnNewFile = document.getElementById('btn-new-file');
+    const btnNewFolder = document.getElementById('btn-new-folder');
+    const btnRefreshExplorer = document.getElementById('btn-refresh-explorer');
+
+    if (btnRefreshExplorer) btnRefreshExplorer.addEventListener('click', loadWorkspaceTree);
+    if (btnNewFile) {
+      btnNewFile.addEventListener('click', async () => {
+        if (!currentWorkspaceTree || !currentWorkspaceTree.path) {
+          if (typeof window.showToast === 'function') window.showToast('Open a folder first.');
+          return;
+        }
+        const name = window.prompt('New file name (relative to workspace):');
+        if (!name || !name.trim()) return;
+        const target = `${currentWorkspaceTree.path}\\${name.trim().replace(/\//g, '\\')}`;
+        if (window.electronAPI && window.electronAPI.ideCreateFile) {
+          const res = await window.electronAPI.ideCreateFile(target);
+          if (res && res.success) {
+            await loadWorkspaceTree();
+            openFileInEditor(target);
+          }
+        }
+      });
+    }
+    if (btnNewFolder) {
+      btnNewFolder.addEventListener('click', async () => {
+        if (!currentWorkspaceTree || !currentWorkspaceTree.path) {
+          if (typeof window.showToast === 'function') window.showToast('Open a folder first.');
+          return;
+        }
+        const name = window.prompt('New folder name (relative to workspace):');
+        if (!name || !name.trim()) return;
+        const target = `${currentWorkspaceTree.path}\\${name.trim().replace(/\//g, '\\')}`;
+        if (window.electronAPI && window.electronAPI.ideCreateFolder) {
+          const res = await window.electronAPI.ideCreateFolder(target);
+          if (res && res.success) {
+            await loadWorkspaceTree();
+          }
+        }
+      });
+    }
+
     // Command Palette (Ctrl+Shift+P / F1)
     const cmdModal = document.getElementById('command-palette-modal');
     const cmdBackdrop = document.getElementById('command-palette-backdrop');
@@ -1797,7 +2098,9 @@
       { label: 'File: Save Active File', kbd: 'Ctrl+S', run: () => saveActiveTab() },
       { label: 'File: Open Folder...', kbd: 'Ctrl+O', run: () => handleSelectFolder() },
       { label: 'View: Toggle Terminal', kbd: 'Ctrl+`', run: () => toggleTerminalDock() },
+      { label: 'View: Toggle Live Frontend Preview', kbd: '', run: () => togglePreviewPane() },
       { label: 'View: Toggle AI Assistant', kbd: 'Ctrl+L', run: () => toggleCopilotDock() },
+      { label: 'Editor: Inline AI Edit', kbd: 'Ctrl+K', run: () => openInlineEditBar() },
       { label: 'View: Explorer', kbd: 'Ctrl+Shift+E', run: () => { switchMode('ide'); switchSidebarTab('explorer'); } },
       { label: 'View: Search Workspace', kbd: 'Ctrl+Shift+F', run: () => { switchMode('ide'); switchSidebarTab('search'); } },
       { label: 'View: Source Control (Git)', kbd: 'Ctrl+Shift+G', run: () => { switchMode('ide'); switchSidebarTab('git'); } },
@@ -1903,9 +2206,14 @@
         e.preventDefault();
         toggleCopilotDock();
       }
+      if (e.ctrlKey && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openInlineEditBar();
+      }
       if (e.key === 'Escape') {
         hideQuickFileSwitcher();
         hideCommandPalette();
+        closeInlineEditBar();
         if (pendingDiffData) {
           rejectPendingDiff();
         }
