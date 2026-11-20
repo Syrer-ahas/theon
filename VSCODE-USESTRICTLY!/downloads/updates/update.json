@@ -1,12 +1,12 @@
 {
   "version": "1.0.7",
   "previousVersion": "1.0.6",
-  "releaseDate": "2026-11-20T15:06:13.708Z",
+  "releaseDate": "2026-11-20T15:10:31.070Z",
   "releaseNotes": "• Launches directly into the redesigned clean studio IDE (zero neon/glows across Chat & IDE)\n• Real Monaco side-by-side Diff Editor for reviewing AI edits (Accept / Reject)\n• Command Palette (Ctrl+Shift+P / F1) & Go to Line (Ctrl+G)\n• Live Context Window meter, token breakdown popover, and history compaction\n• @ file mention autocomplete, multi-file context chips, and editor selection context\n• Authentic, natural AI responses without rigid boilerplate templates",
   "asarFileName": "app.asar",
   "downloadUrl": "https://raw.githubusercontent.com/Syrer-ahas/theon/main/downloads/updates/app.asar",
   "fallbackUrl": "https://www.tacticalweb.online/downloads/updates/app.asar",
-  "sizeBytes": 60995281,
+  "sizeBytes": 60993427,
   "sizeMb": "58.2 MB",
-  "sha256": "4e6e40340aae351ebb21195d8c1cd425c867a99e89f5267912aa9c35188349a9"
+  "sha256": "4ac57256a86b8103e1a411c2fc2ea1080a9799358aaa0c74043b236d287dba1e"
 }
