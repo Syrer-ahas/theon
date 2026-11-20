@@ -1,12 +1,12 @@
 {
   "version": "1.0.5",
   "previousVersion": "1.0.4",
-  "releaseDate": "2026-10-28T19:53:48.902Z",
+  "releaseDate": "2026-11-20T15:33:04.179Z",
   "releaseNotes": "• Gemini fallback API key with strict gemini-2.0-flash free tier support\n• Intelligent multi-key rate-limit rotation across all Groq & Gemini fallbacks\n• Fixed ReShade library discovery bug for remote users (resolved \"The ReShade library was not found\")\n• Dynamic update button auto-hiding when up to date\n• Bottom application version & status indicator\n• Standalone preset generation with drop-in instructions\n• Global OTA auto-updates with hot-swapping",
   "asarFileName": "app.asar",
   "downloadUrl": "https://raw.githubusercontent.com/Syrer-ahas/theon/main/downloads/updates/app.asar",
   "fallbackUrl": "https://www.tacticalweb.online/downloads/updates/app.asar",
-  "sizeBytes": 61039307,
+  "sizeBytes": 61024507,
   "sizeMb": "58.2 MB",
-  "sha256": "3df18e4db542e29c97605d277738978e6b9db9f7995fbd32357e7e9b624296a8"
+  "sha256": "78cd4ca092818b69c1d1e2a5c01ab813741c5392fd5df72337f70dcc4ae1b2d1"
 }
