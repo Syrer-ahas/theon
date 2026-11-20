@@ -2789,7 +2789,7 @@ body.code-no-wrap .code-pre { white-space: pre; overflow-wrap: normal; }
 .settings-full-view {
   position: absolute;
   inset: 0;
-  background: #0e0e11;
+  background: var(--bg-deep);
   display: flex;
   z-index: 50;
   overflow: hidden;
@@ -2802,8 +2802,8 @@ body.code-no-wrap .code-pre { white-space: pre; overflow-wrap: normal; }
 /* Settings Left Sidebar */
 .settings-v2-sidebar {
   width: 220px;
-  background: #121215;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -2961,8 +2961,8 @@ body.code-no-wrap .code-pre { white-space: pre; overflow-wrap: normal; }
 }
 
 .settings-card-box {
-  background: #141417;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   padding: 6px 18px;
   display: flex;
@@ -3221,7 +3221,7 @@ input:checked + .toggle-slider:before {
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: #09090b;
+  background: var(--bg-deep);
   position: relative;
   min-width: 0;
 }
@@ -3245,8 +3245,8 @@ input:checked + .toggle-slider:before {
 
 .dest-top-bar {
   height: 52px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: #111114;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-topbar);
   display: flex;
   align-items: center;
   padding: 0 24px;
@@ -3318,7 +3318,7 @@ input:checked + .toggle-slider:before {
   flex: 1;
   overflow-y: auto;
   padding: 28px 36px 48px 36px;
-  background: #09090b;
+  background: var(--bg-deep);
 }
 
 .dest-content-cluster {
@@ -3344,8 +3344,8 @@ input:checked + .toggle-slider:before {
 }
 
 .dest-card-surface {
-  background: #141416;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   padding: 16px 20px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
