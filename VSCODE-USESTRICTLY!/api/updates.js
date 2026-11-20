@@ -20,10 +20,10 @@ module.exports = (req, res) => {
   }
 
   return res.status(200).json({
-    version: "1.0.5",
-    previousVersion: "1.0.4",
+    version: "1.0.6",
+    previousVersion: "1.0.5",
     releaseDate: new Date().toISOString(),
-    releaseNotes: "• Gemini fallback API key with strict gemini-2.0-flash free tier support\n• Intelligent multi-key rate-limit rotation across all Groq & Gemini fallbacks\n• Fixed ReShade library discovery bug for remote users (resolved \"The ReShade library was not found\")\n• Dynamic update button auto-hiding when up to date\n• Bottom application version & status indicator\n• Standalone preset generation with drop-in instructions\n• Global OTA auto-updates with hot-swapping",
+    releaseNotes: "• Redesigned clean studio IDE UI (Claude / Codex / Qoder inspired, zero neon/glows)\n• Live Context Window meter, token breakdown popover, and history compaction\n• @ file mention autocomplete, multi-file context chips, and editor selection context\n• Agent / Ask / Plan mode selector, model switcher, and persistent conversation history\n• Editor breadcrumbs, bottom IDE status bar, resizable split panes, and Terminal/Problems/Output tabs",
     asarFileName: "app.asar",
     downloadUrl: "https://raw.githubusercontent.com/Syrer-ahas/theon/main/downloads/updates/app.asar",
     fallbackUrl: "https://www.tacticalweb.online/downloads/updates/app.asar",

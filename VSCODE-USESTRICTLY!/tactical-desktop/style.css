@@ -6,13 +6,13 @@
    ============================================================================ */
 
 :root {
-  /* Surface Color Palette — Pure Dark Matte OLED Zinc (Cursor / Modern AI IDE) */
-  --bg-deep: #070709;
-  --bg-base: #09090b;
-  --bg-sidebar: #0d0d10;
-  --bg-rail: #070709;
-  --bg-topbar: #070709;
-  --bg-card: #131316;
+  /* Surface Color Palette — Clean Matte Studio Graphite (Claude / Codex / Zed) */
+  --bg-deep: #0c0c0e;
+  --bg-base: #0e0e11;
+  --bg-sidebar: #111114;
+  --bg-rail: #0c0c0e;
+  --bg-topbar: #0c0c0e;
+  --bg-card: #16161a;
   --bg-capsule: #16161a;
   --bg-chip: rgba(255, 255, 255, 0.05);
   --bg-chip-hover: rgba(255, 255, 255, 0.09);
@@ -20,14 +20,14 @@
   /* Borders */
   --border-subtle: rgba(255, 255, 255, 0.07);
   --border-muted: rgba(255, 255, 255, 0.10);
-  --border-focus: rgba(56, 189, 248, 0.5);
+  --border-focus: rgba(255, 255, 255, 0.24);
 
-  /* Accents (Signature Electric Cyan-Blue) */
-  --accent-purple: #38bdf8;
-  --accent-purple-hover: #0ea5e9;
-  --accent-emerald: #10b981;
-  --accent-amber: #f59e0b;
-  --accent-rose: #ef4444;
+  /* Accents (Restrained Editorial Terracotta & Neutral Alabaster — Zero Neon) */
+  --accent-purple: #d97757;
+  --accent-purple-hover: #c56748;
+  --accent-emerald: #3fb950;
+  --accent-amber: #e3b341;
+  --accent-rose: #f85149;
 
   /* Typography */
   --text-primary: #f4f4f5;
@@ -5901,9 +5901,8 @@ input:checked + .toggle-slider:before {
 }
 
 .prompt-capsule-card.has-approval {
-  border-color: rgba(255, 255, 255, 0.45) !important;
-  background: linear-gradient(180deg, rgba(22, 22, 26, 0.98) 0%, rgba(13, 13, 16, 0.98) 100%) !important;
-  animation: chatboxGlowPulse 2.8s infinite ease-in-out;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  background: #16161a !important;
   padding: 14px 22px !important;
   gap: 0 !important;
   min-height: 56px;

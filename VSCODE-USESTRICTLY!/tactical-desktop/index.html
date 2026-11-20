@@ -847,262 +847,386 @@
     </main>
 
     <!-- ========================================================================
-         3. FULL IDE WORKSPACE STAGE (Monaco Editor, Docked Terminal, Docked AI Copilot)
+         3. FULL IDE WORKSPACE STAGE (Monaco Editor, Docked Terminal, AI Assistant)
          ======================================================================== -->
     <section class="ide-workspace-stage hidden" id="ide-workspace-stage">
+      <div class="ide-main-body">
 
-      <!-- Left IDE Sidebar (Explorer, Search, Git) -->
-      <aside class="ide-sidebar-pane" id="ide-sidebar-pane">
-        <!-- Sidebar Navigation Tabs -->
-        <div class="ide-sidebar-nav">
-          <button class="ide-nav-tab active" id="tab-nav-explorer" data-pane="explorer" title="Explorer (Ctrl+Shift+E)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-            </svg>
-            <span>Explorer</span>
-          </button>
-          <button class="ide-nav-tab" id="tab-nav-search" data-pane="search" title="Global Search (Ctrl+Shift+F)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <span>Search</span>
-          </button>
-          <button class="ide-nav-tab" id="tab-nav-git" data-pane="git" title="Source Control (Ctrl+Shift+G)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="18" cy="18" r="3"></circle>
-              <circle cx="6" cy="6" r="3"></circle>
-              <path d="M18 9a9 9 0 0 1-9 9"></path>
-              <line x1="6" y1="9" x2="6" y2="21"></line>
-            </svg>
-            <span>Git</span>
-          </button>
-        </div>
-
-        <!-- 1. Explorer View Pane -->
-        <div class="sidebar-view-pane" id="sidebar-view-explorer">
-          <div class="explorer-pane-header">
-            <span class="explorer-workspace-title" id="explorer-workspace-name">NO FOLDER OPEN</span>
-            <div class="explorer-actions">
-              <button class="ide-action-icon-btn" id="btn-new-file" title="New File">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <line x1="12" y1="18" x2="12" y2="12"></line>
-                  <line x1="9" y1="15" x2="15" y2="15"></line>
-                </svg>
-              </button>
-              <button class="ide-action-icon-btn" id="btn-new-folder" title="New Folder">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                  <line x1="12" y1="11" x2="12" y2="17"></line>
-                  <line x1="9" y1="14" x2="15" y2="14"></line>
-                </svg>
-              </button>
-              <button class="ide-action-icon-btn" id="btn-refresh-explorer" title="Refresh Explorer">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="23 4 23 10 17 10"></polyline>
-                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                </svg>
-              </button>
-              <button class="ide-action-icon-btn" id="btn-explorer-open-folder" title="Open Folder">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div class="explorer-tree-container" id="explorer-tree-container"></div>
-        </div>
-
-        <!-- 2. Global Search View Pane (Ctrl+Shift+F) -->
-        <div class="sidebar-view-pane hidden" id="sidebar-view-search">
-          <div class="explorer-pane-header">
-            <span class="explorer-workspace-title">SEARCH WORKSPACE</span>
-          </div>
-          <div class="search-input-box-wrap">
-            <div class="search-input-inner">
-              <input type="text" id="global-search-input" placeholder="Search (Enter to search)..." autocomplete="off" />
-              <div class="search-opt-toggles">
-                <button class="search-opt-btn" id="btn-search-opt-case" title="Match Case (Alt+C)">Aa</button>
-                <button class="search-opt-btn" id="btn-search-opt-word" title="Match Whole Word (Alt+W)">\b</button>
-                <button class="search-opt-btn" id="btn-search-opt-regex" title="Use Regular Expression (Alt+R)">.*</button>
-              </div>
-            </div>
-            <div class="search-summary-row" id="search-summary-row"></div>
-          </div>
-          <div class="search-results-list" id="search-results-list"></div>
-        </div>
-
-        <!-- 3. Git Source Control View Pane -->
-        <div class="sidebar-view-pane hidden" id="sidebar-view-git">
-          <div class="git-pane-header">
-            <div class="git-branch-badge">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="6" y1="3" x2="6" y2="15"></line>
-                <circle cx="18" cy="6" r="3"></circle>
-                <circle cx="6" cy="18" r="3"></circle>
-                <path d="M18 9a9 9 0 0 1-9 9"></path>
+        <!-- Left IDE Sidebar (Explorer, Search, Git) -->
+        <aside class="ide-sidebar-pane" id="ide-sidebar-pane">
+          <!-- Sidebar Navigation Tabs -->
+          <div class="ide-sidebar-nav">
+            <button class="ide-nav-tab active" id="tab-nav-explorer" data-pane="explorer" title="Explorer (Ctrl+Shift+E)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
               </svg>
-              <span id="git-branch-name">main</span>
-            </div>
-          </div>
-          <div class="git-commit-box">
-            <textarea id="git-commit-msg" class="git-commit-input" placeholder="Message (Ctrl+Enter to commit)"></textarea>
-            <button class="btn-git-commit" id="btn-git-commit" type="button">Commit Changes</button>
-          </div>
-          <div class="git-files-header">Changes</div>
-          <div class="git-files-list" id="git-files-list"></div>
-        </div>
-      </aside>
-
-      <!-- Center Editor Column -->
-      <div class="ide-editor-column">
-        <!-- Multi-file Tab Bar -->
-        <div class="ide-tab-bar" id="ide-tab-bar">
-          <div class="ide-tabs-list" id="ide-tabs-list"></div>
-          <div class="ide-tab-bar-actions">
-            <button class="ide-tool-btn btn-return-to-chat" id="btn-return-to-chat" title="Return to Main Chat (Ctrl+Shift+C)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-              </svg>
-              <span>Return to Chat</span>
+              <span>Explorer</span>
             </button>
-            <button class="ide-tool-btn" id="btn-quick-open-file" title="Quick Open (Ctrl+P)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button class="ide-nav-tab" id="tab-nav-search" data-pane="search" title="Search Workspace (Ctrl+Shift+F)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
+              <span>Search</span>
             </button>
-            <button class="ide-tool-btn" id="btn-toggle-terminal" title="Terminal (Ctrl+`)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="4 17 10 11 4 5"></polyline>
-                <line x1="12" y1="19" x2="20" y2="19"></line>
+            <button class="ide-nav-tab" id="tab-nav-git" data-pane="git" title="Source Control (Ctrl+Shift+G)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="18" cy="18" r="3"></circle>
+                <circle cx="6" cy="6" r="3"></circle>
+                <path d="M18 9a9 9 0 0 1-9 9"></path>
+                <line x1="6" y1="9" x2="6" y2="21"></line>
               </svg>
-            </button>
-            <button class="ide-tool-btn active-copilot" id="btn-toggle-copilot-dock" title="Toggle Docked Sparx AI (Ctrl+L)">
-              <span class="copilot-sparkle">✦</span>
-              <span>Copilot</span>
+              <span>Git</span>
             </button>
           </div>
-        </div>
 
-        <!-- Inline Diff Review Banner (P1 Requirement) -->
-        <div class="ide-diff-review-banner hidden" id="ide-diff-review-banner">
-          <div class="diff-banner-left">
-            <span class="diff-indicator-dot"></span>
-            <span class="diff-banner-title" id="diff-banner-title">AI Modification Proposal</span>
-            <span class="diff-banner-stats" id="diff-banner-stats"></span>
+          <!-- 1. Explorer View Pane -->
+          <div class="sidebar-view-pane" id="sidebar-view-explorer">
+            <div class="explorer-pane-header">
+              <span class="explorer-workspace-title" id="explorer-workspace-name">NO FOLDER OPEN</span>
+              <div class="explorer-actions">
+                <button class="ide-action-icon-btn" id="btn-new-file" title="New File">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                  </svg>
+                </button>
+                <button class="ide-action-icon-btn" id="btn-new-folder" title="New Folder">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    <line x1="12" y1="11" x2="12" y2="17"></line>
+                    <line x1="9" y1="14" x2="15" y2="14"></line>
+                  </svg>
+                </button>
+                <button class="ide-action-icon-btn" id="btn-refresh-explorer" title="Refresh Explorer">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                  </svg>
+                </button>
+                <button class="ide-action-icon-btn" id="btn-explorer-open-folder" title="Open Folder">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="explorer-tree-container" id="explorer-tree-container"></div>
           </div>
-          <div class="diff-banner-actions">
-            <button class="btn-diff-reject" id="btn-diff-reject-banner" type="button">Reject (Esc)</button>
-            <button class="btn-diff-accept" id="btn-diff-accept-banner" type="button">✓ Accept & Apply</button>
-          </div>
-        </div>
 
-        <!-- Monaco Code Editor Stage -->
-        <div class="monaco-editor-stage" id="monaco-editor-stage">
-          <div class="monaco-editor-container" id="monaco-editor-container"></div>
-          
-          <!-- Empty Editor State -->
-          <div class="ide-empty-editor" id="ide-empty-editor">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-            <p>No file is currently open</p>
-            <div class="ide-empty-shortcuts">
-              <button class="btn-open-workspace" id="btn-open-workspace" type="button">Open Folder</button>
-              <span class="empty-shortcut-hint">Press <kbd>Ctrl+P</kbd> to quick open file</span>
+          <!-- 2. Global Search View Pane (Ctrl+Shift+F) -->
+          <div class="sidebar-view-pane hidden" id="sidebar-view-search">
+            <div class="explorer-pane-header">
+              <span class="explorer-workspace-title">SEARCH</span>
+            </div>
+            <div class="search-input-box-wrap">
+              <div class="search-input-inner">
+                <input type="text" id="global-search-input" placeholder="Search files (Enter)..." autocomplete="off" />
+                <div class="search-opt-toggles">
+                  <button class="search-opt-btn" id="btn-search-opt-case" title="Match Case (Alt+C)">Aa</button>
+                  <button class="search-opt-btn" id="btn-search-opt-word" title="Match Whole Word (Alt+W)">\b</button>
+                  <button class="search-opt-btn" id="btn-search-opt-regex" title="Use Regular Expression (Alt+R)">.*</button>
+                </div>
+              </div>
+              <div class="search-summary-row" id="search-summary-row"></div>
+            </div>
+            <div class="search-results-list" id="search-results-list"></div>
+          </div>
+
+          <!-- 3. Git Source Control View Pane -->
+          <div class="sidebar-view-pane hidden" id="sidebar-view-git">
+            <div class="git-pane-header">
+              <div class="git-branch-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <line x1="6" y1="3" x2="6" y2="15"></line>
+                  <circle cx="18" cy="6" r="3"></circle>
+                  <circle cx="6" cy="18" r="3"></circle>
+                  <path d="M18 9a9 9 0 0 1-9 9"></path>
+                </svg>
+                <span id="git-branch-name">main</span>
+              </div>
+            </div>
+            <div class="git-commit-box">
+              <textarea id="git-commit-msg" class="git-commit-input" placeholder="Commit message (Ctrl+Enter)"></textarea>
+              <button class="btn-git-commit" id="btn-git-commit" type="button">Commit</button>
+            </div>
+            <div class="git-files-header">Changes</div>
+            <div class="git-files-list" id="git-files-list"></div>
+          </div>
+        </aside>
+
+        <!-- Drag Resizer: Sidebar <-> Editor -->
+        <div class="ide-resizer-v" id="ide-resizer-sidebar" title="Drag to resize sidebar"></div>
+
+        <!-- Center Editor Column -->
+        <div class="ide-editor-column">
+          <!-- Multi-file Tab Bar -->
+          <div class="ide-tab-bar" id="ide-tab-bar">
+            <div class="ide-tabs-list" id="ide-tabs-list"></div>
+            <div class="ide-tab-bar-actions">
+              <button class="ide-tool-btn" id="btn-quick-open-file" title="Quick Open File (Ctrl+P)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
+              <button class="ide-tool-btn" id="btn-toggle-terminal" title="Toggle Panel (Ctrl+`)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <polyline points="4 17 10 11 4 5"></polyline>
+                  <line x1="12" y1="19" x2="20" y2="19"></line>
+                </svg>
+              </button>
+              <button class="ide-tool-btn active-copilot" id="btn-toggle-copilot-dock" title="Toggle Assistant (Ctrl+L)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                  <line x1="15" y1="3" x2="15" y2="21"></line>
+                </svg>
+                <span>Assistant</span>
+              </button>
+              <button class="ide-tool-btn hidden" id="btn-return-to-chat" type="button" title="Chat View"></button>
+            </div>
+          </div>
+
+          <!-- Breadcrumbs Bar -->
+          <div class="ide-breadcrumbs-bar" id="ide-breadcrumbs-bar">
+            <div class="ide-breadcrumbs-path" id="ide-breadcrumbs-path">
+              <span class="breadcrumb-muted">No file open</span>
+            </div>
+            <div class="ide-breadcrumbs-meta">
+              <span class="breadcrumb-save-state" id="ide-save-state"></span>
+            </div>
+          </div>
+
+          <!-- Inline Diff Review Banner -->
+          <div class="ide-diff-review-banner hidden" id="ide-diff-review-banner">
+            <div class="diff-banner-left">
+              <span class="diff-indicator-dot"></span>
+              <span class="diff-banner-title" id="diff-banner-title">Proposed Changes</span>
+              <span class="diff-banner-stats" id="diff-banner-stats"></span>
+            </div>
+            <div class="diff-banner-actions">
+              <button class="btn-diff-reject" id="btn-diff-reject-banner" type="button">Reject (Esc)</button>
+              <button class="btn-diff-accept" id="btn-diff-accept-banner" type="button">Accept</button>
+            </div>
+          </div>
+
+          <!-- Monaco Code Editor Stage -->
+          <div class="monaco-editor-stage" id="monaco-editor-stage">
+            <div class="monaco-editor-container" id="monaco-editor-container"></div>
+
+            <!-- Empty Editor State -->
+            <div class="ide-empty-editor" id="ide-empty-editor">
+              <div class="ide-empty-mark">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                  <polyline points="16 18 22 12 16 6"></polyline>
+                  <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+              </div>
+              <p class="ide-empty-title">No file open</p>
+              <div class="ide-empty-shortcuts">
+                <button class="btn-open-workspace" id="btn-open-workspace" type="button">Open Folder</button>
+                <div class="empty-kbd-grid">
+                  <div class="empty-kbd-row"><span>Quick Open</span><kbd>Ctrl+P</kbd></div>
+                  <div class="empty-kbd-row"><span>Toggle Assistant</span><kbd>Ctrl+L</kbd></div>
+                  <div class="empty-kbd-row"><span>Toggle Terminal</span><kbd>Ctrl+`</kbd></div>
+                  <div class="empty-kbd-row"><span>Search Workspace</span><kbd>Ctrl+Shift+F</kbd></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Drag Resizer: Editor <-> Terminal -->
+          <div class="ide-resizer-h" id="ide-resizer-terminal" title="Drag to resize panel"></div>
+
+          <!-- Docked Bottom Panel (Terminal / Problems / Output) -->
+          <div class="ide-terminal-dock" id="ide-terminal-dock">
+            <div class="ide-terminal-header">
+              <div class="ide-panel-tabs">
+                <button class="ide-panel-tab active" id="panel-tab-terminal" data-panel-tab="terminal" type="button">Terminal</button>
+                <button class="ide-panel-tab" id="panel-tab-problems" data-panel-tab="problems" type="button">Problems <span class="panel-count-badge" id="problems-count-badge">0</span></button>
+                <button class="ide-panel-tab" id="panel-tab-output" data-panel-tab="output" type="button">Output</button>
+              </div>
+              <div class="ide-terminal-actions">
+                <button class="ide-terminal-btn" id="btn-clear-terminal" title="Clear Terminal (Ctrl+K)">Clear</button>
+                <button class="ide-terminal-btn" id="btn-maximize-terminal" title="Maximize Panel">⌃</button>
+                <button class="ide-terminal-btn" id="btn-close-terminal" title="Close Panel">✕</button>
+              </div>
+            </div>
+            <div class="ide-terminal-body" id="xterm-terminal-container"></div>
+            <div class="ide-panel-pane hidden" id="ide-problems-pane">
+              <div class="ide-panel-empty">No problems detected in workspace.</div>
+            </div>
+            <div class="ide-panel-pane hidden" id="ide-output-pane">
+              <div class="ide-output-log" id="ide-output-log">Sparx IDE initialized.</div>
             </div>
           </div>
         </div>
 
-        <!-- Docked Bottom Terminal (xterm.js with Cascadia Code & crisp typography) -->
-        <div class="ide-terminal-dock" id="ide-terminal-dock">
-          <div class="ide-terminal-header">
-            <div class="ide-terminal-tab-title">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="4 17 10 11 4 5"></polyline>
-                <line x1="12" y1="19" x2="20" y2="19"></line>
-              </svg>
-              <span>PowerShell</span>
-              <span class="term-status-pill">Active</span>
+        <!-- Drag Resizer: Editor <-> AI Assistant -->
+        <div class="ide-resizer-v" id="ide-resizer-copilot" title="Drag to resize assistant"></div>
+
+        <!-- Right Docked AI Assistant Pane -->
+        <aside class="ide-docked-chat-pane" id="ide-docked-chat-pane">
+          <div class="docked-chat-header">
+            <div class="docked-chat-title">
+              <span>Assistant</span>
+              <span class="docked-model-tag hidden" id="docked-model-tag"></span>
             </div>
-            <div class="ide-terminal-actions">
-              <button class="ide-terminal-btn" id="btn-clear-terminal" title="Clear Terminal (Ctrl+K)">Clear</button>
-              <button class="ide-terminal-btn" id="btn-close-terminal" title="Close Terminal">✕</button>
+            <div class="docked-chat-header-actions">
+              <button class="docked-header-btn" id="btn-docked-compact" title="Compact Context">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <polyline points="4 14 10 14 10 20"></polyline>
+                  <polyline points="20 10 14 10 14 4"></polyline>
+                  <line x1="14" y1="10" x2="21" y2="3"></line>
+                  <line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+              </button>
+              <button class="docked-header-btn" id="btn-docked-new-chat" title="New Thread">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+              <button class="docked-header-btn" id="btn-docked-collapse" title="Hide Assistant (Ctrl+L)">✕</button>
             </div>
           </div>
-          <div class="ide-terminal-body" id="xterm-terminal-container"></div>
-        </div>
+
+          <!-- Docked Transcript -->
+          <div class="docked-chat-transcript" id="docked-chat-transcript">
+            <div class="docked-welcome-card" id="docked-welcome-card">
+              <div class="docked-welcome-title">Sparx Assistant</div>
+              <p class="docked-welcome-desc">Use <code>@</code> to attach files, ask about your codebase, or request edits directly in the editor.</p>
+              <div class="docked-quick-prompts">
+                <button class="docked-prompt-chip" data-prompt="Explain the architecture and key functions of the open file">Explain open file</button>
+                <button class="docked-prompt-chip" data-prompt="Review the open file for bugs, edge cases, and potential issues">Review for bugs</button>
+                <button class="docked-prompt-chip" data-prompt="Suggest clean refactorings for this file">Refactor &amp; simplify</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Docked Input Composer -->
+          <div class="docked-chat-composer">
+            <!-- @ File Mention Autocomplete Popup -->
+            <div class="ide-mention-popup hidden" id="ide-mention-popup">
+              <div class="ide-mention-header">Attach file to context</div>
+              <div class="ide-mention-list" id="ide-mention-list"></div>
+            </div>
+
+            <!-- Context Window Breakdown Popover -->
+            <div class="ide-context-popover hidden" id="ide-context-popover">
+              <div class="context-pop-header">
+                <span class="context-pop-title">Context Window</span>
+                <span class="context-pop-pct" id="context-pop-pct">0%</span>
+              </div>
+              <div class="context-pop-bar-track">
+                <div class="context-pop-bar-fill" id="context-pop-bar-fill" style="width: 0%;"></div>
+              </div>
+              <div class="context-pop-total" id="context-pop-total">0 / 128,000 tokens</div>
+              <div class="context-pop-breakdown">
+                <div class="context-pop-row"><span>System instructions</span><span id="ctx-tokens-system">0</span></div>
+                <div class="context-pop-row"><span>Active file &amp; selection</span><span id="ctx-tokens-active">0</span></div>
+                <div class="context-pop-row"><span>Attached @files</span><span id="ctx-tokens-attached">0</span></div>
+                <div class="context-pop-row"><span>Conversation history</span><span id="ctx-tokens-history">0</span></div>
+              </div>
+              <div class="context-pop-actions">
+                <button class="context-pop-btn" id="btn-ctx-compact" type="button">Compact history</button>
+                <button class="context-pop-btn danger" id="btn-ctx-clear" type="button">Clear thread</button>
+              </div>
+            </div>
+
+            <!-- Context Chips Row -->
+            <div class="docked-context-row" id="docked-context-chips">
+              <button class="docked-add-ctx-btn" id="btn-docked-add-context" type="button" title="Attach file (@)">@ Add context</button>
+              <span class="docked-file-pill" id="docked-file-context-pill" title="Active file included in context">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                </svg>
+                <span id="docked-active-file-label">No file</span>
+                <button class="ctx-pill-toggle" id="btn-toggle-active-file-ctx" type="button" title="Toggle active file context">×</button>
+              </span>
+              <span class="docked-selection-pill hidden" id="docked-selection-pill">
+                <span id="docked-selection-label"></span>
+              </span>
+              <div class="docked-extra-chips" id="docked-extra-chips"></div>
+            </div>
+
+            <!-- Composer Input Box -->
+            <div class="docked-composer-box">
+              <textarea id="docked-chat-textarea" rows="1" placeholder="Ask, edit, or @ to reference files..."></textarea>
+              <div class="docked-composer-footer">
+                <div class="docked-composer-controls">
+                  <select id="ide-agent-mode-select" class="docked-select-pill" title="Assistant Mode">
+                    <option value="agent">Agent</option>
+                    <option value="ask">Ask</option>
+                    <option value="plan">Plan</option>
+                  </select>
+                  <select id="ide-model-select" class="docked-select-pill" title="Model">
+                    <option value="gemini-4-hydrogen">Gemini 4 Hydrogen</option>
+                    <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
+                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+                    <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 70B</option>
+                  </select>
+                </div>
+                <div class="docked-composer-right">
+                  <button class="ide-context-meter-btn" id="btn-ide-context-meter" type="button" title="Context Window Usage">
+                    <svg class="ctx-ring-svg" width="14" height="14" viewBox="0 0 18 18">
+                      <circle class="ctx-ring-bg" cx="9" cy="9" r="7" fill="none" stroke-width="2"></circle>
+                      <circle class="ctx-ring-fill" id="ctx-ring-fill" cx="9" cy="9" r="7" fill="none" stroke-width="2" stroke-dasharray="43.98" stroke-dashoffset="43.98"></circle>
+                    </svg>
+                    <span id="ide-context-pct-label">0%</span>
+                  </button>
+                  <button class="voice-mic-btn docked-mic" id="btn-docked-voice" type="button" title="Voice dictation">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                      <line x1="12" y1="19" x2="12" y2="23"></line>
+                    </svg>
+                  </button>
+                  <button class="docked-send-btn" id="btn-docked-send" type="button" title="Send (Enter)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                      <line x1="12" y1="19" x2="12" y2="5"></line>
+                      <polyline points="5 12 12 5 19 12"></polyline>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
       </div>
 
-      <!-- Right Docked AI Chat Pane (P1 Requirement: Side-by-Side Real-Time Coding) -->
-      <aside class="ide-docked-chat-pane" id="ide-docked-chat-pane">
-        <div class="docked-chat-header">
-          <div class="docked-chat-title">
-            <span class="docked-ai-sparkle">✦</span>
-            <span>Sparx Copilot</span>
-            <span class="docked-model-tag" id="docked-model-tag">3.9 Flash</span>
-          </div>
-          <div class="docked-chat-header-actions">
-            <button class="docked-header-btn" id="btn-docked-new-chat" title="New Topic">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-            </button>
-            <button class="docked-header-btn" id="btn-docked-collapse" title="Collapse Dock (Ctrl+L)">✕</button>
-          </div>
+      <!-- Bottom IDE Status Bar -->
+      <footer class="ide-status-bar" id="ide-status-bar">
+        <div class="ide-status-left">
+          <button class="ide-status-item" id="status-git-branch-btn" type="button" title="Source Control">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="6" y1="3" x2="6" y2="15"></line>
+              <circle cx="18" cy="6" r="3"></circle>
+              <circle cx="6" cy="18" r="3"></circle>
+              <path d="M18 9a9 9 0 0 1-9 9"></path>
+            </svg>
+            <span id="status-git-branch">main</span>
+          </button>
+          <button class="ide-status-item" id="status-problems-btn" type="button" title="Problems">
+            <span>⊗ <span id="status-error-count">0</span></span>
+            <span>⚠ <span id="status-warn-count">0</span></span>
+          </button>
+          <button class="ide-status-item" id="status-terminal-btn" type="button" title="Toggle Terminal (Ctrl+`)">
+            <span>Terminal</span>
+          </button>
         </div>
-
-        <!-- Docked Transcript -->
-        <div class="docked-chat-transcript" id="docked-chat-transcript">
-          <div class="docked-welcome-card" id="docked-welcome-card">
-            <div class="docked-welcome-icon">✦</div>
-            <div class="docked-welcome-title">Coding with Sparx</div>
-            <p class="docked-welcome-desc">Ask questions, generate functions, refactor code, or fix errors in real-time alongside your editor.</p>
-            <div class="docked-quick-prompts">
-              <button class="docked-prompt-chip" data-prompt="Explain what the open file does and how it is structured">Explain open file</button>
-              <button class="docked-prompt-chip" data-prompt="Review the open file for bugs, security issues, and edge cases">Review for bugs</button>
-              <button class="docked-prompt-chip" data-prompt="Suggest clean refactorings and optimizations for this file">Refactor & optimize</button>
-            </div>
-          </div>
+        <div class="ide-status-right">
+          <span class="ide-status-item" id="status-cursor-pos">Ln 1, Col 1</span>
+          <span class="ide-status-item" id="status-indent">Spaces: 2</span>
+          <span class="ide-status-item" id="status-encoding">UTF-8</span>
+          <span class="ide-status-item" id="status-language">Plain Text</span>
+          <button class="ide-status-item" id="status-context-btn" type="button" title="Context Window">
+            <span id="status-context-label">0 / 128k ctx</span>
+          </button>
         </div>
-
-        <!-- Docked Input Composer -->
-        <div class="docked-chat-composer">
-          <!-- Active file context pill -->
-          <div class="docked-context-row">
-            <span class="docked-file-pill" id="docked-file-context-pill">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              </svg>
-              <span id="docked-active-file-label">No file selected</span>
-            </span>
-          </div>
-          <div class="docked-composer-row">
-            <textarea id="docked-chat-textarea" rows="1" placeholder="Ask Sparx or request edits..."></textarea>
-            <button class="voice-mic-btn docked-mic" id="btn-docked-voice" type="button" title="Voice dictation">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                <line x1="12" y1="19" x2="12" y2="23"></line>
-              </svg>
-            </button>
-            <button class="docked-send-btn" id="btn-docked-send" title="Send (Enter)">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="12" y1="19" x2="12" y2="5"></line>
-                <polyline points="5 12 12 5 19 12"></polyline>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </aside>
-
+      </footer>
     </section>
 
     <!-- Quick File Switcher Modal (Ctrl+P) -->

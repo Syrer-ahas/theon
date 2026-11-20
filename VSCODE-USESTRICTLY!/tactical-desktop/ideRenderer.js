@@ -35,9 +35,15 @@
     regex: false
   };
 
-  // Docked AI Copilot Chat State
+  // Docked AI Assistant State
   let dockedMessages = [];
   let isDockedStreaming = false;
+  let includeActiveFileInContext = true;
+  let attachedContextFiles = []; // Array of { path, relativePath, name, content }
+  let activeSelectionContext = null; // { startLine, endLine, text }
+  const CONTEXT_LIMIT_TOKENS = 128000;
+  let mentionSelectedIndex = 0;
+  let mentionFilteredFiles = [];
 
   // Active Pending Diff State
   let pendingDiffData = null; // { tabId, originalText, proposedText }
@@ -96,30 +102,30 @@
       window.require(['vs/editor/editor.main'], function (monaco) {
         monacoInstance = monaco;
 
-        // Define Sparx Dark Obsidian OLED Theme
+        // Define Sparx Clean Studio Theme (Zed / GitHub Dark / Claude inspired)
         monaco.editor.defineTheme('sparx-dark', {
           base: 'vs-dark',
           inherit: true,
           rules: [
-            { background: '070709' },
-            { token: 'comment', foreground: '62626b', fontStyle: 'italic' },
-            { token: 'keyword', foreground: '38bdf8', fontStyle: 'bold' },
-            { token: 'identifier', foreground: 'f4f4f5' },
-            { token: 'string', foreground: 'a7f3d0' },
-            { token: 'number', foreground: 'fbbf24' },
-            { token: 'type', foreground: 'c084fc' }
+            { background: '0c0c0e' },
+            { token: 'comment', foreground: '6e7681', fontStyle: 'italic' },
+            { token: 'keyword', foreground: 'ff7b72' },
+            { token: 'identifier', foreground: 'e4e4e7' },
+            { token: 'string', foreground: 'a5d6ff' },
+            { token: 'number', foreground: '79c0ff' },
+            { token: 'type', foreground: 'ffa657' }
           ],
           colors: {
-            'editor.background': '#070709',
-            'editor.foreground': '#f4f4f5',
-            'editorCursor.foreground': '#38bdf8',
-            'editor.lineHighlightBackground': '#0d0d12',
-            'editorLineNumber.foreground': '#3f3f46',
+            'editor.background': '#0c0c0e',
+            'editor.foreground': '#e4e4e7',
+            'editorCursor.foreground': '#f4f4f5',
+            'editor.lineHighlightBackground': '#141418',
+            'editorLineNumber.foreground': '#4b4b55',
             'editorLineNumber.activeForeground': '#a1a1aa',
-            'editor.selectionBackground': '#1e293b',
-            'editor.inactiveSelectionBackground': '#0f172a',
-            'editorWidget.background': '#0d0d10',
-            'editorWidget.border': 'rgba(255,255,255,0.08)'
+            'editor.selectionBackground': '#262630',
+            'editor.inactiveSelectionBackground': '#1a1a22',
+            'editorWidget.background': '#141418',
+            'editorWidget.border': 'rgba(255,255,255,0.09)'
           }
         });
 
@@ -138,6 +144,40 @@
           cursorSmoothCaretAnimation: 'on',
           bracketPairColorization: { enabled: true },
           padding: { top: 12, bottom: 12 }
+        });
+
+        // Live Cursor Position -> Status Bar
+        activeEditor.onDidChangeCursorPosition((e) => {
+          const posEl = document.getElementById('status-cursor-pos');
+          if (posEl && e.position) {
+            posEl.textContent = `Ln ${e.position.lineNumber}, Col ${e.position.column}`;
+          }
+        });
+
+        // Live Selection -> Assistant Context Chip
+        activeEditor.onDidChangeCursorSelection((e) => {
+          const model = activeEditor.getModel();
+          const selPill = document.getElementById('docked-selection-pill');
+          const selLabel = document.getElementById('docked-selection-label');
+          if (!model || !e.selection || e.selection.isEmpty()) {
+            activeSelectionContext = null;
+            if (selPill) selPill.classList.add('hidden');
+          } else {
+            const selectedText = model.getValueInRange(e.selection);
+            if (selectedText && selectedText.trim().length > 0) {
+              const startLine = e.selection.startLineNumber;
+              const endLine = e.selection.endLineNumber;
+              activeSelectionContext = { startLine, endLine, text: selectedText };
+              const activeTab = openTabs.find(t => t.id === activeTabId);
+              const fname = activeTab ? activeTab.name : 'selection';
+              if (selLabel) selLabel.textContent = `${fname}:${startLine}-${endLine}`;
+              if (selPill) selPill.classList.remove('hidden');
+            } else {
+              activeSelectionContext = null;
+              if (selPill) selPill.classList.add('hidden');
+            }
+          }
+          updateContextWindowMeter();
         });
 
         // Setup Save Shortcut (Ctrl+S) inside Monaco
@@ -286,6 +326,9 @@
       if (tabEl) {
         tabEl.classList.toggle('dirty', isDirty);
       }
+      if (tab.id === activeTabId) {
+        updateBreadcrumbsAndStatus(tab);
+      }
     }
   }
 
@@ -332,13 +375,171 @@
 
   function updateDockedContextLabel() {
     const label = document.getElementById('docked-active-file-label');
-    if (!label) return;
+    const pill = document.getElementById('docked-file-context-pill');
     const activeTab = openTabs.find(t => t.id === activeTabId);
-    if (activeTab) {
-      label.textContent = activeTab.relativePath || activeTab.name;
-    } else {
-      label.textContent = 'No file open in editor';
+
+    if (label) {
+      label.textContent = activeTab ? (activeTab.relativePath || activeTab.name) : 'No file';
     }
+    if (pill) {
+      pill.classList.toggle('excluded', !includeActiveFileInContext || !activeTab);
+    }
+
+    updateBreadcrumbsAndStatus(activeTab);
+    updateContextWindowMeter();
+  }
+
+  function updateBreadcrumbsAndStatus(activeTab) {
+    const bcPath = document.getElementById('ide-breadcrumbs-path');
+    const saveState = document.getElementById('ide-save-state');
+    const langEl = document.getElementById('status-language');
+
+    if (bcPath) {
+      if (!activeTab) {
+        bcPath.innerHTML = '<span class="breadcrumb-muted">No file open</span>';
+      } else {
+        const rel = activeTab.relativePath || activeTab.name;
+        const parts = rel.split(/[\\/]/).filter(Boolean);
+        bcPath.innerHTML = parts.map((seg, i) => {
+          const isLast = i === parts.length - 1;
+          return `<span class="breadcrumb-segment ${isLast ? 'current' : ''}">${escapeHTML(seg)}</span>` +
+                 (isLast ? '' : '<span class="breadcrumb-sep">›</span>');
+        }).join('');
+      }
+    }
+
+    if (saveState) {
+      if (!activeTab) {
+        saveState.textContent = '';
+        saveState.classList.remove('dirty');
+      } else if (activeTab.dirty) {
+        saveState.textContent = 'Unsaved changes';
+        saveState.classList.add('dirty');
+      } else {
+        saveState.textContent = 'Saved';
+        saveState.classList.remove('dirty');
+      }
+    }
+
+    if (langEl) {
+      if (!activeTab) {
+        langEl.textContent = 'Plain Text';
+      } else {
+        const lang = getLanguageForExt(activeTab.extension || '');
+        langEl.textContent = lang.charAt(0).toUpperCase() + lang.slice(1);
+      }
+    }
+  }
+
+  function estimateTokens(str) {
+    if (!str) return 0;
+    return Math.ceil(String(str).length / 4);
+  }
+
+  function formatCompactTokens(n) {
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+    return String(n);
+  }
+
+  function updateContextWindowMeter() {
+    const sysTokens = 450; // Base IDE system prompt
+    let activeTokens = 0;
+    const activeTab = openTabs.find(t => t.id === activeTabId);
+    if (activeTab && includeActiveFileInContext) {
+      const code = activeTab.model ? activeTab.model.getValue() : activeTab.content;
+      activeTokens += estimateTokens(code);
+    }
+    if (activeSelectionContext && activeSelectionContext.text) {
+      activeTokens += estimateTokens(activeSelectionContext.text);
+    }
+
+    let attachedTokens = 0;
+    attachedContextFiles.forEach(f => {
+      attachedTokens += estimateTokens(f.content || '');
+    });
+
+    let historyTokens = 0;
+    dockedMessages.forEach(m => {
+      historyTokens += estimateTokens(m.content || '');
+    });
+
+    const totalTokens = sysTokens + activeTokens + attachedTokens + historyTokens;
+    const pct = Math.min(100, Math.round((totalTokens / CONTEXT_LIMIT_TOKENS) * 100));
+
+    // Update SVG Ring & Footer Label
+    const ringFill = document.getElementById('ctx-ring-fill');
+    const pctLabel = document.getElementById('ide-context-pct-label');
+    if (ringFill) {
+      const circumference = 43.98;
+      const offset = circumference - (pct / 100) * circumference;
+      ringFill.style.strokeDashoffset = String(offset);
+      ringFill.style.stroke = pct > 80 ? '#f85149' : (pct > 55 ? '#e3b341' : '#d97757');
+    }
+    if (pctLabel) pctLabel.textContent = `${pct}%`;
+
+    // Update Status Bar Context Indicator
+    const statusCtx = document.getElementById('status-context-label');
+    if (statusCtx) {
+      statusCtx.textContent = `${formatCompactTokens(totalTokens)} / 128k ctx`;
+    }
+
+    // Update Context Popover Breakdown
+    const popPct = document.getElementById('context-pop-pct');
+    const popBar = document.getElementById('context-pop-bar-fill');
+    const popTotal = document.getElementById('context-pop-total');
+    const elSys = document.getElementById('ctx-tokens-system');
+    const elAct = document.getElementById('ctx-tokens-active');
+    const elAtt = document.getElementById('ctx-tokens-attached');
+    const elHis = document.getElementById('ctx-tokens-history');
+
+    if (popPct) popPct.textContent = `${pct}%`;
+    if (popBar) {
+      popBar.style.width = `${pct}%`;
+      popBar.className = 'context-pop-bar-fill' + (pct > 80 ? ' high' : (pct > 55 ? ' warn' : ''));
+    }
+    if (popTotal) popTotal.textContent = `${totalTokens.toLocaleString()} / ${CONTEXT_LIMIT_TOKENS.toLocaleString()} tokens`;
+    if (elSys) elSys.textContent = formatCompactTokens(sysTokens);
+    if (elAct) elAct.textContent = formatCompactTokens(activeTokens);
+    if (elAtt) elAtt.textContent = formatCompactTokens(attachedTokens);
+    if (elHis) elHis.textContent = formatCompactTokens(historyTokens);
+  }
+
+  function renderAttachedContextChips() {
+    const container = document.getElementById('docked-extra-chips');
+    if (!container) return;
+    container.innerHTML = '';
+    attachedContextFiles.forEach((f, idx) => {
+      const chip = document.createElement('span');
+      chip.className = 'docked-extra-chip';
+      chip.title = f.relativePath || f.path;
+      chip.innerHTML = `<span>@${escapeHTML(f.name)}</span><button class="ctx-pill-toggle" type="button" title="Remove">×</button>`;
+      chip.querySelector('.ctx-pill-toggle').addEventListener('click', () => {
+        attachedContextFiles.splice(idx, 1);
+        renderAttachedContextChips();
+        updateContextWindowMeter();
+      });
+      container.appendChild(chip);
+    });
+  }
+
+  async function attachFileToContext(fileEntry) {
+    if (!fileEntry || !fileEntry.path) return;
+    if (attachedContextFiles.some(f => f.path === fileEntry.path)) return;
+    let content = '';
+    if (window.electronAPI && window.electronAPI.ideReadFile) {
+      try {
+        const res = await window.electronAPI.ideReadFile(fileEntry.path);
+        if (res && res.success) content = res.content || '';
+      } catch (e) {}
+    }
+    attachedContextFiles.push({
+      path: fileEntry.path,
+      relativePath: fileEntry.relativePath || fileEntry.name,
+      name: fileEntry.name,
+      content
+    });
+    renderAttachedContextChips();
+    updateContextWindowMeter();
   }
 
   // --------------------------------------------------------------------------
@@ -618,6 +819,8 @@
     const textarea = document.getElementById('docked-chat-textarea');
     const transcript = document.getElementById('docked-chat-transcript');
     const welcomeCard = document.getElementById('docked-welcome-card');
+    const modeSelect = document.getElementById('ide-agent-mode-select');
+    const modelSelect = document.getElementById('ide-model-select');
     if (!textarea || !transcript || isDockedStreaming) return;
 
     const text = textarea.value.trim();
@@ -628,63 +831,110 @@
 
     if (welcomeCard) welcomeCard.style.display = 'none';
 
+    const agentMode = modeSelect ? modeSelect.value : 'agent';
+    const selectedModel = modelSelect ? modelSelect.value : 'gemini-4-hydrogen';
+
+    // Collect context badges for display
+    const contextTags = [];
+    const activeTab = openTabs.find(t => t.id === activeTabId);
+    if (activeTab && includeActiveFileInContext) {
+      contextTags.push(activeTab.name);
+    }
+    if (activeSelectionContext) {
+      contextTags.push(`L${activeSelectionContext.startLine}-${activeSelectionContext.endLine}`);
+    }
+    attachedContextFiles.forEach(f => contextTags.push(`@${f.name}`));
+
     // 1. Append User Bubble
     const userMsg = { role: 'user', content: text };
     dockedMessages.push(userMsg);
-    appendDockedBubble('user', text);
+    appendDockedBubble('user', text, contextTags);
+    updateContextWindowMeter();
 
-    // 2. Gather active file context
-    const activeTab = openTabs.find(t => t.id === activeTabId);
-    let contextualUserPrompt = text;
-    if (activeTab) {
+    // 2. Build full multi-file + selection context block
+    const contextBlocks = [];
+    if (activeTab && includeActiveFileInContext) {
       const code = activeTab.model ? activeTab.model.getValue() : activeTab.content;
-      contextualUserPrompt = `${text}\n\n[Active File Context: ${activeTab.relativePath || activeTab.name}]\n\`\`\`${activeTab.extension.replace('.', '')}\n${code}\n\`\`\``;
+      contextBlocks.push(`[Active File: ${activeTab.relativePath || activeTab.name}]\n\`\`\`${(activeTab.extension || '').replace('.', '')}\n${code}\n\`\`\``);
     }
+    if (activeSelectionContext && activeSelectionContext.text) {
+      contextBlocks.push(`[Selected Lines ${activeSelectionContext.startLine}-${activeSelectionContext.endLine}]\n\`\`\`\n${activeSelectionContext.text}\n\`\`\``);
+    }
+    attachedContextFiles.forEach(f => {
+      contextBlocks.push(`[Attached File: ${f.relativePath || f.name}]\n\`\`\`\n${f.content || ''}\n\`\`\``);
+    });
+
+    const contextualUserPrompt = contextBlocks.length > 0
+      ? `${text}\n\n${contextBlocks.join('\n\n')}`
+      : text;
+
+    const modeDirectives = {
+      agent: 'Mode: AGENT. You may inspect workspace files, propose complete code edits in fenced blocks, and run commands when needed.',
+      ask: 'Mode: ASK (Read-Only). Answer questions clearly and concisely based on the provided code context without modifying files.',
+      plan: 'Mode: PLAN. Produce a structured, step-by-step architectural & implementation plan before writing any code.'
+    };
+
+    const systemPrompt = `You are Sparx, an authentic, senior AI software engineer embedded in the IDE. ${modeDirectives[agentMode] || modeDirectives.agent} Provide clean, accurate, production-ready code using markdown code blocks. Keep responses concise, direct, and free of filler.`;
+
+    // Build message payload preserving conversation history
+    const historyWindow = dockedMessages.slice(-16, -1).map(m => ({ role: m.role, content: m.content }));
+    const payloadMessages = [
+      { role: 'system', content: systemPrompt },
+      ...historyWindow,
+      { role: 'user', content: contextualUserPrompt }
+    ];
 
     // 3. Create Assistant Live Bubble
     isDockedStreaming = true;
+    const sendBtn = document.getElementById('btn-docked-send');
+    if (sendBtn) sendBtn.disabled = true;
+
     const assistantBubble = appendDockedBubble('assistant', 'Thinking...');
     let assistantText = '';
 
     // Stream handlers
     const unsubChunk = window.electronAPI.onStreamChunk((chunk) => {
       if (!isDockedStreaming) return;
-      const text = (chunk && chunk.text) || (typeof chunk === 'string' ? chunk : '');
-      assistantText += text;
+      const chunkStr = (chunk && chunk.text) || (typeof chunk === 'string' ? chunk : '');
+      assistantText += chunkStr;
       renderDockedAssistantContent(assistantBubble, assistantText);
       transcript.scrollTop = transcript.scrollHeight;
     });
 
     const unsubEnd = window.electronAPI.onStreamEnd((data) => {
       isDockedStreaming = false;
+      if (sendBtn) sendBtn.disabled = false;
       if (unsubChunk) unsubChunk();
       if (unsubEnd) unsubEnd();
       const finalTxt = (data && data.fullText) || assistantText || 'Done.';
       renderDockedAssistantContent(assistantBubble, finalTxt);
       dockedMessages.push({ role: 'assistant', content: finalTxt });
+      updateContextWindowMeter();
     });
 
     // Send to backend
     window.electronAPI.sendMessage({
-      messages: [
-        { role: 'system', content: 'You are Sparx, a world-class coding AI assistant embedded in the IDE. Provide concise, clean, production-ready code. Whenever providing code modifications or snippets, use markdown code blocks. Keep conversation calm, unbothered, and concise; respond to casual slang, banter, or unclear non-action messages with a short, natural redirect.' },
-        { role: 'user', content: contextualUserPrompt }
-      ],
-      model: 'sparx-3.9-flash',
-      mode: 'ide'
+      messages: payloadMessages,
+      model: selectedModel,
+      mode: agentMode === 'agent' ? 'work' : 'ide'
     });
   }
 
-  function appendDockedBubble(role, content) {
+  function appendDockedBubble(role, content, contextTags = []) {
     const transcript = document.getElementById('docked-chat-transcript');
     if (!transcript) return null;
+
+    const tagsHtml = (role === 'user' && Array.isArray(contextTags) && contextTags.length > 0)
+      ? `<div class="docked-msg-context-tags">${contextTags.map(t => `<span class="docked-msg-ctx-badge">${escapeHTML(t)}</span>`).join('')}</div>`
+      : '';
 
     const msgEl = document.createElement('div');
     msgEl.className = `docked-msg ${role}`;
     msgEl.innerHTML = `
       <div class="docked-msg-role">
-        ${role === 'user' ? 'You' : '<span style="color:#38bdf8;">✦ Sparx</span>'}
+        ${role === 'user' ? 'You' : 'Sparx'}
       </div>
+      ${tagsHtml}
       <div class="docked-msg-content">${escapeHTML(content)}</div>
     `;
 
@@ -839,9 +1089,10 @@
     currentGitInfo = git;
 
     const branchEl = document.getElementById('git-branch-name');
-    if (branchEl) {
-      branchEl.textContent = git && git.branch ? git.branch : 'No Git Repo';
-    }
+    const statusBranchEl = document.getElementById('status-git-branch');
+    const branchText = git && git.branch ? git.branch : 'main';
+    if (branchEl) branchEl.textContent = git && git.branch ? git.branch : 'No Git Repo';
+    if (statusBranchEl) statusBranchEl.textContent = branchText;
 
     const list = document.getElementById('git-files-list');
     if (!list) return;
@@ -1086,24 +1337,251 @@
     const dockedTextarea = document.getElementById('docked-chat-textarea');
     const btnDockedVoice = document.getElementById('btn-docked-voice');
 
+    function resetDockedThread() {
+      dockedMessages = [];
+      attachedContextFiles = [];
+      renderAttachedContextChips();
+      const transcript = document.getElementById('docked-chat-transcript');
+      const welcomeCard = document.getElementById('docked-welcome-card');
+      if (transcript) transcript.innerHTML = '';
+      if (welcomeCard && transcript) {
+        transcript.appendChild(welcomeCard);
+        welcomeCard.style.display = 'block';
+      }
+      updateContextWindowMeter();
+    }
+
+    function compactDockedThread() {
+      if (dockedMessages.length <= 4) {
+        if (typeof window.showToast === 'function') window.showToast('Context is already compact.');
+        return;
+      }
+      const kept = dockedMessages.slice(-4);
+      const droppedCount = dockedMessages.length - kept.length;
+      dockedMessages = [
+        { role: 'assistant', content: `[Compacted ${droppedCount} earlier messages to free context window]` },
+        ...kept
+      ];
+      updateContextWindowMeter();
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Compacted ${droppedCount} messages.`);
+      }
+    }
+
     if (btnToggleCopilot) btnToggleCopilot.addEventListener('click', toggleCopilotDock);
     if (btnDockedCollapse) btnDockedCollapse.addEventListener('click', toggleCopilotDock);
-    if (btnDockedNewChat) {
-      btnDockedNewChat.addEventListener('click', () => {
-        dockedMessages = [];
-        const transcript = document.getElementById('docked-chat-transcript');
-        const welcomeCard = document.getElementById('docked-welcome-card');
-        if (transcript) transcript.innerHTML = '';
-        if (welcomeCard) {
-          transcript.appendChild(welcomeCard);
-          welcomeCard.style.display = 'block';
+    if (btnDockedNewChat) btnDockedNewChat.addEventListener('click', resetDockedThread);
+
+    // Context Window Popover & Controls
+    const ctxPopover = document.getElementById('ide-context-popover');
+    const btnCtxMeter = document.getElementById('btn-ide-context-meter');
+    const btnStatusCtx = document.getElementById('status-context-btn');
+    const btnCtxCompact = document.getElementById('btn-ctx-compact');
+    const btnDockedCompact = document.getElementById('btn-docked-compact');
+    const btnCtxClear = document.getElementById('btn-ctx-clear');
+
+    const toggleCtxPopover = (e) => {
+      e.stopPropagation();
+      if (!ctxPopover) return;
+      updateContextWindowMeter();
+      ctxPopover.classList.toggle('hidden');
+    };
+    if (btnCtxMeter) btnCtxMeter.addEventListener('click', toggleCtxPopover);
+    if (btnStatusCtx) btnStatusCtx.addEventListener('click', toggleCtxPopover);
+    if (btnCtxCompact) btnCtxCompact.addEventListener('click', () => { compactDockedThread(); if (ctxPopover) ctxPopover.classList.add('hidden'); });
+    if (btnDockedCompact) btnDockedCompact.addEventListener('click', compactDockedThread);
+    if (btnCtxClear) btnCtxClear.addEventListener('click', () => { resetDockedThread(); if (ctxPopover) ctxPopover.classList.add('hidden'); });
+
+    document.addEventListener('click', (e) => {
+      if (ctxPopover && !ctxPopover.classList.contains('hidden')) {
+        if (!ctxPopover.contains(e.target) && e.target !== btnCtxMeter && e.target !== btnStatusCtx) {
+          ctxPopover.classList.add('hidden');
+        }
+      }
+    });
+
+    // Toggle active file inclusion
+    const btnToggleActiveFileCtx = document.getElementById('btn-toggle-active-file-ctx');
+    if (btnToggleActiveFileCtx) {
+      btnToggleActiveFileCtx.addEventListener('click', (e) => {
+        e.stopPropagation();
+        includeActiveFileInContext = !includeActiveFileInContext;
+        updateDockedContextLabel();
+      });
+    }
+
+    // @ Mention File Picker
+    const mentionPopup = document.getElementById('ide-mention-popup');
+    const mentionList = document.getElementById('ide-mention-list');
+    const btnAddContext = document.getElementById('btn-docked-add-context');
+
+    async function openMentionPopup(query = '') {
+      if (!mentionPopup || !mentionList) return;
+      if (quickFilesCache.length === 0 && window.electronAPI && window.electronAPI.ideListAllFiles) {
+        try {
+          const res = await window.electronAPI.ideListAllFiles();
+          if (res && res.success && Array.isArray(res.files)) {
+            quickFilesCache = res.files;
+          }
+        } catch (e) {}
+      }
+      const q = query.trim().toLowerCase();
+      mentionFilteredFiles = quickFilesCache
+        .filter(f => !q || (f.name && f.name.toLowerCase().includes(q)) || (f.relativePath && f.relativePath.toLowerCase().includes(q)))
+        .slice(0, 12);
+
+      mentionList.innerHTML = '';
+      if (mentionFilteredFiles.length === 0) {
+        mentionList.innerHTML = '<div class="ide-mention-item" style="color:#71717a;">No matching files</div>';
+      } else {
+        if (mentionSelectedIndex >= mentionFilteredFiles.length) mentionSelectedIndex = 0;
+        mentionFilteredFiles.forEach((f, idx) => {
+          const item = document.createElement('div');
+          item.className = `ide-mention-item ${idx === mentionSelectedIndex ? 'selected' : ''}`;
+          item.innerHTML = `<span>${escapeHTML(f.name)}</span><span class="ide-mention-path">${escapeHTML(f.relativePath || '')}</span>`;
+          item.addEventListener('click', () => {
+            attachFileToContext(f);
+            if (dockedTextarea) {
+              dockedTextarea.value = dockedTextarea.value.replace(/@[^\s]*$/, '');
+              dockedTextarea.focus();
+            }
+            mentionPopup.classList.add('hidden');
+          });
+          mentionList.appendChild(item);
+        });
+      }
+      mentionPopup.classList.remove('hidden');
+    }
+
+    if (btnAddContext) {
+      btnAddContext.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (mentionPopup && !mentionPopup.classList.contains('hidden')) {
+          mentionPopup.classList.add('hidden');
+        } else {
+          openMentionPopup('');
         }
       });
     }
 
+    // Bottom Panel Tabs (Terminal, Problems, Output) + Maximize
+    function switchBottomPanelTab(tabName) {
+      document.querySelectorAll('.ide-panel-tab').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-panel-tab') === tabName);
+      });
+      const termBody = document.getElementById('xterm-terminal-container');
+      const probPane = document.getElementById('ide-problems-pane');
+      const outPane = document.getElementById('ide-output-pane');
+      if (termBody) termBody.classList.toggle('hidden', tabName !== 'terminal');
+      if (probPane) probPane.classList.toggle('hidden', tabName !== 'problems');
+      if (outPane) outPane.classList.toggle('hidden', tabName !== 'output');
+      if (tabName === 'terminal' && terminalFitAddon && activeTerminal) {
+        setTimeout(() => terminalFitAddon.fit(), 40);
+      }
+    }
+
+    document.querySelectorAll('.ide-panel-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.getAttribute('data-panel-tab');
+        if (t) switchBottomPanelTab(t);
+      });
+    });
+
+    const btnMaxTerm = document.getElementById('btn-maximize-terminal');
+    if (btnMaxTerm) {
+      btnMaxTerm.addEventListener('click', () => {
+        const dock = document.getElementById('ide-terminal-dock');
+        if (dock) {
+          dock.classList.toggle('maximized');
+          if (terminalFitAddon && activeTerminal) setTimeout(() => terminalFitAddon.fit(), 60);
+          if (activeEditor) setTimeout(() => activeEditor.layout(), 60);
+        }
+      });
+    }
+
+    // Status Bar Action Buttons
+    const statusGitBtn = document.getElementById('status-git-branch-btn');
+    const statusProbBtn = document.getElementById('status-problems-btn');
+    const statusTermBtn = document.getElementById('status-terminal-btn');
+    if (statusGitBtn) statusGitBtn.addEventListener('click', () => switchSidebarTab('git'));
+    if (statusProbBtn) statusProbBtn.addEventListener('click', () => {
+      const dock = document.getElementById('ide-terminal-dock');
+      if (dock && dock.classList.contains('collapsed')) toggleTerminalDock();
+      switchBottomPanelTab('problems');
+    });
+    if (statusTermBtn) statusTermBtn.addEventListener('click', toggleTerminalDock);
+
+    // Split-Pane Drag Resizers
+    function setupResizer(resizerId, targetId, direction, invert = false, minSize = 160, maxSize = 600) {
+      const resizer = document.getElementById(resizerId);
+      const target = document.getElementById(targetId);
+      if (!resizer || !target) return;
+
+      resizer.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        resizer.classList.add('dragging');
+        const startPos = direction === 'v' ? e.clientX : e.clientY;
+        const startSize = direction === 'v' ? target.getBoundingClientRect().width : target.getBoundingClientRect().height;
+
+        const onMove = (moveEvent) => {
+          const delta = (direction === 'v' ? moveEvent.clientX : moveEvent.clientY) - startPos;
+          const next = Math.max(minSize, Math.min(maxSize, startSize + (invert ? -delta : delta)));
+          if (direction === 'v') {
+            target.style.width = `${next}px`;
+          } else {
+            target.style.height = `${next}px`;
+          }
+          if (activeEditor) activeEditor.layout();
+          if (terminalFitAddon && activeTerminal) terminalFitAddon.fit();
+        };
+
+        const onUp = () => {
+          resizer.classList.remove('dragging');
+          window.removeEventListener('mousemove', onMove);
+          window.removeEventListener('mouseup', onUp);
+        };
+
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+      });
+    }
+
+    setupResizer('ide-resizer-sidebar', 'ide-sidebar-pane', 'v', false, 170, 460);
+    setupResizer('ide-resizer-copilot', 'ide-docked-chat-pane', 'v', true, 300, 620);
+    setupResizer('ide-resizer-terminal', 'ide-terminal-dock', 'h', true, 110, 560);
+
+    // Sync initial context meter
+    updateContextWindowMeter();
+
     if (btnDockedSend) btnDockedSend.addEventListener('click', handleSendDockedMessage);
     if (dockedTextarea) {
       dockedTextarea.addEventListener('keydown', (e) => {
+        if (mentionPopup && !mentionPopup.classList.contains('hidden')) {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            mentionPopup.classList.add('hidden');
+            return;
+          }
+          if (e.key === 'ArrowDown' && mentionFilteredFiles.length > 0) {
+            e.preventDefault();
+            mentionSelectedIndex = (mentionSelectedIndex + 1) % mentionFilteredFiles.length;
+            openMentionPopup(dockedTextarea.value.match(/@([^\s]*)$/)?.[1] || '');
+            return;
+          }
+          if (e.key === 'ArrowUp' && mentionFilteredFiles.length > 0) {
+            e.preventDefault();
+            mentionSelectedIndex = (mentionSelectedIndex - 1 + mentionFilteredFiles.length) % mentionFilteredFiles.length;
+            openMentionPopup(dockedTextarea.value.match(/@([^\s]*)$/)?.[1] || '');
+            return;
+          }
+          if (e.key === 'Enter' && !e.shiftKey && mentionFilteredFiles[mentionSelectedIndex]) {
+            e.preventDefault();
+            attachFileToContext(mentionFilteredFiles[mentionSelectedIndex]);
+            dockedTextarea.value = dockedTextarea.value.replace(/@[^\s]*$/, '');
+            mentionPopup.classList.add('hidden');
+            return;
+          }
+        }
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           handleSendDockedMessage();
@@ -1111,7 +1589,13 @@
       });
       dockedTextarea.addEventListener('input', () => {
         dockedTextarea.style.height = 'auto';
-        dockedTextarea.style.height = Math.min(dockedTextarea.scrollHeight, 120) + 'px';
+        dockedTextarea.style.height = Math.min(dockedTextarea.scrollHeight, 140) + 'px';
+        const match = dockedTextarea.value.match(/@([^\s]*)$/);
+        if (match) {
+          openMentionPopup(match[1]);
+        } else if (mentionPopup) {
+          mentionPopup.classList.add('hidden');
+        }
       });
     }
 
