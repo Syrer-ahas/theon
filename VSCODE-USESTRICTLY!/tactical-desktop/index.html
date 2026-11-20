@@ -1014,6 +1014,7 @@
           <!-- Monaco Code Editor Stage -->
           <div class="monaco-editor-stage" id="monaco-editor-stage">
             <div class="monaco-editor-container" id="monaco-editor-container"></div>
+            <div class="monaco-editor-container hidden" id="monaco-diff-container"></div>
 
             <!-- Empty Editor State -->
             <div class="ide-empty-editor" id="ide-empty-editor">
@@ -1241,6 +1242,18 @@
           <input type="text" id="quick-file-input" placeholder="Type name to open file (↑↓ navigate, Enter open, Esc exit)..." autocomplete="off" />
         </div>
         <div class="quick-file-results" id="quick-file-results"></div>
+      </div>
+    </div>
+
+    <!-- Command Palette Modal (Ctrl+Shift+P / F1) -->
+    <div class="quick-file-modal-overlay hidden" id="command-palette-modal">
+      <div class="quick-file-backdrop" id="command-palette-backdrop"></div>
+      <div class="quick-file-dialog">
+        <div class="quick-file-search-row">
+          <span class="cmd-palette-prefix">&gt;</span>
+          <input type="text" id="command-palette-input" placeholder="Type a command (e.g. Toggle Terminal, Go to Line, Compact Context)..." autocomplete="off" />
+        </div>
+        <div class="quick-file-results" id="command-palette-results"></div>
       </div>
     </div>
 

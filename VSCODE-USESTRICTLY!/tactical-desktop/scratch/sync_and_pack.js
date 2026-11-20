@@ -88,21 +88,22 @@ if (!fs.existsSync(updatesDir)) {
 fs.copyFileSync(tempAsar, updatesAsar);
 console.log(`  -> Updates Cache: ${updatesAsar} (${(fs.statSync(updatesAsar).size / 1024 / 1024).toFixed(1)} MB)`);
 
-console.log('[6/6] Updating update.json metadata to v1.0.6...');
+console.log('[6/6] Updating update.json metadata to v1.0.7...');
 const hash = crypto.createHash('sha256').update(fs.readFileSync(tempAsar)).digest('hex');
 const size = fs.statSync(tempAsar).size;
 const sizeMb = `${(size / 1024 / 1024).toFixed(1)} MB`;
 
 const manifest = {
-  version: '1.0.6',
-  previousVersion: '1.0.5',
+  version: '1.0.7',
+  previousVersion: '1.0.6',
   releaseDate: new Date().toISOString(),
   releaseNotes: [
-    '• Redesigned clean studio IDE UI (Claude / Codex / Qoder inspired, zero neon/glows)',
+    '• Launches directly into the redesigned clean studio IDE (zero neon/glows across Chat & IDE)',
+    '• Real Monaco side-by-side Diff Editor for reviewing AI edits (Accept / Reject)',
+    '• Command Palette (Ctrl+Shift+P / F1) & Go to Line (Ctrl+G)',
     '• Live Context Window meter, token breakdown popover, and history compaction',
     '• @ file mention autocomplete, multi-file context chips, and editor selection context',
-    '• Agent / Ask / Plan mode selector, model switcher, and persistent conversation history',
-    '• Editor breadcrumbs, bottom IDE status bar, resizable split panes, and Terminal/Problems/Output tabs'
+    '• Authentic, natural AI responses without rigid boilerplate templates'
   ].join('\n'),
   asarFileName: 'app.asar',
   downloadUrl: 'https://raw.githubusercontent.com/Syrer-ahas/theon/main/downloads/updates/app.asar',
@@ -115,21 +116,21 @@ const manifest = {
 fs.writeFileSync(updateJsonPath, JSON.stringify(manifest, null, 2), 'utf8');
 console.log(`  -> Updated update.json (version: ${manifest.version}, hash: ${hash.slice(0, 8)}..., size: ${sizeMb})`);
 
-// Update package.json version to 1.0.6
+// Update package.json version to 1.0.7
 const desktopPkgPath = path.join(srcDir, 'package.json');
 if (fs.existsSync(desktopPkgPath)) {
   const pkg = JSON.parse(fs.readFileSync(desktopPkgPath, 'utf8'));
-  pkg.version = '1.0.6';
+  pkg.version = '1.0.7';
   fs.writeFileSync(desktopPkgPath, JSON.stringify(pkg, null, 2), 'utf8');
-  console.log('  -> Updated tactical-desktop/package.json to v1.0.6');
+  console.log('  -> Updated tactical-desktop/package.json to v1.0.7');
 }
 
 const rootPkgPath = path.resolve(__dirname, '..', '..', 'package.json');
 if (fs.existsSync(rootPkgPath)) {
   const pkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
-  pkg.version = '1.0.6';
+  pkg.version = '1.0.7';
   fs.writeFileSync(rootPkgPath, JSON.stringify(pkg, null, 2), 'utf8');
-  console.log('  -> Updated root package.json to v1.0.6');
+  console.log('  -> Updated root package.json to v1.0.7');
 }
 
 console.log('\n[SUCCESS] Sync, pack, and installation completed cleanly!');

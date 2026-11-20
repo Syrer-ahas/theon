@@ -1,12 +1,12 @@
 {
-  "version": "1.0.6",
-  "previousVersion": "1.0.5",
-  "releaseDate": "2026-11-20T15:00:12.853Z",
-  "releaseNotes": "• Redesigned clean studio IDE UI (Claude / Codex / Qoder inspired, zero neon/glows)\n• Live Context Window meter, token breakdown popover, and history compaction\n• @ file mention autocomplete, multi-file context chips, and editor selection context\n• Agent / Ask / Plan mode selector, model switcher, and persistent conversation history\n• Editor breadcrumbs, bottom IDE status bar, resizable split panes, and Terminal/Problems/Output tabs",
+  "version": "1.0.7",
+  "previousVersion": "1.0.6",
+  "releaseDate": "2026-11-20T15:06:13.708Z",
+  "releaseNotes": "• Launches directly into the redesigned clean studio IDE (zero neon/glows across Chat & IDE)\n• Real Monaco side-by-side Diff Editor for reviewing AI edits (Accept / Reject)\n• Command Palette (Ctrl+Shift+P / F1) & Go to Line (Ctrl+G)\n• Live Context Window meter, token breakdown popover, and history compaction\n• @ file mention autocomplete, multi-file context chips, and editor selection context\n• Authentic, natural AI responses without rigid boilerplate templates",
   "asarFileName": "app.asar",
   "downloadUrl": "https://raw.githubusercontent.com/Syrer-ahas/theon/main/downloads/updates/app.asar",
   "fallbackUrl": "https://www.tacticalweb.online/downloads/updates/app.asar",
-  "sizeBytes": 60989836,
+  "sizeBytes": 60995281,
   "sizeMb": "58.2 MB",
-  "sha256": "445472e009c255ef4493dc4aa04638311684d0f3a5dea33eb7721a512a533a3a"
+  "sha256": "4e6e40340aae351ebb21195d8c1cd425c867a99e89f5267912aa9c35188349a9"
 }

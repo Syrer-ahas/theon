@@ -20,8 +20,8 @@ module.exports = (req, res) => {
   }
 
   return res.status(200).json({
-    version: "1.0.6",
-    previousVersion: "1.0.5",
+    version: "1.0.7",
+    previousVersion: "1.0.6",
     releaseDate: new Date().toISOString(),
     releaseNotes: "• Redesigned clean studio IDE UI (Claude / Codex / Qoder inspired, zero neon/glows)\n• Live Context Window meter, token breakdown popover, and history compaction\n• @ file mention autocomplete, multi-file context chips, and editor selection context\n• Agent / Ask / Plan mode selector, model switcher, and persistent conversation history\n• Editor breadcrumbs, bottom IDE status bar, resizable split panes, and Terminal/Problems/Output tabs",
     asarFileName: "app.asar",

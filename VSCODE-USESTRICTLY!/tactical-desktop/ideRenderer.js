@@ -13,6 +13,7 @@
   // --------------------------------------------------------------------------
   let monacoInstance = null;
   let activeEditor = null;
+  let activeDiffEditor = null;
   let activeTerminal = null;
   let activeTerminalId = null;
   let terminalFitAddon = null;
@@ -601,6 +602,30 @@
     targetTab.model.setValue(newCode);
     markTabDirty(targetTab.id, true);
 
+    // Render real Monaco Diff Editor if available
+    const edContainer = document.getElementById('monaco-editor-container');
+    const diffContainer = document.getElementById('monaco-diff-container');
+    if (monacoInstance && diffContainer && edContainer) {
+      edContainer.classList.add('hidden');
+      diffContainer.classList.remove('hidden');
+      if (!activeDiffEditor) {
+        activeDiffEditor = monacoInstance.editor.createDiffEditor(diffContainer, {
+          theme: 'sparx-dark',
+          automaticLayout: true,
+          readOnly: true,
+          renderSideBySide: true,
+          fontFamily: "'Cascadia Code', 'Cascadia Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace",
+          fontSize: 13,
+          lineHeight: 20
+        });
+      }
+      const lang = getLanguageForExt(targetTab.extension || '');
+      const origModel = monacoInstance.editor.createModel(currentText, lang);
+      const modModel = monacoInstance.editor.createModel(newCode, lang);
+      activeDiffEditor.setModel({ original: origModel, modified: modModel });
+      pendingDiffData.diffModels = { origModel, modModel };
+    }
+
     // Show Diff Review Banner at top of editor
     const banner = document.getElementById('ide-diff-review-banner');
     const bannerTitle = document.getElementById('diff-banner-title');
@@ -608,17 +633,33 @@
 
     if (banner) {
       banner.classList.remove('hidden');
-      if (bannerTitle) bannerTitle.textContent = `AI Changes: ${targetTab.name}`;
+      if (bannerTitle) bannerTitle.textContent = `Reviewing Diff: ${targetTab.name}`;
       if (bannerStats) bannerStats.textContent = `~${diffCount} lines changed`;
     }
 
     if (typeof window.showToast === 'function') {
-      window.showToast('AI changes loaded in buffer. Review and Accept or Reject.');
+      window.showToast('Review diff and Accept or Reject.');
     }
+  }
+
+  function closeDiffView() {
+    const edContainer = document.getElementById('monaco-editor-container');
+    const diffContainer = document.getElementById('monaco-diff-container');
+    if (diffContainer) diffContainer.classList.add('hidden');
+    if (edContainer) edContainer.classList.remove('hidden');
+    if (activeDiffEditor) {
+      try { activeDiffEditor.setModel(null); } catch (e) {}
+    }
+    if (pendingDiffData && pendingDiffData.diffModels) {
+      try { pendingDiffData.diffModels.origModel.dispose(); } catch (e) {}
+      try { pendingDiffData.diffModels.modModel.dispose(); } catch (e) {}
+    }
+    if (activeEditor) activeEditor.layout();
   }
 
   function acceptPendingDiff() {
     if (!pendingDiffData) return;
+    closeDiffView();
     const banner = document.getElementById('ide-diff-review-banner');
     if (banner) banner.classList.add('hidden');
 
@@ -626,12 +667,13 @@
     pendingDiffData = null;
 
     if (typeof window.showToast === 'function') {
-      window.showToast('✓ Changes accepted and saved to file.');
+      window.showToast('Changes accepted and saved.');
     }
   }
 
   function rejectPendingDiff() {
     if (!pendingDiffData) return;
+    closeDiffView();
     const tab = openTabs.find(t => t.id === pendingDiffData.tabId);
     if (tab && tab.model) {
       tab.model.setValue(pendingDiffData.originalText);
@@ -1743,13 +1785,99 @@
       });
     }
 
+    // Command Palette (Ctrl+Shift+P / F1)
+    const cmdModal = document.getElementById('command-palette-modal');
+    const cmdBackdrop = document.getElementById('command-palette-backdrop');
+    const cmdInput = document.getElementById('command-palette-input');
+    const cmdResults = document.getElementById('command-palette-results');
+    let cmdSelectedIndex = 0;
+
+    const IDE_COMMANDS = [
+      { label: 'File: Quick Open', kbd: 'Ctrl+P', run: () => showQuickFileSwitcher() },
+      { label: 'File: Save Active File', kbd: 'Ctrl+S', run: () => saveActiveTab() },
+      { label: 'File: Open Folder...', kbd: 'Ctrl+O', run: () => handleSelectFolder() },
+      { label: 'View: Toggle Terminal', kbd: 'Ctrl+`', run: () => toggleTerminalDock() },
+      { label: 'View: Toggle AI Assistant', kbd: 'Ctrl+L', run: () => toggleCopilotDock() },
+      { label: 'View: Explorer', kbd: 'Ctrl+Shift+E', run: () => { switchMode('ide'); switchSidebarTab('explorer'); } },
+      { label: 'View: Search Workspace', kbd: 'Ctrl+Shift+F', run: () => { switchMode('ide'); switchSidebarTab('search'); } },
+      { label: 'View: Source Control (Git)', kbd: 'Ctrl+Shift+G', run: () => { switchMode('ide'); switchSidebarTab('git'); } },
+      { label: 'View: Switch to Chat View', kbd: 'Ctrl+Shift+C', run: () => switchMode('chat') },
+      { label: 'Editor: Go to Line', kbd: 'Ctrl+G', run: () => { if (activeEditor) activeEditor.trigger('keyboard', 'editor.action.gotoLine', null); } },
+      { label: 'Assistant: Compact Context Window', kbd: '', run: () => compactDockedThread() },
+      { label: 'Assistant: Clear Thread', kbd: '', run: () => resetDockedThread() },
+      { label: 'Git: Refresh Status', kbd: '', run: () => refreshGitStatus() }
+    ];
+
+    function renderCommands(filter = '') {
+      if (!cmdResults) return;
+      const q = filter.trim().toLowerCase();
+      const filtered = IDE_COMMANDS.filter(c => !q || c.label.toLowerCase().includes(q));
+      cmdResults.innerHTML = '';
+      if (cmdSelectedIndex >= filtered.length) cmdSelectedIndex = 0;
+      filtered.forEach((cmd, idx) => {
+        const el = document.createElement('div');
+        el.className = `quick-file-item ${idx === cmdSelectedIndex ? 'selected' : ''}`;
+        el.innerHTML = `<span>${escapeHTML(cmd.label)}</span><span class="quick-file-path">${escapeHTML(cmd.kbd)}</span>`;
+        el.addEventListener('click', () => {
+          hideCommandPalette();
+          cmd.run();
+        });
+        cmdResults.appendChild(el);
+      });
+    }
+
+    function showCommandPalette() {
+      if (!cmdModal) return;
+      cmdSelectedIndex = 0;
+      cmdModal.classList.remove('hidden');
+      if (cmdInput) {
+        cmdInput.value = '';
+        cmdInput.focus();
+      }
+      renderCommands('');
+    }
+
+    function hideCommandPalette() {
+      if (cmdModal) cmdModal.classList.add('hidden');
+    }
+
+    if (cmdBackdrop) cmdBackdrop.addEventListener('click', hideCommandPalette);
+    if (cmdInput) {
+      cmdInput.addEventListener('input', (e) => {
+        cmdSelectedIndex = 0;
+        renderCommands(e.target.value);
+      });
+      cmdInput.addEventListener('keydown', (e) => {
+        const items = cmdResults ? cmdResults.querySelectorAll('.quick-file-item') : [];
+        if (e.key === 'Escape') {
+          hideCommandPalette();
+        } else if (e.key === 'ArrowDown' && items.length > 0) {
+          e.preventDefault();
+          cmdSelectedIndex = (cmdSelectedIndex + 1) % items.length;
+          renderCommands(cmdInput.value);
+        } else if (e.key === 'ArrowUp' && items.length > 0) {
+          e.preventDefault();
+          cmdSelectedIndex = (cmdSelectedIndex - 1 + items.length) % items.length;
+          renderCommands(cmdInput.value);
+        } else if (e.key === 'Enter' && items[cmdSelectedIndex]) {
+          e.preventDefault();
+          items[cmdSelectedIndex].click();
+        }
+      });
+    }
+
     // Global Keybindings:
+    // Ctrl+Shift+P / F1 -> Command Palette
     // Ctrl+` -> Toggle Terminal
     // Ctrl+S -> Save
     // Ctrl+P -> Quick Open File
     // Ctrl+Shift+F -> Global Search
-    // Ctrl+L -> Toggle Docked AI Copilot
+    // Ctrl+L -> Toggle Docked AI Assistant
     window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') || e.key === 'F1') {
+        e.preventDefault();
+        showCommandPalette();
+      }
       if (e.ctrlKey && e.key === '`') {
         e.preventDefault();
         toggleTerminalDock();
@@ -1777,6 +1905,7 @@
       }
       if (e.key === 'Escape') {
         hideQuickFileSwitcher();
+        hideCommandPalette();
         if (pendingDiffData) {
           rejectPendingDiff();
         }
@@ -1797,7 +1926,13 @@
       if (activeEditor) {
         activeEditor.layout();
       }
+      if (activeDiffEditor) {
+        activeDiffEditor.layout();
+      }
     });
+
+    // Launch directly into IDE workspace by default
+    switchMode('ide');
   });
 
   // Expose Sparx IDE module to global scope
