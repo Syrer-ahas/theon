@@ -1398,19 +1398,33 @@
   // 10. View & Mode Switching (Sparx Chat Mode)
   // --------------------------------------------------------------------------
   function switchMode(mode) {
-    currentMode = 'chat';
+    const nextMode = mode === 'ide' ? 'ide' : 'chat';
+    currentMode = nextMode;
     const shell = document.getElementById('app-shell');
     const stage = document.getElementById('ide-workspace-stage');
     const btnChat = document.getElementById('btn-mode-chat');
     const btnIde = document.getElementById('btn-mode-ide');
+    const chatSidebar = document.getElementById('sidebar-panel');
 
     if (!shell) return;
 
-    shell.classList.remove('mode-ide');
-    shell.classList.add('mode-chat');
-    if (stage) stage.classList.add('hidden');
-    if (btnIde) btnIde.classList.remove('active');
-    if (btnChat) btnChat.classList.add('active');
+    if (nextMode === 'ide') {
+      shell.classList.remove('mode-chat');
+      shell.classList.add('mode-ide');
+      if (stage) stage.classList.remove('hidden');
+      if (chatSidebar) chatSidebar.classList.add('hidden');
+      if (btnIde) btnIde.classList.add('active');
+      if (btnChat) btnChat.classList.remove('active');
+      if (activeEditor) setTimeout(() => activeEditor.layout(), 60);
+      if (terminalFitAddon && activeTerminal) setTimeout(() => terminalFitAddon.fit(), 80);
+    } else {
+      shell.classList.remove('mode-ide');
+      shell.classList.add('mode-chat');
+      if (stage) stage.classList.add('hidden');
+      if (chatSidebar) chatSidebar.classList.remove('hidden');
+      if (btnIde) btnIde.classList.remove('active');
+      if (btnChat) btnChat.classList.add('active');
+    }
   }
 
   function switchSidebarTab(tabName) {

@@ -1,6 +1,6 @@
 {
   "name": "sparx",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Sparx AI Workstation",
   "main": "main.js",
   "type": "commonjs",

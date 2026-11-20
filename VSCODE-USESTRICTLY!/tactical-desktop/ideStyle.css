@@ -7,7 +7,8 @@
 /* ----------------------------------------------------------------------------
    Layout Modes: Chat Mode vs IDE Mode
    ---------------------------------------------------------------------------- */
-.app-shell.mode-ide .chat-workspace-main {
+.app-shell.mode-ide .chat-workspace-main,
+.app-shell.mode-ide #workspace-sidebar {
   display: none !important;
 }
 

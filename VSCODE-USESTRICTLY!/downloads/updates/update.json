@@ -1,12 +1,12 @@
 {
-  "version": "1.0.8",
-  "previousVersion": "1.0.7",
-  "releaseDate": "2026-11-20T15:21:19.236Z",
-  "releaseNotes": "• Live AI Reasoning & Tool Execution Trace inside Assistant turns\n• Safety Checkpoints with 1-click Restore per turn + Stop Streaming\n• Live Frontend Preview pane (Desktop/Mobile toggle, auto-reload on save)\n• Floating Ctrl+K Inline AI Edit bar inside Monaco\n• Working Explorer New File / New Folder / Refresh actions & Workspace Context Awareness",
+  "version": "1.0.9",
+  "previousVersion": "1.0.8",
+  "releaseDate": "2026-11-20T15:27:34.967Z",
+  "releaseNotes": "• Fixed switchMode(\"ide\") so Sparx opens directly into the clean studio IDE workspace\n• Live AI Reasoning & Tool Execution Trace, Checkpoints (Restore), and Stop Streaming\n• Live Frontend Preview pane (Desktop/Mobile toggle, auto-reload on save)\n• Floating Ctrl+K Inline Edit, Monaco Diff Editor, Command Palette (Ctrl+Shift+P)\n• Context Window meter, @ file mentions, breadcrumbs, status bar, and split-pane resizers",
   "asarFileName": "app.asar",
   "downloadUrl": "https://raw.githubusercontent.com/Syrer-ahas/theon/main/downloads/updates/app.asar",
   "fallbackUrl": "https://www.tacticalweb.online/downloads/updates/app.asar",
-  "sizeBytes": 61015875,
+  "sizeBytes": 61016618,
   "sizeMb": "58.2 MB",
-  "sha256": "89d7ffc5780d921654f7af936275ac02a789f6bd76ac09354a93b4117cadbd3b"
+  "sha256": "422e25ed96ac5d0867272ba9f6fa0c5943fd35c5d526efbd36a2099c32fe9c46"
 }
